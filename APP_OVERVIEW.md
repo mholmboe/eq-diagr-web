@@ -624,14 +624,14 @@ The two sections of the Chemical system tab (database and periodic table; compon
       </fieldset>
       <div class="row">
         <button id="search" class="primary cta" disabled>Search reactions</button>
+        <button id="toDiagram" class="cta" disabled>Create a diagram</button>
       </div>
       <p id="status"></p>
       <div id="found"></div>
       <label for="dat" class="adv-only">Data file (<code>.dat</code>)</label>
       <textarea id="dat" class="adv-only" spellcheck="false" readonly placeholder="The chemical system appears here after a search."></textarea>
-      <div class="row">
-        <button id="toDiagram" class="cta" disabled>Create a diagram</button>
-        <button id="download" class="adv-only" disabled>Download .dat</button>
+      <div class="row adv-only">
+        <button id="download" disabled>Download .dat</button>
       </div>
       <p class="note adv-only">The data file holds the chemical system. "Create a diagram" saves it in this browser and opens the diagram setup, where you choose the diagram type, the axes and the concentrations.</p>
       <details id="logDetails"><summary>Search messages</summary><pre id="log"></pre></details>
