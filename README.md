@@ -1,6 +1,6 @@
 # Eq-Diagr in the browser
 
-A browser version of **eq-diagr** (Chemical Equilibrium Diagrams, by Ignasi Puigdomènech, https://github.com/ignasi-p/eq-diagr, GPL-3): the programs DataBase, Spana, SED, Predom and HaltaFall with their database tools, compiled from Java to JavaScript with TeaVM and run in a Web Worker. The calculations are those of the desktop programs; the plot files of the 17 example diagrams are identical to the ones the desktop jars write. Files and databases stay in the browser, and nothing is sent to a server.
+A browser version of **eq-diagr** (Chemical Equilibrium Diagrams, by Ignasi Puigdomènech, https://github.com/ignasi-p/eq-diagr, GPL-3): the programs DataBase, Spana, SED, Predom and HaltaFall with their database tools, compiled from Java to JavaScript with TeaVM and run in a Web Worker. The calculations are those of the desktop programs; the plot files of the 17 example diagrams are identical to the ones the desktop jars write. Files and databases stay in the browser, and nothing of them is sent to a server. The hosted app can count its visits with GoatCounter (`COUNTER` in `webpoc/web/app.js`; off when empty and on local addresses).
 
 The app is written for teaching. Normal mode shows what a student needs to go from a periodic table to a diagram; advanced mode adds the remaining options of the desktop programs.
 

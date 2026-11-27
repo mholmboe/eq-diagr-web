@@ -221,6 +221,9 @@ const STEPS = [
     await h.waitForFunction(() => document.getElementById("results").hidden && !document.getElementById("toc").hidden && document.getElementById("q").value === "");
   }],
   ["the examples dialog lists the 17 examples; the About box opens", async t => {
+    // the visit counter of the hosted app is off on this computer
+    assert.equal(await t.page.$$eval('script[src*="gc.zgo.at"], script[data-goatcounter]', x => x.length), 0);
+    assert.ok(await t.page.$eval("#aboutCounter", e => e.hidden));
     await t.menu("File", "Open an example");
     assert.equal(await t.page.$$eval("#exList button", b => b.length), 17);
     await t.shot("10-examples-dialog");

@@ -489,6 +489,24 @@
 
   // ---------------------------------------------------------------- the connection with the views (app-view.js)
   const tabOf = win => tabs.find(t => t.frame.contentWindow === win);
+  // ---------------------------------------------------------------- visit counter (hosted app)
+  // GoatCounter (goatcounter.com) counts the visits to the hosted app: one page
+  // view when the app window starts (not one per tab), with the address of the
+  // page, the referring page, the page title and the screen width; no cookies,
+  // and nothing of the files or diagrams (the script does not send the part of
+  // the address after "#", where a link to a diagram carries its data file).
+  // COUNTER is the site code, the first part of CODE.goatcounter.com; empty: no
+  // counter. Addresses on this computer are never counted.
+  const COUNTER = "";
+  const counted = !!COUNTER && location.protocol === "https:" && !/^(localhost|127\.|\[::1\])/.test(location.hostname);
+  if (counted) {
+    const sc = document.createElement("script");
+    sc.async = true; sc.src = "https://gc.zgo.at/count.js";
+    sc.dataset.goatcounter = `https://${COUNTER}.goatcounter.com/count`;
+    document.head.appendChild(sc);
+  }
+  $("aboutCounter").hidden = !counted;
+
   window.EqApp = {
     // a view alone on the screen (the diagram on a phone): no menus, tabs, file list or status bar
     fullView(on) { document.body.classList.toggle("viewfull", !!on); },

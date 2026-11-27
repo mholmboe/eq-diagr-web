@@ -553,3 +553,7 @@ Checked at 390 × 844 with touch emulation in Chrome, and in the UI test at that
 **Not done in this pass:** a bottom bar in place of the menus and tabs; sheets in place of the long settings column and the style dialog; the system share sheet for exports; installation to the home screen with offline use; a phone layout of advanced mode.
 
 Open question: is the grid of elements the right start for students on a phone, or should a search field for components ("iron", "sulfate") come first?
+
+## Visit counter for the hosted app (2026-11-27)
+
+The app window can report a page view to GoatCounter when it starts. It is switched off until the site code is written into `COUNTER` in `webpoc/web/app.js`, and it never counts on addresses of the own computer, so local use and the tests are not counted. One view is counted per start of the app, not per tab. The script (`gc.zgo.at/count.js`, read on 2026-11-27) reports the path of the page, the referring page, the page title and the screen width, and not the part of the address after "#", where a link to a diagram carries its data file. When the counter is on, the About box says so; the README, the development document and the help page on files mention it.
