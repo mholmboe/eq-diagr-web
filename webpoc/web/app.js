@@ -110,14 +110,16 @@
         return open;
       }
     }
-    const tab = openTab("diagram", { file: opts.file, title: opts.file ? opts.file.replace(/\.dat$/i, "") : opts.name ? opts.name.replace(/\.(dat|plt)$/i, "") : "Diagram" });
+    const tab = openTab("diagram", { file: opts.file, title: opts.file ? opts.file.replace(/\.dat$/i, "") : opts.name ? opts.name.replace(/\.(dat|plt|txt)$/i, "") : "Diagram" });
     if (opts.text != null) {
       await tab.ready;
       const v = view(tab);
-      // a file that is not a plot file leaves no empty tab
+      // a file that cannot be read leaves no empty tab
       if (v && v.openText && (await v.openText(opts.name, opts.text)) === false) {
+        const why = v.openError || `"${opts.name}" could not be read.`;
         await closeTab(tab);
-        $("sbStatus").className = "sb-status fail"; $("sbStatus").textContent = `"${opts.name}" could not be read as a plot file.`;
+        $("sbStatus").className = "sb-status fail"; $("sbStatus").textContent = why;
+        await EqDialog.choose(why, [["ok", "OK"]]);
         return null;
       }
     }
@@ -204,12 +206,12 @@
     try {
       const r = await fetch("data/examples/" + encodeURIComponent(b.dataset.ex + ".dat"));
       if (!r.ok) throw new Error(r.status);
-      await openDiagram({ name: b.dataset.ex + ".dat", text: await r.text() });
+      await openDiagram({ name: b.dataset.ex + ".dat", text: await EqText.read(r) });
     } catch (err) { $("sbStatus").textContent = "Could not open the example: " + err.message; }
   });
   $("openDat").addEventListener("change", async e => {
     const f = e.target.files[0]; e.target.value = "";
-    if (f) await openDiagram({ name: f.name, text: await f.text() });
+    if (f) await openDiagram({ name: f.name, text: await EqText.read(f) });
   });
   async function loadDbFiles(list) {
     const files = await Promise.all([...list].map(async f => ({ name: f.name, buffer: await f.arrayBuffer() })));
@@ -222,13 +224,17 @@
   const DB_EXT = /\.(db|elb|txt|skv|csv|elt|elm)$/i;
   async function dropFiles(list) {
     dragging(false);
-    const files = [...list], dats = files.filter(f => /\.(dat|plt)$/i.test(f.name)), dbs = files.filter(f => DB_EXT.test(f.name));
+    const files = [...list], dats = files.filter(f => /\.(dat|plt)$/i.test(f.name)), dbs = [];
+    // a .txt file is a text database, or a data file saved with that ending
+    for (const f of files.filter(f => DB_EXT.test(f.name))) {
+      if (/\.txt$/i.test(f.name) && EqText.isDataFile(await EqText.read(f.slice(0, 400)))) dats.push(f); else dbs.push(f);
+    }
     if (!dats.length && !dbs.length) {
       if (files.length) { $("sbStatus").className = "sb-status fail"; $("sbStatus").textContent = "Drop data files (.dat), plot files (.plt) or database files (.db, .elb, .txt, .skv, .csv, .elt, .elm)."; }
       return;
     }
     if (dbs.length) await loadDbFiles(dbs);
-    for (const f of dats) await openDiagram({ name: f.name, text: await f.text() });
+    for (const f of dats) await openDiagram({ name: f.name, text: await EqText.read(f) });
   }
   let dragTimer = null;
   function dragging(on) {

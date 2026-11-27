@@ -69,7 +69,7 @@ npm install && npm run install-browsers
 npm run test:ui
 ```
 
-34 steps of the main flow in Chromium, WebKit and Firefox with Playwright (the test starts its own server; Chromium is the installed Chrome). `npm run screenshots` retakes the pictures in `review/`.
+35 steps of the main flow in Chromium, WebKit and Firefox with Playwright (the test starts its own server; Chromium is the installed Chrome). `npm run screenshots` retakes the pictures in `review/`.
 
 ## Documentation
 

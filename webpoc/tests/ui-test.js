@@ -456,6 +456,8 @@ const STEPS = [
     const n = await t.page.$$eval("#tabs .tab", x => x.length);
     await t.page.setInputFiles("#openDat", { name: "bad.plt", mimeType: "text/plain", buffer: Buffer.from("hello\n") });
     await t.page.waitForFunction(() => /could not be read as a plot file/.test(document.getElementById("sbStatus").textContent));
+    assert.match(await t.page.textContent("dialog[open] .msg"), /"bad\.plt" could not be read as a plot file/);
+    await t.page.click("dialog[open] button.primary");
     assert.equal(await t.page.$$eval("#tabs .tab", x => x.length), n);
     await t.page.click('#tabs .tab .t:text-is("10-Poubaix diag Cu")');
   }],
@@ -734,6 +736,47 @@ const STEPS = [
     assert.deepEqual(await sp.evaluate(() => ["stPalette", "stWidth", "stPage", "stScale", "stPs"].map(i => document.getElementById(i).value)), ["eqdiagr", "1", "fit", "100", "eps"]);
     assert.equal(await sp.textContent("#dlEps"), "EPS");
     await sp.click('#styleDlg button[value="close"]');
+  }],
+  ["a data file of one's own: the Windows encoding, a .txt ending, a file that is no data file", async t => {
+    // in the Windows encoding (windows-1252), as two examples of eq-diagr are: the middle dot is the single byte B7, "ö" is F6
+    const own = [" 3, 2, 1, 0,   /SPANA (MEDUSA), t= 25, p= 1", "H+", "Fe 2+", "SO4 2-",
+      "FeSO4               ,  2.25      0  1  1", "OH-                 , -14       -1  0  0",
+      "FeSO4\u00b77H2O(cr)      ,  2.209     0  1  1 /melanterite, gr\u00f6n", "LS,-9, 0.5, H+,", "LAV, -1 -12", "T,  0.01", "T,  1", ""].join("\r\n");
+    const tabsNow = () => t.page.$$eval("#tabs .tab", x => x.length);
+    const opened = async title => { await t.page.waitForFunction(x => document.querySelector("#tabs .tab.active .t").textContent === x, title); return t.spana(); };
+    const names = sp => sp.$$eval("#specTable [data-logk]", els => els.map(i => i.closest("tr").textContent));
+    await t.page.setInputFiles("#openDat", { name: "melanterite.dat", mimeType: "application/octet-stream", buffer: Buffer.from(own, "latin1") });
+    let sp = await opened("melanterite");
+    await sp.waitForFunction(() => !document.getElementById("make").disabled);
+    assert.ok((await names(sp)).some(x => x.includes("FeSO4\u00b77H2O(cr)") && x.includes("gr\u00f6n")), "the names of a file in the Windows encoding");
+    await sp.click("#make");
+    await sp.waitForFunction(() => document.getElementById("status").className === "ok");
+    assert.ok(await sp.$$eval("#plot svg path", x => x.length) > 3, "the diagram of the file is drawn");
+    // the same file in UTF-8 and with the ending .txt, by the dialog and dropped on the window
+    await t.page.setInputFiles("#openDat", { name: "own system.txt", mimeType: "text/plain", buffer: Buffer.from(own, "utf8") });
+    sp = await opened("own system");
+    assert.equal(await sp.textContent("#fileName"), "own system.dat");
+    assert.ok((await names(sp)).some(x => x.includes("FeSO4\u00b77H2O(cr)")));
+    const dt = await t.page.evaluateHandle(text => { const d = new DataTransfer(); d.items.add(new File([text], "dropped own.txt", { type: "text/plain" })); return d; }, own);
+    await t.page.dispatchEvent("body", "drop", { dataTransfer: dt });
+    sp = await opened("dropped own");
+    await sp.waitForFunction(() => !document.getElementById("make").disabled);
+    // a file that is no data file: the reason is told and no tab is left
+    const n = await tabsNow();
+    await t.page.setInputFiles("#openDat", { name: "notes.dat", mimeType: "text/plain", buffer: Buffer.from("this is not a data file\n1 2 3\n") });
+    await t.page.waitForSelector("dialog[open]");
+    assert.match(await t.page.textContent("dialog[open] .msg"), /"notes\.dat" is not a data file the program can read: .*Nbr of components/);
+    await t.page.click("dialog[open] button.primary");
+    assert.equal(await tabsNow(), n);
+    for (const title of ["dropped own", "own system", "melanterite"]) await t.page.click(`#tabs .tab:has(.t:text-is("${title}")) .x`);
+    // the page on its own: a file is opened when none is open yet
+    const alone = await t.page.context().newPage();
+    try {
+      await alone.goto(new URL("spana.html", t.page.url()).href);
+      await alone.bringToFront();
+      await alone.setInputFiles("#openFile", { name: "melanterite.dat", mimeType: "application/octet-stream", buffer: Buffer.from(own, "latin1") });
+      await alone.waitForFunction(() => document.getElementById("fileName").textContent === "melanterite.dat" && !document.getElementById("make").disabled);
+    } finally { await alone.close(); await t.page.bringToFront(); }
   }],
   ["the colour themes (View menu) reach the views and are remembered", async t => {
     const pick = async label => { await t.menu("View"); await t.page.click(`.menu:not([hidden]) button span:text-is("${label}")`); await wait(200); };

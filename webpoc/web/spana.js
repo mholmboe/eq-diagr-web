@@ -58,10 +58,15 @@
   async function loadText(name, text, fromStore = false) {
     status("", "Reading the data file…");
     const d = await engine.datDefaults(text);
-    if (!d.ok) { status("fail", "Could not read the data file; see the messages."); showLog(d.log || d.error); return; }
+    if (!d.ok) {
+      openError = `"${name}" is not a data file the program can read: ${datError(d.log || d.error)}.`;
+      if (window.EqView) EqView.openError = openError;
+      status("fail", openError); showLog(d.log || d.error);
+      return false;
+    }
     document.documentElement.classList.remove("plotonly");
     overlays = []; frameMemo = {};
-    fileName = name.replace(/\.dat$/i, "") || "diagram";
+    fileName = name.replace(/\.(dat|txt)$/i, "") || "diagram";
     $("fileName").textContent = fileName + ".dat";
     if (window.EqView) EqView.setTitle(fileName);
     $("fileNote").textContent = d.defaulted ? "(no diagram in the file: a default diagram was set, as Spana does)" : "";
@@ -81,13 +86,21 @@
     status("", "Choose the diagram and the concentrations, then click \"Plot the diagram\".");
     ["saveMy", "dlDat", "editDat"].forEach(id => $(id).disabled = false);
     checkConcs();
+    return true;
   }
+  // why a data file could not be read, in one line, from the message of the engine
+  let openError = "";
+  const datError = log => String(log || "").replace(/^Error: \S*Exception:\s*/, "").replace(/^Error:\s*/, "")
+    .replace(/\s*in file: "[^"]*"\.?\s*$/, "").replace(/NumberFormatException reading/, "could not read")
+    .replace(/reached the End-Of-File/, "the file ends too early").replace(/\s*\n\s*/g, " ").replace(/ {2,}/g, " ").replace(/[.,\s]+$/, "") || "unknown error";
 
   // A plot file (.plt) from this computer, as File > Plot file > Open of the
   // desktop Spana: the drawing alone, with the exports, without a data file.
   async function loadPlot(name, text) {
     if (!parsePlt(text) || !/^\s*[01]\s*-?\d/m.test(text)) {
-      status("fail", `"${name}" could not be read as a plot file.`);
+      openError = `"${name}" could not be read as a plot file.`;
+      if (window.EqView) EqView.openError = openError;
+      status("fail", openError);
       return false;
     }
     model = null; dat = null; form = null; stored = null; savedDat = null; setDirty(false);
@@ -1145,7 +1158,7 @@
   $("open").addEventListener("click", () => $("openFile").click());
   $("openFile").addEventListener("change", async e => {
     const f = e.target.files[0]; e.target.value = "";
-    if (f) await openAny(f.name, await f.text());
+    if (f) await openAny(f.name, await EqText.read(f));
   });
   $("myFiles").addEventListener("change", async e => {
     const name = e.target.value; e.target.value = "";
@@ -1274,9 +1287,10 @@
   $("editText").addEventListener("keydown", e => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) { e.preventDefault(); e.stopPropagation(); applyEdit(); } });
 
   // until a data file is read there is no form: a change of a field is ignored
-  // (the fields are drawn again when the file has been read)
+  // (the fields are drawn again when the file has been read). The row that
+  // opens a file on the page on its own is not such a field.
   for (const ev of ["input", "change"])
-    $("settings").addEventListener(ev, e => { if (!form && e.target.id !== "live") e.stopPropagation(); }, true);
+    $("settings").addEventListener(ev, e => { if (!form && e.target.id !== "live" && !e.target.closest(".standalone-only")) e.stopPropagation(); }, true);
   $("ptype").addEventListener("change", e => {
     const old = form.plotType, t = +e.target.value;
     form.plotType = t;
@@ -1403,7 +1417,7 @@
   $("mergeDisk").addEventListener("click", () => { $("mergeDlg").close(); $("mergeFile").click(); });
   $("mergeFile").addEventListener("change", async e => {
     const f = e.target.files[0]; e.target.value = "";
-    if (f) await mergeWith(f.name, await f.text());
+    if (f) await mergeWith(f.name, await EqText.read(f));
   });
 
   // ---------------------------------------------------------------- sliders of the options (live mode)
