@@ -539,3 +539,17 @@ Decision made without asking: the steps are always written as acid dissociation 
 - **"Create a diagram" beside "Search reactions"** (after a comment): the two buttons of the Chemical system tab are in one row above the species found, so the second one is in view without scrolling past a long result. Before a search it is there but disabled.
 
 - **pKb as a third choice** (asked for): "stepwise pKb" shows pKw − pKa for each step, the pKb of the base of that step, with pKw from the reaction of OH⁻ in the data file. Phosphate in the KTH database: 11.851, 6.793 and 1.654 in the rows of H₃PO₄, H₂PO₄⁻ and HPO₄²⁻. The row of OH⁻ is marked "pKw" in both stepwise views. Fields, sliders and the reset button work on the pKb.
+
+## Phone pass: Chemical system and diagram tabs (2026-11-27)
+
+Checked at 390 × 844 with touch emulation in Chrome, and in the UI test at that size in Chromium, WebKit and Firefox. Not checked on a real phone.
+
+- **Elements.** At phone width the periodic table had cells of 19 × 23 px with 9 px text. Below 521 px the elements that the database has are now a wrapped grid of buttons of 46 × 42 px, in the order of the table with H and e⁻ first (34 buttons for the KTH database). The periodic table itself is not shown at that width.
+- **Explanations on tap.** Texts that carry an explanation as a tooltip (the reaction of a species, the pKa mark, a reference, a table header) show it in a bubble when tapped. Buttons, lists, fields, links and the labels of fields keep their own action and show no bubble, so the explanations of field labels remain out of reach on a touch screen.
+- **Full screen.** A "Full screen" button above the diagram (small or touch screens) shows the diagram alone, without the menus, tabs and status bar; turning the phone gives a wider diagram. "Close full screen" and the Escape key leave it.
+- **No zoom on focus.** With a touch screen the fields have 16 px text, since iOS Safari zooms the page when a field with smaller text gets the focus.
+- The hint under the diagram says "Touch the diagram…" on a touch screen.
+
+**Not done in this pass:** a bottom bar in place of the menus and tabs; sheets in place of the long settings column and the style dialog; the system share sheet for exports; installation to the home screen with offline use; a phone layout of advanced mode.
+
+Open question: is the grid of elements the right start for students on a phone, or should a search field for components ("iron", "sulfate") come first?

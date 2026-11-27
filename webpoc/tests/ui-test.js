@@ -760,6 +760,44 @@ const STEPS = [
     assert.ok(await t.page.$eval("#sideToggle", b => getComputedStyle(b).display !== "none"));
     assert.ok(await t.page.$eval("#sidebar", s => getComputedStyle(s).display === "none"));
     await t.shot("13-phone-chemical-system");
+  }],
+  ["on a phone: the elements as large buttons, explanations on tap, the diagram in full screen", async t => {
+    const db = await t.frame("database.html");
+    // the elements of the database only, each large enough for a finger, H and e- first
+    const cells = await db.$$eval("#ptable button", b => b.filter(x => x.offsetParent).map(x => { const r = x.getBoundingClientRect(); return [x.textContent, r.width, r.height, r.top, r.left]; }));
+    assert.ok(cells.length > 25 && cells.length < 60, "only the elements with components: " + cells.length);
+    assert.ok(cells.every(c => c[1] >= 44 && c[2] >= 40), "cells of at least 44 x 40 px");
+    assert.deepEqual(cells.slice().sort((a, b) => a[3] - b[3] || a[4] - b[4]).slice(0, 2).map(c => c[0]), ["H", "e⁻"]);
+    assert.equal(await db.$$eval("#ptable button.none", b => b.filter(x => x.offsetParent).length), 0);
+    // a diagram tab: a tap on the mark of a constant shows its reaction (no hover on a touch screen)
+    await t.page.click('#tabs .tab .t:text-is("H+_PO43-")');
+    const sp = await t.spana();
+    await sp.evaluate(() => { document.getElementById("sysPanel").open = true; });
+    await sp.selectOption("#kMode", "step");
+    await sp.$eval("#specTable .kkind", e => { const r = e.getBoundingClientRect(); e.dispatchEvent(new PointerEvent("pointerup", { pointerType: "touch", bubbles: true, clientX: r.x + 5, clientY: r.y + 5 })); });
+    assert.equal(await sp.textContent(".taptip"), "H2PO4- ⇌ HPO4 2- + H+");
+    const tip = await sp.$eval(".taptip", e => { const r = e.getBoundingClientRect(); return [r.left, r.right, innerWidth]; });
+    assert.ok(tip[0] >= 0 && tip[1] <= tip[2], "the bubble is inside the screen");
+    // a tap elsewhere removes it; a tap on a control does not show one
+    await sp.$eval("#make", e => e.dispatchEvent(new PointerEvent("pointerup", { pointerType: "touch", bubbles: true, clientX: 30, clientY: 30 })));
+    assert.equal(await sp.$$eval(".taptip", x => x.length), 0);
+    await sp.selectOption("#kMode", "cum");
+    // the diagram alone on the screen, without the menus and tabs of the app
+    await sp.click("#make");
+    await sp.waitForFunction(() => !!document.querySelector("#plot svg") && !document.getElementById("fullBtn").disabled);
+    assert.ok(await sp.$eval("#fullBtn", b => getComputedStyle(b).display !== "none"));
+    await sp.click("#fullBtn");
+    assert.ok(await t.page.evaluate(() => document.body.classList.contains("viewfull") && getComputedStyle(document.querySelector(".menubar")).display === "none" && getComputedStyle(document.getElementById("tabs")).display === "none"));
+    assert.ok(await sp.$eval("#settings", e => getComputedStyle(e).display === "none"));
+    await t.page.setViewportSize({ width: 844, height: 390 });       // the phone turned
+    await wait(300);
+    const svg = await sp.$eval("#plot svg", x => { const r = x.getBoundingClientRect(); return [r.width, r.height, r.bottom, innerHeight]; });
+    assert.ok(svg[1] > 250 && svg[2] <= svg[3], "the diagram fills the height and fits in it");
+    await t.shot("24-phone-full-screen");
+    assert.equal(await sp.textContent("#fullBtn"), "Close full screen");
+    await sp.click("#fullBtn");
+    assert.ok(await t.page.evaluate(() => !document.body.classList.contains("viewfull")));
+    await t.page.setViewportSize({ width: 390, height: 844 });
   }]
 ];
 

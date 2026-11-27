@@ -108,6 +108,18 @@ html.embedded details.panel > summary, html.embedded details.tool > summary { fo
   html.embedded .grid > section:first-child { border-bottom: 1px solid var(--line); }
 }
 
+/* ---- a touch screen has no hover: the explanation of a text (its title) is
+   shown in a bubble when the text is tapped (app-view.js) */
+.taptip { position: fixed; z-index: 60; max-width: min(300px, calc(100vw - 24px)); padding: var(--space-4) var(--space-5); border-radius: 8px;
+  background: var(--fg); color: var(--bg); font: var(--text-md)/1.4 var(--font-sans); white-space: pre-wrap; box-shadow: 0 6px 18px rgba(0, 0, 0, .25); pointer-events: none; }
+/* controls shown on small or touch screens only */
+.touch-only { display: none !important; }
+@media (max-width: 700px), (pointer: coarse) { .touch-only { display: inline-block !important; } }
+/* iOS Safari zooms the page when a field with text smaller than 16 px gets the focus */
+@media (pointer: coarse) {
+  select, input[type=text], input[type=number], textarea { font-size: 16px !important; }
+}
+
 /* ---- questions in the page (dialogs.js) */
 dialog.eqdlg { max-width: min(480px, calc(100vw - 32px)); border: 1px solid var(--line); border-radius: 10px; color: var(--fg); background: var(--bg); padding: var(--space-6) 18px; }
 dialog.eqdlg::backdrop { background: rgba(0, 0, 0, .3); }

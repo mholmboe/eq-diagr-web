@@ -18,7 +18,18 @@
   :root[data-theme="original"] .ptable { background: #ffff99; border: 1px solid var(--line); padding: var(--space-3); }
   :root[data-theme="original"] .ptable button.has:not(.picked) { background: linear-gradient(#ffffff, #e4e4e4); }
   .ptable .gap { grid-column: 1 / -1; height: 6px; }
-  @media (max-width: 520px) { .ptable { gap: 1px; } .ptable button { font-size: 9px; padding: var(--space-2) 0; border-radius: 2px; } }
+  /* On a phone the periodic table has cells too small to tap (18 columns in
+     360 px). The elements that the database has are shown instead as a grid
+     of large buttons, in the order of the table, with H and e- first. */
+  @media (max-width: 520px) {
+    .ptable { grid-template-columns: repeat(auto-fill, minmax(46px, 1fr)); gap: var(--space-3); }
+    .ptable button { grid-row: auto !important; grid-column: auto !important; font-size: var(--text-lg); padding: 9px 0; border-radius: 6px; }
+    .ptable button.none, .ptable .gap { display: none; }
+    .ptable button:first-child { order: -2; }
+    .ptable button.elec { order: -1; }
+    .ptable .extra { grid-row: auto; grid-column: 1 / -1; order: 1; flex-wrap: wrap; }
+    .chip { padding: var(--space-3) var(--space-5); font-size: var(--text-base); }
+  }
   /* e- is a cell (row of H, column of Ti); the other non-elements (advanced) are under it */
   .ptable button.elec { font-family: var(--font-sans); }
   .ptable .extra { grid-row: 2; grid-column: 4 / 11; display: flex; gap: var(--space-3); align-items: center; }
@@ -79,7 +90,7 @@
       </div>
       <p class="note adv-only">Three databases come with the program: the database of the KTH course KD1280 (the default; log <i>K</i> at 25 °C only), the database of the eq-diagr release (with its literature references and data for other temperatures), and a small sample. To use your own, load a <code>.db</code> file together with its <code>.elb</code> file (or a text <code>.txt</code> or <code>.skv</code> database with its <code>.elt</code> or <code>.elm</code> file), and a references file (<code>References.txt</code>) to see the literature references.</p>
 
-      <label>Elements <span class="note">(click an element, then a component)</span></label>
+      <label>Elements <span class="note">(choose an element, then a component)</span></label>
       <div id="ptable" class="ptable"></div>
       <label id="availLabel">Available components</label>
       <div id="avail" class="chips"></div>

@@ -54,6 +54,26 @@
     publishDatabases(files) { if (app) app.databasesChanged(window, files); }
   };
   window.EqView = EqView;
+
+  // Touch screens have no hover: a tap on a text that has an explanation (a
+  // title) shows it in a bubble, until the next tap or scroll. Controls keep
+  // their own action (buttons, lists, fields, links, and labels of fields).
+  let tip = null, tipTimer = null;
+  const hideTip = () => { if (tip) { tip.remove(); tip = null; } clearTimeout(tipTimer); };
+  document.addEventListener("pointerup", e => {
+    if (e.pointerType === "mouse") return;
+    hideTip();
+    const el = e.target.closest ? e.target.closest("[title]") : null;
+    if (!el || !el.title.trim() || el.closest("button, select, input, textarea, a, summary, label, dialog[open] .btns")) return;
+    tip = document.createElement("div");
+    tip.className = "taptip"; tip.setAttribute("role", "tooltip"); tip.textContent = el.title;
+    document.body.appendChild(tip);
+    const r = tip.getBoundingClientRect(), x = Math.max(8, Math.min(e.clientX - r.width / 2, innerWidth - r.width - 8));
+    const above = e.clientY - r.height - 14;
+    tip.style.left = x + "px"; tip.style.top = (above > 8 ? above : Math.min(e.clientY + 18, innerHeight - r.height - 8)) + "px";
+    tipTimer = setTimeout(hideTip, 7000);
+  });
+  document.addEventListener("scroll", hideTip, true);
   EqView.setAdvanced(storedAdvanced());
 
   if (!embedded) return;
@@ -66,6 +86,8 @@
       send();
     }
   });
+  // the view alone on the screen, without the menus, tabs and status bar of the app
+  EqView.setFull = on => { if (app.fullView) app.fullView(!!on); };
   // keyboard shortcuts of the app also work while the focus is in the view
   window.addEventListener("keydown", e => app.key(e));
   window.addEventListener("mousedown", () => app.closeMenus());

@@ -490,6 +490,8 @@
   // ---------------------------------------------------------------- the connection with the views (app-view.js)
   const tabOf = win => tabs.find(t => t.frame.contentWindow === win);
   window.EqApp = {
+    // a view alone on the screen (the diagram on a phone): no menus, tabs, file list or status bar
+    fullView(on) { document.body.classList.toggle("viewfull", !!on); },
     viewStatus(win, text, cls) {
       const t = tabOf(win);
       if (!t) return;

@@ -75,7 +75,7 @@
     await loadTicks();
     // no diagram yet for this file
     last = null; lastRun = null; $("readout").hidden = true; drawKept();
-    ["dlSvg", "dlPng", "dlPdf", "dlEps", "dlPlt", "dlCsv", "copyImg"].forEach(id => $(id).disabled = true);
+    ["dlSvg", "dlPng", "dlPdf", "dlEps", "dlPlt", "dlCsv", "copyImg", "fullBtn"].forEach(id => $(id).disabled = true);
     $("plot").innerHTML = `<div class="empty">Click <b>Plot the diagram</b> to draw the diagram of this file.</div>`;
     updateStale();
     status("", "Choose the diagram and the concentrations, then click \"Plot the diagram\".");
@@ -98,7 +98,7 @@
     overlays = [];
     last = { name: fileName, plt: text, csv: "", ext: "csv" }; lastRun = null;
     $("csv").textContent = ""; showLog("");
-    ["dlSvg", "dlPng", "dlPdf", "dlEps", "dlPlt", "copyImg"].forEach(id => $(id).disabled = false);
+    ["dlSvg", "dlPng", "dlPdf", "dlEps", "dlPlt", "copyImg", "fullBtn"].forEach(id => $(id).disabled = false);
     ["dlCsv", "dlDat", "editDat", "saveMy"].forEach(id => $(id).disabled = true);
     showPlot(); updateStale(); updateMake();
     status("ok", `Plot file ${name}: the drawing only, without its data file.`);
@@ -768,7 +768,7 @@
     $("dlCsv").textContent = "." + ext;
     showLog(r.log || r.error);
     $("csv").textContent = last.csv;
-    ["dlSvg", "dlPng", "dlPdf", "dlEps", "dlPlt", "copyImg"].forEach(id => $(id).disabled = !last.plt);
+    ["dlSvg", "dlPng", "dlPdf", "dlEps", "dlPlt", "copyImg", "fullBtn"].forEach(id => $(id).disabled = !last.plt);
     $("dlCsv").disabled = !last.csv;
     if (r.stopped) status("fail", "Stopped.");
     else if (r.ok && last.plt) status("ok", `${program === "sed" ? "SED" : "Predom"}: ${(info.points || 0).toLocaleString("en")} equilibrium calculations in ${ms} ms` +
@@ -974,7 +974,7 @@
         .sort((p, q) => q[1] - p[1]).slice(0, 6)
         .map(([n, v]) => `<span class="sp">${nameHtml(n)} ${fmt(v, d)}</span>`).join("");
     }
-    const idle = "Point at the diagram to read values off it." + (T ? `<span class="at">&nbsp;</span>` : "");
+    const idle = (matchMedia("(pointer: coarse)").matches ? "Touch the diagram to read values off it." : "Point at the diagram to read values off it.") + (T ? `<span class="at">&nbsp;</span>` : "");
     out.innerHTML = idle;
     const NS = "http://www.w3.org/2000/svg";
     const g = document.createElementNS(NS, "g");
@@ -1241,6 +1241,14 @@
   $("dlPng").addEventListener("click", png);
   $("copyImg").addEventListener("click", copyImage);
   $("keepBtn").addEventListener("click", keep);
+  // the diagram alone on the screen, for a phone (also in landscape); Escape leaves it
+  function setFull(on) {
+    document.documentElement.classList.toggle("plotfull", !!on);
+    $("fullBtn").textContent = on ? "Close full screen" : "Full screen";
+    if (window.EqView && EqView.setFull) EqView.setFull(on);
+  }
+  $("fullBtn").addEventListener("click", () => setFull(!document.documentElement.classList.contains("plotfull")));
+  document.addEventListener("keydown", e => { if (e.key === "Escape" && document.documentElement.classList.contains("plotfull")) setFull(false); });
   $("kept").addEventListener("click", async e => {
     const b = e.target.closest("button");
     if (!b) return;

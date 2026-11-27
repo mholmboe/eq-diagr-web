@@ -88,6 +88,9 @@ body.noside .sidebar { display: none; }
 @media (min-width: 761px) { .sidetoggle { display: none; } }
 @media (max-width: 520px) { .mode { display: none; } .menus > div > button { padding: var(--space-3) var(--space-4); } }
 
+/* ---- a view alone on the screen (EqApp.fullView) */
+body.viewfull .menubar, body.viewfull .tabs, body.viewfull .statusbar, body.viewfull .sidebar { display: none; }
+
 /* ---- files dragged over the window */
 .dropzone { display: none; position: fixed; inset: 0; z-index: 50; pointer-events: none; align-items: center; justify-content: center;
   background: color-mix(in srgb, var(--bg) 70%, transparent); border: 3px dashed var(--accent); font-size: var(--text-lg); font-weight: 600; color: var(--fg); }
