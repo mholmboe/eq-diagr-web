@@ -497,7 +497,7 @@
   // the address after "#", where a link to a diagram carries its data file).
   // COUNTER is the site code, the first part of CODE.goatcounter.com; empty: no
   // counter. Addresses on this computer are never counted.
-  const COUNTER = "";
+  const COUNTER = "eq-diagr";
   const counted = !!COUNTER && location.protocol === "https:" && !/^(localhost|127\.|\[::1\])/.test(location.hostname);
   if (counted) {
     const sc = document.createElement("script");
