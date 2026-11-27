@@ -1,0 +1,17 @@
+e00|01-Make your 1st diagram.dat
+e01|02-Fraction diagram.dat
+e02|03-fixed CO2 pressure.dat
+e03|04-Log conc diagr.dat
+e04|05-pH calculated (log).dat
+e05|05-pH calculated.dat
+e06|06-Eh calculated (log).dat
+e07|06-Eh calculated.dat
+e08|07-Solubility Al.dat
+e09|08-Solubility calcite.dat
+e10|09-Predom Cd-NTA.dat
+e11|10-Poubaix diag Cu.dat
+e12|11-logO2-pH 300C.dat
+e13|12-logO2-pH Au 250C.dat
+e14|13-Titration acetic acid.dat
+e15|14-Titration Mg-edta.dat
+e16|15-H-affinity (oxalate-carbonate mix).dat

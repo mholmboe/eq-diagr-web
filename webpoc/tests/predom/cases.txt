@@ -1,0 +1,6 @@
+Fe_Eh-pH -n=60
+Fe_Eh-pH_n150 -n=150
+Fe_noHaem -n=60
+Fe_Eh-pH_Davies -n=50 -i=0.1 -t=25 -m=0
+Fe_Eh-pH_aqu60 -n=50 -aqu -ph -t=60
+Fe_logFe-pH -n=80

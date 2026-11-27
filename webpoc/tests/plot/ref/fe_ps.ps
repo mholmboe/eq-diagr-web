@@ -1,0 +1,987 @@
+%!PS-Adobe-2.0
+%%Title: fe_ps.plt; 
+%%Creator: PlotPS [java],  version: 2021-Mar-08
+%%CreationDate: Nov 25, 2026, 4:41:45 PM
+%%For: anonymous
+%%DocumentNeededResources: font Courier Helvetica Helvetica-Bold Helvetica-Oblique
+%%Pages: 1
+%%EndComments
+%%BeginProlog
+% ------- Prolog:  defining procedures and variables -------
+/ChemEqDict 60 dict def   % create a dictionary
+ChemEqDict begin          % push dictionary in dictionary stack
+/Mv {moveto} def
+/Ln {lineto} def
+/_sn {stroke newpath} def
+/_csn {closepath stroke newpath} def
+/_setWidth {/linWidth exch def linWidth setlinewidth}  def
+% --- dash-line types:
+/Lt0 {stroke linWidth setlinewidth [] 0 setdash} def
+/Lt1 {stroke linWidth setlinewidth [30 10] 0 setdash} def
+/Lt2 {stroke linWidth setlinewidth [15 15] 0 setdash} def
+/Lt3 {stroke linWidth setlinewidth [5 10] 0 setdash} def
+/Lt4 {stroke linWidth setlinewidth [30 10 5 10] 0 setdash } def
+/Lt5 {stroke linWidth setlinewidth [15 10 5 10] 0 setdash} def
+%--------------------  Font related stuff:  ---------------------------------
+/rShow {dup stringwidth pop 0 exch        % right-show
+        sub 0 rmoveto show} def
+/lShow {show} def                         % left-show
+/cShow {dup stringwidth pop -2 div -0.5   % center-show (both
+        getSize siz mul rmoveto show} def %  vertically & horizontally)
+/_angle 0 def                 % angle to rotate text
+/TxtRotate                    % Procedure to rotate text. Usage:
+    {gsave                    %   /_angle nn def  TxtRotate
+     currentpoint translate   %   x y moveto (text1) show
+     _angle rotate} def       %   x y moveto (text2) show  grestore
+/fontScale  1.40 def
+/_setSize     % scale current font (parameter: font size in 0.01 cm units)
+          {fontScale mul /UserFont currentfont def
+           /UserFont findfont exch scalefont setfont} def
+/getSize  {gsave newpath 0 0 moveto (X)       % find current font size
+           true charpath flattenpath pathbbox %   and store result in "siz"
+           /siz exch def pop pop pop grestore} def
+%----------------------------------------------------------------------------
+%          -----        additions for PostScript output            -----
+%          -----  which allow printing math and chemical formulas  -----
+%----------------------------------------------------------------------------
+% ---- super/sub-scripts.
+%      Both "^" and "_^" take two arguments: the string to output and
+%      the vertical shift (positive or negative as fraction of letter
+%      size). The difference: "_^" does not advance the cursor (allowing
+%      subs- and super-scripts on the same letter).
+%      For example, to output UO2(CO3)3-4:
+%        (UO) show (2) -0.5 ^ (\(CO) show (3) -0.5 ^
+%        (\)) show (3) -0.5 ^ (4-) 0.5 _^
+%      "_f" takes one argument (spacing as fraction of letter size)
+%      and moves the cursor forward or backward. Useful in math formulas.
+/^  {/regFont currentfont def /ssFont currentfont [.7 0 0 .7 0 0] makefont def
+    getSize dup 0 exch siz mul rmoveto ssFont setfont
+    exch show 0 exch siz neg mul rmoveto regFont setfont } def
+/_^ {/regFont currentfont def /ssFont currentfont [.7 0 0 .7 0 0] makefont def
+    getSize dup 0 exch siz mul rmoveto ssFont setfont
+    exch dup stringwidth pop neg exch show 
+    0 rmoveto 0 exch siz neg mul rmoveto regFont setfont } def
+/_f {getSize siz mul 0 rmoveto} def
+%
+% ----- printing symbols and/or change to Bold and Italic.
+%  *1*  bold, italics, etc:  "_norm", "_bold", "_em" and "_sym" take
+%       no arguments and they are used before a "(text) show".
+%       Because the Roman fonts use here the ISOLatin1 encoding,
+%       one can plot some symbols with them.  Examples:
+%           _norm (normal) show _bold (bold) show _em (italics) show _norm
+%           _norm (T=25 \260C, [Cu]=1\265M) show
+%  *2*  the Symbol font may be used with octal codes (\nnn).
+%       Example formula (- delta-r-Cp0m):
+%              _sym (-\104) show _norm (r) -0.4 ^ 0.05 _f _em (C) show
+%              _sym (\260) 0.3 _^ _norm (p,m) -0.4 ^
+%       another example (log_10 pCO2(g)):
+%              _norm (log) show (10) -0.4 ^ 0.1 _f _em (p) show
+%              _norm (CO) -0.4 ^ (2) -0.8 ^ (\(g\)) -0.4 ^
+%       Tables with the octal encoding vectors for the Roman and Symbol
+%       fonts are given in PostScript manuals.
+%
+/_norm     {/Helvetica findfont dup length dict begin
+            {1 index /FID ne {def} {pop pop} ifelse} forall
+            /Encoding ISOLatin1Encoding def currentdict end
+            /UserFont exch definefont pop
+            getSize /UserFont findfont 1.43 siz mul scalefont setfont} def
+/_bold     {/Helvetica-Bold findfont dup length dict begin
+            {1 index /FID ne {def} {pop pop} ifelse} forall
+            /Encoding ISOLatin1Encoding def currentdict end
+            /UserFont exch definefont pop
+            getSize /UserFont findfont 1.43 siz mul scalefont setfont} def
+/_em       {/Helvetica-Oblique findfont dup length dict begin
+            {1 index /FID ne {def} {pop pop} ifelse} forall
+            /Encoding ISOLatin1Encoding def currentdict end
+            /UserFont exch definefont pop
+            getSize /UserFont findfont 1.43 siz mul scalefont setfont} def
+/_normS    {/Helvetica findfont dup length dict begin
+            {1 index /FID ne {def} {pop pop} ifelse} forall
+            /Encoding StandardEncoding def currentdict end
+            /UserFont exch definefont pop
+            getSize /UserFont findfont 1.43 siz mul scalefont setfont} def
+/_boldS    {/Helvetica-Bold findfont dup length dict begin
+            {1 index /FID ne {def} {pop pop} ifelse} forall
+            /Encoding StandardEncoding def currentdict end
+            /UserFont exch definefont pop
+            getSize /UserFont findfont 1.43 siz mul scalefont setfont} def
+/_emS      {/Helvetica-Oblique findfont dup length dict begin
+            {1 index /FID ne {def} {pop pop} ifelse} forall
+            /Encoding StandardEncoding def currentdict end
+            /UserFont exch definefont pop
+            getSize /UserFont findfont 1.43 siz mul scalefont setfont} def
+/_sym      {getSize /Symbol findfont 1.43 siz mul scalefont setfont} def
+%
+end   % pop ChemEqDict from dictionary stack
+% ------------------------------- end Prolog --------------------------------
+%%EndProlog
+%%Page: 1 1
+% ----------------------------- PlotPS options:
+% size: 80%; left- and bottom-margin: 0.0 0.0
+% colours;   landscape;   font: Helvetica
+% ---- Initialize the page ----
+ChemEqDict begin  % push dictionary in dictionary stack
+gsave
+% ---- set landscape/portrait orientation
+90 rotate 12 -579 translate
+% ----  re-scale to 100 = 1 cm; (1 inch * 2.54) cm /72 points * 100
+0.283465 0.283465 scale
+1 setlinejoin  0 setgray  2.82 _setWidth    % set defaults for line drawing
+% ---- set initial font size (0.35 cm). Needed before "_norm", "rShow", etc
+%      (which call "getSize", and require a font size)
+/Helvetica findfont 35 scalefont setfont
+_norm
+%-------------------------- plot file starts here --------------------------
+newpath 0 0 0 setrgbcolor 2.26 _setWidth
+360 928 Mv
+360 128 Ln
+1160 128 Ln
+1160 928 Ln
+360 928 Ln
+% text at X,Y= 436 95;  size = 0.35;  angle = 0;  is formula: true;  alignment:centre
+%     text is: 0
+28 _setSize
+_csn
+362.80 90 Mv
+(0)cShow
+% text at X,Y= 590 95;  size = 0.35;  angle = 0;  is formula: true;  alignment:centre
+%     text is: 2
+486 90 Mv
+(2)cShow
+% text at X,Y= 744 95;  size = 0.35;  angle = 0;  is formula: true;  alignment:centre
+%     text is: 4
+609.20 90 Mv
+(4)cShow
+% text at X,Y= 898 95;  size = 0.35;  angle = 0;  is formula: true;  alignment:centre
+%     text is: 6
+732.40 90 Mv
+(6)cShow
+% text at X,Y= 1051 95;  size = 0.35;  angle = 0;  is formula: true;  alignment:centre
+%     text is: 8
+854.80 90 Mv
+(8)cShow
+% text at X,Y= 1188 95;  size = 0.35;  angle = 0;  is formula: true;  alignment:centre
+%     text is: 10
+978.40 90 Mv
+(10)cShow
+% text at X,Y= 1342 95;  size = 0.35;  angle = 0;  is formula: true;  alignment:centre
+%     text is: 12
+1101.60 90 Mv
+(12)cShow
+360 128 Mv
+360 142.40 Ln
+_sn
+360 928 Mv
+360 914.40 Ln
+_sn
+421.60 128 Mv
+421.60 142.40 Ln
+_sn
+421.60 928 Mv
+421.60 914.40 Ln
+_sn
+483.20 128 Mv
+483.20 142.40 Ln
+_sn
+483.20 928 Mv
+483.20 914.40 Ln
+_sn
+544.80 128 Mv
+544.80 142.40 Ln
+_sn
+544.80 928 Mv
+544.80 914.40 Ln
+_sn
+606.40 128 Mv
+606.40 142.40 Ln
+_sn
+606.40 928 Mv
+606.40 914.40 Ln
+_sn
+668 128 Mv
+668 142.40 Ln
+_sn
+668 928 Mv
+668 914.40 Ln
+_sn
+729.60 128 Mv
+729.60 142.40 Ln
+_sn
+729.60 928 Mv
+729.60 914.40 Ln
+_sn
+790.40 128 Mv
+790.40 142.40 Ln
+_sn
+790.40 928 Mv
+790.40 914.40 Ln
+_sn
+852 128 Mv
+852 142.40 Ln
+_sn
+852 928 Mv
+852 914.40 Ln
+_sn
+913.60 128 Mv
+913.60 142.40 Ln
+_sn
+913.60 928 Mv
+913.60 914.40 Ln
+_sn
+975.20 128 Mv
+975.20 142.40 Ln
+_sn
+975.20 928 Mv
+975.20 914.40 Ln
+_sn
+1036.80 128 Mv
+1036.80 142.40 Ln
+_sn
+1036.80 928 Mv
+1036.80 914.40 Ln
+_sn
+1098.40 128 Mv
+1098.40 142.40 Ln
+_sn
+1098.40 928 Mv
+1098.40 914.40 Ln
+_sn
+1160 128 Mv
+1160 142.40 Ln
+_sn
+1160 928 Mv
+1160 914.40 Ln
+% text at X,Y= 287 380;  size = 0.35;  angle = 0;  is formula: true;  alignment:right
+%     text is: -0.5
+_sn
+341.60 304 Mv
+(\0550.5)rShow
+% text at X,Y= 322 619;  size = 0.35;  angle = 0;  is formula: true;  alignment:right
+%     text is: 0.0
+341.60 495.20 Mv
+(0.0)rShow
+% text at X,Y= 322 857;  size = 0.35;  angle = 0;  is formula: true;  alignment:right
+%     text is: 0.5
+341.60 685.60 Mv
+(0.5)rShow
+% text at X,Y= 322 1095;  size = 0.35;  angle = 0;  is formula: true;  alignment:right
+%     text is: 1.0
+341.60 876 Mv
+(1.0)rShow
+360 223.20 Mv
+374.40 223.20 Ln
+_sn
+1160 223.20 Mv
+1146.40 223.20 Ln
+_sn
+360 318.40 Mv
+374.40 318.40 Ln
+_sn
+1160 318.40 Mv
+1146.40 318.40 Ln
+_sn
+360 413.60 Mv
+374.40 413.60 Ln
+_sn
+1160 413.60 Mv
+1146.40 413.60 Ln
+_sn
+360 508.80 Mv
+374.40 508.80 Ln
+_sn
+1160 508.80 Mv
+1146.40 508.80 Ln
+_sn
+360 604 Mv
+374.40 604 Ln
+_sn
+1160 604 Mv
+1146.40 604 Ln
+_sn
+360 699.20 Mv
+374.40 699.20 Ln
+_sn
+1160 699.20 Mv
+1146.40 699.20 Ln
+_sn
+360 794.40 Mv
+374.40 794.40 Ln
+_sn
+1160 794.40 Mv
+1146.40 794.40 Ln
+_sn
+360 889.60 Mv
+374.40 889.60 Ln
+_sn
+1160 889.60 Mv
+1146.40 889.60 Ln
+_sn
+% text at X,Y= 219 513;  size = 0.35;  angle = 90;  is formula: true;  alignment:centre
+%     text is: E`SHE' / V
+175.20 423 Mv
+/_angle 90 def TxtRotate
+(E)lShow
+(SHE)-0.50 ^
+( / V)lShow
+grestore
+% text at X,Y= 910 34;  size = 0.35;  angle = 0;  is formula: true;  alignment:centre
+%     text is: pH
+736.12 27.20 Mv
+(pH)lShow
+360 268 Mv
+366.40 268 Ln
+_sn
+360 268 Mv
+380 268 Ln
+_sn
+360 801.60 Mv
+366.40 801.60 Ln
+_sn
+360 801.60 Mv
+380 801.60 Ln
+_sn
+366.40 268 Mv
+380 268 Ln
+_sn
+366.40 801.60 Mv
+380 801.60 Ln
+_sn
+380 268 Mv
+393.60 268 Ln
+_sn
+380 801.60 Mv
+393.60 801.60 Ln
+_sn
+393.60 268 Mv
+406.40 268 Ln
+_sn
+393.60 801.60 Mv
+406.40 801.60 Ln
+_sn
+406.40 268 Mv
+420 268 Ln
+_sn
+406.40 801.60 Mv
+420 801.60 Ln
+_sn
+420 268 Mv
+433.60 268 Ln
+_sn
+420 801.60 Mv
+433.60 801.60 Ln
+_sn
+433.60 268 Mv
+446.40 268 Ln
+_sn
+433.60 801.60 Mv
+446.40 801.60 Ln
+_sn
+446.40 268 Mv
+460 268 Ln
+_sn
+446.40 801.60 Mv
+460 801.60 Ln
+_sn
+460 268 Mv
+473.60 268 Ln
+_sn
+460 801.60 Mv
+473.60 801.60 Ln
+_sn
+473.60 268 Mv
+486.40 268 Ln
+_sn
+473.60 801.60 Mv
+486.40 801.60 Ln
+_sn
+486.40 268 Mv
+500 268 Ln
+_sn
+486.40 801.60 Mv
+486.40 814.40 Ln
+_sn
+486.40 801.60 Mv
+500 788 Ln
+_sn
+486.40 814.40 Mv
+486.40 828 Ln
+486.40 841.60 Ln
+486.40 854.40 Ln
+486.40 868 Ln
+486.40 881.60 Ln
+486.40 894.40 Ln
+486.40 908 Ln
+486.40 928 Ln
+_sn
+500 268 Mv
+513.60 268 Ln
+_sn
+500 774.40 Mv
+500 788 Ln
+_sn
+500 774.40 Mv
+513.60 761.60 Ln
+_sn
+513.60 268 Mv
+526.40 268 Ln
+_sn
+513.60 761.60 Mv
+526.40 748 Ln
+_sn
+526.40 268 Mv
+540 268 Ln
+_sn
+526.40 748 Mv
+540 734.40 Ln
+_sn
+540 268 Mv
+553.60 268 Ln
+_sn
+540 734.40 Mv
+553.60 721.60 Ln
+_sn
+553.60 268 Mv
+566.40 268 Ln
+_sn
+553.60 721.60 Mv
+566.40 708 Ln
+_sn
+566.40 268 Mv
+580 268 Ln
+_sn
+566.40 708 Mv
+580 694.40 Ln
+_sn
+580 268 Mv
+593.60 268 Ln
+_sn
+580 694.40 Mv
+593.60 681.60 Ln
+_sn
+593.60 268 Mv
+606.40 268 Ln
+_sn
+593.60 668 Mv
+593.60 681.60 Ln
+_sn
+593.60 668 Mv
+606.40 654.40 Ln
+_sn
+606.40 268 Mv
+620 268 Ln
+_sn
+606.40 654.40 Mv
+620 641.60 Ln
+_sn
+620 268 Mv
+633.60 268 Ln
+_sn
+620 641.60 Mv
+633.60 628 Ln
+_sn
+633.60 268 Mv
+646.40 268 Ln
+_sn
+633.60 628 Mv
+646.40 614.40 Ln
+_sn
+646.40 268 Mv
+660 268 Ln
+_sn
+646.40 614.40 Mv
+660 601.60 Ln
+_sn
+660 268 Mv
+673.60 268 Ln
+_sn
+660 601.60 Mv
+673.60 588 Ln
+_sn
+673.60 268 Mv
+686.40 268 Ln
+_sn
+673.60 588 Mv
+686.40 574.40 Ln
+_sn
+686.40 268 Mv
+700 268 Ln
+_sn
+686.40 574.40 Mv
+700 561.60 Ln
+_sn
+700 268 Mv
+713.60 268 Ln
+_sn
+700 561.60 Mv
+713.60 548 Ln
+_sn
+713.60 268 Mv
+726.40 268 Ln
+_sn
+713.60 548 Mv
+726.40 534.40 Ln
+_sn
+726.40 268 Mv
+740 268 Ln
+_sn
+726.40 521.60 Mv
+726.40 534.40 Ln
+_sn
+726.40 521.60 Mv
+740 508 Ln
+_sn
+740 268 Mv
+753.60 268 Ln
+_sn
+740 508 Mv
+753.60 494.40 Ln
+_sn
+753.60 268 Mv
+766.40 268 Ln
+_sn
+753.60 494.40 Mv
+766.40 481.60 Ln
+_sn
+766.40 268 Mv
+780 268 Ln
+_sn
+766.40 481.60 Mv
+780 468 Ln
+_sn
+780 268 Mv
+793.60 268 Ln
+_sn
+780 468 Mv
+793.60 454.40 Ln
+_sn
+793.60 268 Mv
+806.40 268 Ln
+_sn
+793.60 454.40 Mv
+806.40 441.60 Ln
+_sn
+806.40 268 Mv
+820 268 Ln
+_sn
+806.40 441.60 Mv
+820 428 Ln
+_sn
+820 268 Mv
+833.60 268 Ln
+_sn
+820 428 Mv
+833.60 414.40 Ln
+_sn
+833.60 268 Mv
+846.40 268 Ln
+_sn
+833.60 414.40 Mv
+846.40 401.60 Ln
+_sn
+846.40 268 Mv
+860 268 Ln
+_sn
+846.40 401.60 Mv
+860 388 Ln
+_sn
+860 268 Mv
+873.60 254.40 Ln
+_sn
+860 388 Mv
+873.60 374.40 Ln
+_sn
+873.60 254.40 Mv
+886.40 254.40 Ln
+_sn
+873.60 361.60 Mv
+886.40 348 Ln
+_sn
+873.60 361.60 Mv
+873.60 374.40 Ln
+_sn
+873.60 361.60 Mv
+886.40 374.40 Ln
+_sn
+873.60 374.40 Mv
+886.40 374.40 Ln
+_sn
+886.40 254.40 Mv
+900 254.40 Ln
+_sn
+886.40 348 Mv
+900 334.40 Ln
+_sn
+886.40 374.40 Mv
+900 361.60 Ln
+_sn
+900 254.40 Mv
+913.60 254.40 Ln
+_sn
+900 334.40 Mv
+913.60 321.60 Ln
+_sn
+900 361.60 Mv
+913.60 361.60 Ln
+_sn
+913.60 254.40 Mv
+913.60 268 Ln
+_sn
+913.60 254.40 Mv
+926.40 254.40 Ln
+_sn
+913.60 268 Mv
+913.60 281.60 Ln
+913.60 294.40 Ln
+913.60 308 Ln
+_sn
+913.60 294.40 Mv
+926.40 294.40 Ln
+_sn
+913.60 308 Mv
+913.60 321.60 Ln
+_sn
+913.60 308 Mv
+926.40 294.40 Ln
+_sn
+913.60 361.60 Mv
+926.40 361.60 Ln
+_sn
+926.40 254.40 Mv
+940 254.40 Ln
+_sn
+926.40 294.40 Mv
+940 281.60 Ln
+_sn
+926.40 361.60 Mv
+940 348 Ln
+_sn
+940 254.40 Mv
+953.60 254.40 Ln
+_sn
+940 281.60 Mv
+953.60 268 Ln
+_sn
+940 348 Mv
+953.60 348 Ln
+_sn
+953.60 254.40 Mv
+966.40 254.40 Ln
+_sn
+953.60 268 Mv
+966.40 254.40 Ln
+_sn
+953.60 348 Mv
+966.40 348 Ln
+_sn
+966.40 254.40 Mv
+980 254.40 Ln
+_sn
+966.40 348 Mv
+980 334.40 Ln
+_sn
+980 241.60 Mv
+980 254.40 Ln
+993.60 241.60 Ln
+_sn
+980 334.40 Mv
+993.60 334.40 Ln
+_sn
+993.60 241.60 Mv
+1006.40 241.60 Ln
+_sn
+993.60 334.40 Mv
+1006.40 321.60 Ln
+_sn
+993.60 928 Mv
+1006.40 908 Ln
+_sn
+1006.40 241.60 Mv
+1020 228 Ln
+_sn
+1006.40 241.60 Mv
+1020 241.60 Ln
+_sn
+1006.40 321.60 Mv
+1020 321.60 Ln
+_sn
+1006.40 908 Mv
+1020 908 Ln
+_sn
+1020 228 Mv
+1020 241.60 Ln
+1033.60 228 Ln
+_sn
+1020 321.60 Mv
+1033.60 321.60 Ln
+_sn
+1020 908 Mv
+1033.60 894.40 Ln
+_sn
+1033.60 228 Mv
+1046.40 228 Ln
+_sn
+1033.60 321.60 Mv
+1046.40 308 Ln
+_sn
+1033.60 894.40 Mv
+1046.40 894.40 Ln
+_sn
+1046.40 228 Mv
+1060 214.40 Ln
+_sn
+1046.40 228 Mv
+1060 228 Ln
+_sn
+1046.40 308 Mv
+1060 308 Ln
+_sn
+1046.40 894.40 Mv
+1060 881.60 Ln
+_sn
+1060 214.40 Mv
+1073.60 214.40 Ln
+_sn
+1060 228 Mv
+1073.60 214.40 Ln
+_sn
+1060 308 Mv
+1073.60 308 Ln
+_sn
+1060 881.60 Mv
+1073.60 868 Ln
+_sn
+1073.60 214.40 Mv
+1086.40 214.40 Ln
+_sn
+1073.60 308 Mv
+1086.40 294.40 Ln
+_sn
+1073.60 868 Mv
+1086.40 868 Ln
+_sn
+1086.40 201.60 Mv
+1100 201.60 Ln
+_sn
+1086.40 214.40 Mv
+1100 201.60 Ln
+_sn
+1086.40 294.40 Mv
+1100 294.40 Ln
+_sn
+1086.40 868 Mv
+1100 854.40 Ln
+_sn
+1100 201.60 Mv
+1113.60 201.60 Ln
+_sn
+1100 294.40 Mv
+1113.60 294.40 Ln
+_sn
+1100 854.40 Mv
+1113.60 841.60 Ln
+_sn
+1113.60 201.60 Mv
+1126.40 188 Ln
+_sn
+1113.60 201.60 Mv
+1126.40 201.60 Ln
+_sn
+1113.60 294.40 Mv
+1126.40 281.60 Ln
+_sn
+1113.60 841.60 Mv
+1126.40 841.60 Ln
+_sn
+1126.40 188 Mv
+1140 188 Ln
+_sn
+1126.40 201.60 Mv
+1140 188 Ln
+_sn
+1126.40 281.60 Mv
+1140 281.60 Ln
+_sn
+1126.40 841.60 Mv
+1140 828 Ln
+_sn
+1140 188 Mv
+1160 188 Ln
+_sn
+1140 281.60 Mv
+1160 268 Ln
+_sn
+1140 828 Mv
+1160 834.40 Ln
+_sn
+0.85 _setWidth
+0 0 1 setrgbcolor
+% text at X,Y= 761 555;  size = 0.26;  angle = 0;  is formula: true;  alignment:centre
+%     text is: Fe 2+
+21 _setSize
+613.48 450.24 Mv
+(Fe)lShow
+(2+)0.40 ^
+% text at X,Y= 494 1072;  size = 0.26;  angle = 0;  is formula: true;  alignment:centre
+%     text is: Fe 3+
+399.88 863.84 Mv
+(Fe)lShow
+(3+)0.40 ^
+% text at X,Y= 1118 347;  size = 0.26;  angle = 0;  is formula: true;  alignment:centre
+%     text is: FeOH+
+909.48 283.84 Mv
+(FeOH)lShow
+(+)0.40 ^
+% text at X,Y= 1271 1114;  size = 0.26;  angle = 0;  is formula: true;  alignment:centre
+%     text is: FeO4-2
+1034.90 897.44 Mv
+(FeO)lShow
+(4)-0.40 ^
+(2\055)0.40 ^
+% text at X,Y= 871 239;  size = 0.26;  angle = 0;  is formula: true;  alignment:centre
+%     text is: Fe(cr)
+714.90 197.44 Mv
+(Fe\(cr\))lShow
+% text at X,Y= 1189 272;  size = 0.26;  angle = 0;  is formula: true;  alignment:centre
+%     text is: Fe(OH)2(cr)
+984.38 223.84 Mv
+(Fe\(OH\))lShow
+(2)-0.40 ^
+(\(cr\))lShow
+% text at X,Y= 1157 399;  size = 0.26;  angle = 0;  is formula: true;  alignment:centre
+%     text is: Fe3O4(cr)
+952.74 325.44 Mv
+(Fe)lShow
+(3)-0.40 ^
+(O)lShow
+(4)-0.40 ^
+(\(cr\))lShow
+% text at X,Y= 915 839;  size = 0.26;  angle = 0;  is formula: true;  alignment:centre
+%     text is: Fe2O3(cr)
+759.14 677.44 Mv
+(Fe)lShow
+(2)-0.40 ^
+(O)lShow
+(3)-0.40 ^
+(\(cr\))lShow
+0 0.502 0 setrgbcolor
+493.60 928 Mv
+520.80 918.40 Ln
+_sn
+540 911.20 Mv
+566.40 901.60 Ln
+_sn
+585.60 894.40 Mv
+612 884.80 Ln
+_sn
+631.20 877.60 Mv
+657.60 868 Ln
+_sn
+676.80 860.80 Mv
+703.20 851.20 Ln
+_sn
+722.40 844 Mv
+748.80 834.40 Ln
+_sn
+768 827.20 Mv
+794.40 817.60 Ln
+_sn
+813.60 811.20 Mv
+840.80 800.80 Ln
+_sn
+859.20 794.40 Mv
+886.40 784 Ln
+_sn
+905.60 777.60 Mv
+932 768 Ln
+_sn
+951.20 760.80 Mv
+977.60 751.20 Ln
+_sn
+996.80 744 Mv
+1023.20 734.40 Ln
+_sn
+1042.40 727.20 Mv
+1068.80 717.60 Ln
+_sn
+1088 710.40 Mv
+1114.40 700.80 Ln
+_sn
+1133.60 693.60 Mv
+1160 684 Ln
+_sn
+360 508.80 Mv
+386.40 499.20 Ln
+_sn
+405.60 492 Mv
+432 482.40 Ln
+_sn
+451.20 475.20 Mv
+477.60 465.60 Ln
+_sn
+496.80 459.20 Mv
+523.20 448.80 Ln
+_sn
+542.40 442.40 Mv
+568.80 432.80 Ln
+_sn
+587.20 425.60 Mv
+614.40 416 Ln
+_sn
+632.80 408.80 Mv
+660 399.20 Ln
+_sn
+678.40 392 Mv
+704.80 382.40 Ln
+_sn
+724 375.20 Mv
+750.40 365.60 Ln
+_sn
+769.60 359.20 Mv
+796 348.80 Ln
+_sn
+815.20 342.40 Mv
+841.60 332.80 Ln
+_sn
+860.80 325.60 Mv
+887.20 316 Ln
+_sn
+906.40 308.80 Mv
+932.80 299.20 Ln
+_sn
+952 292 Mv
+978.40 282.40 Ln
+_sn
+996.80 275.20 Mv
+1024 265.60 Ln
+_sn
+1042.40 259.20 Mv
+1069.60 248.80 Ln
+_sn
+1088 242.40 Mv
+1114.40 232.80 Ln
+_sn
+1133.60 225.60 Mv
+1160 216 Ln
+_sn 2.26 _setWidth
+0 0 0 setrgbcolor
+% text at X,Y= 18 1248;  size = 0.35;  angle = 0;  is formula: true;  alignment:left
+%     text is: [Fe 2+]`TOT' =    1.00 $M
+28 _setSize
+14.40 998.40 Mv
+([Fe)lShow
+(2+)0.40 ^
+(])lShow
+(TOT)-0.50 ^
+( =    1.00 \265M)lShow
+% text at X,Y= 1173 1248;  size = 0.35;  angle = 0;  is formula: true;  alignment:left
+%     text is: t= 25~C
+938.40 998.40 Mv
+(t= 25\260C)lShow
+stroke
+%-------------------------- plot file ends here --------------------------
+grestore
+end  % pop ChemEqDict from dictionary stack
+showpage
+%%Trailer
+%%EOF
+

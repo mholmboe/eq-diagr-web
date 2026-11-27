@@ -1,0 +1,24 @@
+ 3, 11, 5, 0,   /SPANA (MEDUSA), t= 25, p= 1
+H+
+Cl-
+Fe 3+
+Fe(OH)2+            , -4.8      -2  0  1
+Fe(OH)3             , -12       -3  0  1
+Fe(OH)4-            , -21.6     -4  0  1
+Fe2(OH)2+4          , -2.82     -2  0  2
+Fe3(OH)4+5          , -6.3      -4  0  3
+FeCl+2              ,  1.52      0  1  1
+FeCl2+              ,  2.22      0  2  1
+FeCl3               ,  1.02      0  3  1
+FeCl4-              , -0.98      0  4  1
+FeOH 2+             , -2.15     -1  0  1
+OH-                 , -14.002   -1  0  0
+Fe(OH)3(am)         , -4.9      -3  0  1 /amorphous
+Fe(OH)3(s)          , -3.43     -3  0  1 /ferrihydrite pp.227-228
+Fe2O3(cr)           ,  0.101    -6  0  2 /haematite
+FeOCl(cr)           , -4.55     -2  1  1
+FeOOH(cr)           , -0.17     -3  0  1 /goethite
+Fe 3+, Cl-,
+LA, -1.5
+LTV, -1  0.75
+T,  1.0E-5

@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Eq-Diagr</title>
+<link rel="icon" href="help/images/thco35_s.gif">
+<script src="theme.js"></script>
+<link rel="stylesheet" href="theme.css">
+<link rel="stylesheet" href="app.css">
+</head>
+<body class="app">
+<header class="menubar">
+  <button class="sidetoggle" id="sideToggle" title="Show or hide the file list" aria-label="Show or hide the file list" aria-controls="sidebar">☰</button>
+  <span class="brand">Eq-Diagr</span>
+  <nav class="menus" id="menus" role="menubar" aria-label="Menu"></nav>
+  <span class="spacer"></span>
+  <div class="mode" role="group" aria-label="Mode">
+    <button id="modeNormal" title="Normal mode: the options needed for most diagrams">Normal</button>
+    <button id="modeAdv" title="Advanced mode: all the options of the programs">Advanced</button>
+  </div>
+</header>
+<div class="appbody">
+  <aside id="sidebar" class="sidebar" aria-label="Files">
+    <div class="side-h"><span>Data files</span><button id="sideOpen" title="Open a data file (.dat) or a plot file (.plt) from this computer">Open…</button></div>
+    <ul id="sideFiles" class="sidelist"></ul>
+    <div class="side-h"><span>Databases</span><button id="sideLoadDb" title="Load database files from this computer">Load…</button></div>
+    <ul id="sideDbs" class="sidelist"></ul>
+    <p class="side-note">Files stay in this browser.</p>
+  </aside>
+  <div class="work">
+    <div class="tabs" id="tabs" role="tablist" aria-label="Open views"></div>
+    <div class="views" id="views"></div>
+  </div>
+</div>
+<footer class="statusbar">
+  <span id="sbStatus" class="sb-status"></span>
+  <span id="sbMode" class="sb-mode"></span>
+</footer>
+<div class="dropzone" aria-hidden="true">Drop data files (.dat), plot files (.plt) or database files to open them</div>
+<input id="openDat" type="file" accept=".dat,.txt,.plt" hidden>
+<input id="openDb" type="file" multiple accept=".db,.elb,.txt,.skv,.csv,.elt,.elm" hidden>
+<dialog id="examples" class="about examples">
+  <h2>Example diagrams</h2>
+  <p>The example files of the desktop programs. Open one, look at the chemical system and the settings, and click "Plot the diagram". The Help tutorials explain them.</p>
+  <ul id="exList" class="exlist"></ul>
+  <form method="dialog"><button>Cancel</button></form>
+</dialog>
+<dialog id="about" class="about">
+  <h2>Eq-Diagr</h2>
+  <p>Chemical equilibrium diagrams with the programs of Ignasi Puigdomènech (DataBase, Spana, SED, Predom, HaltaFall and their tools), compiled from Java to JavaScript and run in this browser. The calculations are the same as in the desktop programs, and your files and databases stay on this computer.</p>
+  <p>Normal mode shows the options needed for most diagrams. Advanced mode adds the calculation options, the table and debugging output, merging chemical systems, and the database maintenance tools, as the advanced preference of the desktop programs does.</p>
+  <form method="dialog"><button class="primary">Close</button></form>
+</dialog>
+<script src="store.js"></script>
+<script src="builtin-db.js"></script>
+<script src="dialogs.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,27 @@
+ 4, 12, 10, 0,   /DATABASE (HYDRA), t= 25, p= 1
+H+
+Ca 2+
+SO4 2-
+CO3 2-
+CaCO3              ,   3.224    0  1  0  1
+CaHCO3+            ,   11.435   1  1  0  1
+CaOH+              ,  -12.78   -1  1  0  0
+CaSO4              ,   2.3      0  1  1  0
+CO2                ,   16.681   2  0  0  1
+CO2(g)             ,   18.149   2  0  0  1
+H2CO3              ,   13.859   2  0  0  1
+H2SO4              ,  -3        2  0  1  0
+HCO3-              ,   10.329   1  0  0  1
+HSO4-              ,   1.988    1  0  1  0
+OH-                ,  -14      -1  0  0  0
+CaHSO4+            ,   3.068    1  1  1  0
+Ca(OH)2(cr)        ,  -22.75   -2  1  0  0 /portlandite
+CaCO3(am)          ,   6.39     0  1  0  1
+CaCO3(cr)          ,   8.48     0  1  0  1 /calcite
+CaO(cr)            ,  -32.7    -2  1  0  0
+CaSO4(cr)          ,   4.261    0  1  1  0 /anhydrite
+CaSO4·2H2O(cr)     ,   4.597    0  1  1  0 /gypsum
+Ca(OH)2(s)         ,  -22.8    -2  1  0  0 /portlandite
+CaCO3(s)           ,   8.48     0  1  0  1 /calcite
+CaSO4(s)           ,   4.36     0  1  1  0 /anhydrite
+CaSO4·2H2O(s)      ,   4.58     0  1  1  0 /gypsum

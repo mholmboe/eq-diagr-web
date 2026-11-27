@@ -1,0 +1,13 @@
+# DataMaintenance cases; references made by make-ref.sh with RefMaint.java
+merge|M1.db|R.txt,Extra.txt
+merge|M2.db|R.txt
+merge|M3.db|Extra.txt
+merge|M4.db|Extra.txt,R.txt
+stats|S1.txt|-|R.txt,Extra.txt
+stats|S2.txt|/Applications/Eq-Diagr/References.txt|/Applications/Eq-Diagr/Reactions.db
+stats|S3.txt|-|R.db
+single|C1.txt|Ca 2+|R.db
+single|C2.txt|Ca 2+|R.txt,Extra.txt
+single|C3.txt|H+|R.db
+single|C4.txt|Ox 2-|R.txt,Extra.txt
+add|add1|add1.txt|R.db

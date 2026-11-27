@@ -1,0 +1,16 @@
+{
+  "name": "eq-diagr-web",
+  "private": true,
+  "description": "Browser version of eq-diagr: test scripts (the app itself has no build step or dependencies)",
+  "scripts": {
+    "serve": "python3 webpoc/serve.py 8765",
+    "test:engine": "node webpoc/tests/test-engine.js",
+    "test:examples": "node webpoc/tests/test-examples.js",
+    "test:ui": "node webpoc/tests/ui-test.js",
+    "screenshots": "node webpoc/tests/ui-test.js --browsers=chromium --screenshots=review",
+    "install-browsers": "playwright-core install webkit firefox"
+  },
+  "devDependencies": {
+    "playwright-core": "1.52.0"
+  }
+}

@@ -1,0 +1,10 @@
+CO3_fract -n=100 -tbl
+CO3_log -n=100 -tbl
+H3PO4_fract -n=100 -tbl
+H3PO4_log -tbl
+titration_SED -n=200 -tbl
+CO3_log_Davies -n=80 -tbl -i=-1 -t=25 -m=0
+CO3_fract_HKF50 -n=60 -tbl -i=0.5 -t=50 -m=2
+CO3_log_tbl -n=100 -tbl -tble:txt -tbls:; -tblcs:# -tblce:*
+CO3_fract_tbltab -n=50 -tbl -tble:prn -tbls:\t -tblcs:% -tblce:%
+CO3_fract_tola -n=60 -tbl -i=-1 -t=50 -m=1 -tol=1E-6 -tola=1E-6

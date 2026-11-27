@@ -1,0 +1,13 @@
+/* Additions to 1_.css for the pages written for the web app (help-web/). */
+.crumb { font-size: 90%; display: flex; align-items: center; gap: 8px; margin: 6px 0 4px; }
+.crumb img { border: 0; }
+.ui { font-family: SansSerif, Arial, Helvetica, sans-serif; font-weight: bold; font-size: 92%; white-space: nowrap; }
+kbd { border: 1px solid #bbb; border-radius: 3px; padding: 0 3px; background: #f6f6f6; }
+ol.steps > li { margin-top: 8px; }
+ul.plain > li { margin-top: 4px; }
+.note { background: #f3f8f3; border-left: 3px solid #008000; padding: 6px 10px; margin-top: 10pt; }
+img.diagr { display: block; margin: 10px auto; max-width: 100%; height: auto; }
+table.opts { border-collapse: collapse; margin-top: 8pt; }
+table.opts td, table.opts th { border-top: 1px solid #ddd; padding: 4px 8px; vertical-align: top; text-align: left; }
+table.opts th { font-family: SansSerif, Arial, Helvetica, sans-serif; font-size: 92%; }
+.adv { font-size: 85%; color: #666; }

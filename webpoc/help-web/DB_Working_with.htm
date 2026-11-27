@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>DATABASE: searching the database</title>
+<link rel="stylesheet" href="1_.css">
+<link rel="stylesheet" href="1_web.css">
+</head>
+<body>
+<div class="crumb"><a href="0_Index.htm"><img src="images/thco35_s.gif" width="32" height="32" alt="Chem.Eq.Diagr"></a>
+<span><a href="DB_0_Main.htm">DATABASE</a></span></div>
+
+<h3>Searching the database: the Chemical system tab</h3>
+
+<h4>Choosing the components</h4>
+
+<p>When the program starts, H<sup>+</sup> is already selected. Click an element in the periodic table to list its
+components (metal ions or ligands) under <span class="ui">Available for &hellip;</span>, and click a component to
+select it. An element with a single component, for example Na or Cl, is selected directly by the click on the
+element. The selected components are listed at the top of the right-hand side; click one there to remove it. The
+elements with a selected component are marked in the periodic table, and elements without data in the database are
+greyed out.</p>
+
+<ul class="plain">
+<li>Organic ligands are found under carbon, <span class="ui">C</span> (in the eq-diagr database).</li>
+<li>Select electrons, with <span class="ui">e&minus;</span> in the top row of the periodic table, if you want diagrams with the redox potential (Eh or pe) on an axis, or if your system
+has an element with several redox states, for example Fe(II) and Fe(III). See
+<a href="ChEq_Redox_React.htm">redox reactions</a>.</li>
+<li>In <a href="S_Menu_Prefs.htm">advanced mode</a>, a database's components that are not linked to a chemical
+element (for example some ions of the Medusa-Hydra database) are listed under <span class="ui">other</span>, under
+e&minus;. Water is added with the option <span class="ui">include H2O as a component</span> (see below).</li>
+<li>If you select two components of the same element, for example Fe 2+ and Fe 3+, the search warns you that they
+may be related by redox reactions, and asks whether to continue.</li>
+</ul>
+
+<p><span class="ui">File &gt; New chemical system</span> clears the selection (H<sup>+</sup> stays) and the search
+result.</p>
+
+<h4>Searching</h4>
+
+<p>Click <span class="ui">Search reactions</span>. The reactions found are listed with their log&nbsp;<i>K</i> at the chosen
+temperature and their reference. Point at a species name to see its reaction, and at a reference key to see the
+full reference (the eq-diagr database has the references; the KTH database has only the keys).</p>
+
+<p id="Details">Click a species name to see the details of its reaction, as <b>show Details</b> does in the
+desktop DataBase: the reaction, log&nbsp;<i>K</i>&deg; at 25&nbsp;&deg;C and at the temperature of the search,
+&Delta;<i>H</i>&deg; and &Delta;<i>C<sub>p</sub></i>&deg; (or a note that log&nbsp;<i>K</i> comes from a function or
+a table of values), the temperature and pressure up to which the data are valid, the references in full, and the
+comment of the database. A species of the KTH database has no data for other temperatures than
+25&nbsp;&deg;C.</p>
+
+<p>To leave a species out of the data file, untick it. The search is made again without it, and the species is
+shown unticked at the end of the list, so that you can take it back. This is how you
+<a href="DB_Solid_solub.htm">exclude a solid</a> that should not form in your experiment.</p>
+
+<h4>Options</h4>
+
+<ul class="plain">
+<li><b>Temperature</b>, and in advanced mode the <b>pressure</b>: see <a href="DB_Temperature.htm">temperature</a>.
+The KTH database has log&nbsp;<i>K</i> values at 25&nbsp;&deg;C only.</li>
+<li><b>Solids</b> <span class="adv">(advanced mode)</span>: include all solids, or exclude those whose names end
+with "(cr)" or "(c)", see <a href="DB_Solid_solub.htm">solids</a>. In normal mode all solids are included.</li>
+<li><b>Redox equilibria</b> <span class="adv">(advanced mode)</span>: when e<sup>&minus;</sup> is a component, the
+redox reactions of nitrogen, sulfur and phosphorus can be left out, for example to keep N<sub>2</sub>(g) or
+NH<sub>4</sub><sup>+</sup> from forming in a nitrate solution. In normal mode they are all included.</li>
+<li><b>Include H<sub>2</sub>O as a component</b> <span class="adv">(advanced mode)</span>: for databases that have
+water as a component, see <a href="ChEq_H2O.htm">water</a>. Water is normally not needed as a component, because
+its activity is taken as one.</li>
+</ul>
+
+<h4>Making the data file</h4>
+
+<p><span class="ui">Create a diagram</span> saves the data file in this browser and opens it in a new diagram
+tab. The file is named after the components, for example <code>H+_Fe2+.dat</code>; if a file with that name already
+exists, you are asked for another name (keeping the name replaces the old file).
+<span class="ui">File &gt; Download data file (.dat)</span> saves the data file on your computer instead (in
+advanced mode there is also a button <span class="ui">Download .dat</span>). See
+<a href="S_Making_Diagrams.htm">making a diagram</a>.</p>
+
+<p>The messages of the search (the files read, the reactions found and any warnings) are under
+<span class="ui">Search messages</span>.</p>
+
+<h4>Using the keyboard</h4>
+
+<p>All buttons and fields can be reached with <kbd>Tab</kbd> and <kbd>Shift</kbd>+<kbd>Tab</kbd>, and
+<kbd>Space</kbd> or <kbd>Enter</kbd> clicks the button in focus. In the menu bar, the arrow keys move between and
+within the menus and <kbd>Esc</kbd> closes them.</p>
+<p>&nbsp;</p>
+</body>
+</html>

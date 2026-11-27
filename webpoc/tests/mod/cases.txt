@@ -1,0 +1,7 @@
+del|modchemsyst|Fe_EC|-del=Cl-
+exch|modchemsyst|CO3_fract|-exch=CO3 2-,HCO3-
+deact|modreaction|Fe_Eh-pH|-deact=Fe2O3(cr)
+act|modreaction|Fe_noHaem|-act=*Fe2O3(cr)
+ch|modreaction|Fe_Eh-pH|-ch=Fe3O4(cr);-30.0
+rev|modreaction|Fe_logK|-rev=Fe3O4(cr)
+chws|modreaction|Fe_Eh-pH|-chws=Fe3O4(cr);-30.5

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Tutorial: redox reactions</title>
+<link rel="stylesheet" href="1_.css">
+<link rel="stylesheet" href="1_web.css">
+</head>
+<body>
+<div class="crumb"><a href="0_Index.htm"><img src="images/thco35_s.gif" width="32" height="32" alt="Chem.Eq.Diagr"></a>
+<span><a href="0_Index.htm">Chemical Equilibrium Diagrams</a> / <a href="Tut_0_Tutorials.htm">Tutorials</a></span></div>
+
+<h3>Diagrams for redox reactions</h3>
+<ul class="plain">
+<li><a href="#Fe">Iron corrosion</a></li>
+<li><a href="#CuCN">Reduction of Cu(II) to Cu(I) by CN<sup>&minus;</sup></a></li>
+</ul>
+
+<h4 id="Fe">Iron corrosion</h4>
+
+<p>The diagram shows the corrosion products formed as a function of the amount of iron metal added to water.
+These steps use the eq-diagr database, which has magnetite, Fe<sub>3</sub>O<sub>4</sub>(cr); the KTH course
+database does not.</p>
+
+<ol class="steps">
+<li>In the <span class="ui">Chemical system</span> tab, choose <span class="ui">eq-diagr database</span> in the
+list <span class="ui">Database</span> (or in the <span class="ui">Database</span> menu).</li>
+<li>Click <span class="ui">Fe</span> in the periodic table and then <span class="ui">Fe 2+</span>. Click
+<span class="ui">e&minus;</span> (the electron, in the top row of the periodic table). The
+selected components are H<sup>+</sup>, Fe<sup>2+</sup> and e<sup>&minus;</sup>.</li>
+<li>Click <span class="ui">Search reactions</span> and then <span class="ui">Create a diagram</span>.</li>
+<li>To show the corrosion products as a function of the iron metal that has reacted, Fe(cr) must be a component
+instead of Fe<sup>2+</sup>. Open the <span class="ui">Chemical system</span> section of the diagram tab and, in the
+row of Fe 2+, choose <span class="ui">Fe(cr)</span> in the list <span class="ui">exchange for&hellip;</span>.
+The components are now H<sup>+</sup>, e<sup>&minus;</sup> and the solid component Fe(cr).</li>
+<li>In the <span class="ui">Diagram</span> section, choose <span class="ui">Fe(cr)</span> as the
+<span class="ui">X-axis component</span>.</li>
+<li>For corrosion in pure water, nothing is added but iron: the total concentrations of H<sup>+</sup> and
+e<sup>&minus;</sup> must be zero. In the <span class="ui">Concentrations</span> section, set the type of H+ to
+<span class="ui">total conc.</span> with the value 0, and do the same for e-. For Fe(cr) choose
+<span class="ui">total conc. varied</span> from 0 to 0.01 (10&nbsp;mmol per kg of water).</li>
+<li>Click <span class="ui">Plot the diagram</span>.</li>
+</ol>
+
+<img class="diagr" src="images/Diagr_LogFecorr.gif" alt="Logarithmic diagram of iron corrosion">
+
+<p>The diagram shows the amounts of the corrosion products (in mol per kg of water) as a function of the iron
+metal that has reacted (in millimol of Fe(cr) per kg of water). Magnetite is the solid corrosion product, and
+hydrogen gas is formed:</p>
+<p style="text-align:center">3&nbsp;Fe(cr) + 4&nbsp;H<sub>2</sub>O &rarr; Fe<sub>3</sub>O<sub>4</sub>(cr) +
+4&nbsp;H<sub>2</sub></p>
+
+<h4 id="CuCN">Reduction of Cu(II) to Cu(I) by cyanide</h4>
+
+<p>In a laboratory exercise the students react Cu<sup>2+</sup> and Cd<sup>2+</sup> with CN<sup>&minus;</sup>. The
+experiment with Cd gives a clear solution, while Cu precipitates.</p>
+
+<p id="Fig1-2">Illustrate first the Cd experiment with a diagram for [Cd]<sub>T</sub>&nbsp;=&nbsp;10&nbsp;mM and a varied
+CN<sup>&minus;</sup> concentration. Assume that the Cd solution had pH&nbsp;4 at the start, that is, set the total
+concentration of H<sup>+</sup> to 10<sup>&minus;4</sup>&nbsp;M
+(<a href="Tut_Redox_Fig1.htm">figure</a>). Why is there no precipitate? What would happen if OH<sup>&minus;</sup>
+were added instead of CN<sup>&minus;</sup> (<a href="Tut_Redox_Fig2.htm">figure</a>)?</p>
+
+<p>With copper(II) a redox reaction takes place:</p>
+<p style="text-align:center">Cu<sup>2+</sup> + CN<sup>&minus;</sup> + e<sup>&minus;</sup> &rarr; CuCN(s)
+<br>CN<sup>&minus;</sup> &rarr; &frac12;&nbsp;(CN)<sub>2</sub>(g) + e<sup>&minus;</sup></p>
+
+<p>Make a diagram to see what happens, with the components e<sup>&minus;</sup>, CN<sup>&minus;</sup> and
+Cu<sup>2+</sup>. If you select both Cu<sup>2+</sup> and Cu<sup>+</sup> as components you can model the solubility,
+but not the redox reaction. Use the same concentrations as for Cd, and set the total concentration of added
+electrons to zero, [e<sup>&minus;</sup>]<sub>T</sub>&nbsp;=&nbsp;0, to simulate the redox process.
+See the <a href="Tut_Redox_CuCN.htm">step by step instructions</a>.</p>
+
+<img class="diagr" src="images/Diagr_FracCuCN.gif" alt="Fraction diagram of Cu with cyanide">
+
+<p>There is an "ideal" CN<sup>&minus;</sup> concentration where almost all Cu precipitates. With an excess of
+ligand, soluble Cu(I) complexes form and the solid dissolves again.</p>
+<p>&nbsp;</p>
+</body>
+</html>

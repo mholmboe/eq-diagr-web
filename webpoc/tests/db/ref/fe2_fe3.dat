@@ -1,0 +1,19 @@
+ 3, 10, 5, 0,   /DATABASE (HYDRA), t= 25, p= 1
+H+
+Fe 2+
+Fe 3+
+Fe(OH)2            ,  -20.6    -2  1  0
+Fe(OH)2+           ,  -4.8     -2  0  1
+Fe(OH)3            ,  -12      -3  0  1
+Fe(OH)3-           ,  -34.2    -3  1  0
+Fe(OH)4-           ,  -21.6    -4  0  1
+Fe(OH)4-2          ,  -46      -4  1  0
+Fe2(OH)2+4         ,  -2.82    -2  0  2
+FeOH 2+            ,  -2.15    -1  0  1
+FeOH+              ,  -9.1     -1  1  0
+OH-                ,  -14.002  -1  0  0
+Fe(OH)2(cr)        ,  -12.8    -2  1  0
+Fe(OH)3(am)        ,  -4.9     -3  0  1 /amorphous
+Fe(OH)3(s)         ,  -3.43    -3  0  1 /ferrihydrite pp.227-228
+Fe2O3(cr)          ,   0.101   -6  0  2 /haematite
+FeOOH(cr)          ,  -0.17    -3  0  1 /goethite

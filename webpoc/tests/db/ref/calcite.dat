@@ -1,0 +1,16 @@
+ 3, 8, 4, 0,   /DATABASE (HYDRA), t= 25, p= 1
+H+
+Ca 2+
+CO3 2-
+CaCO3              ,   3.224    0  1  1
+CaHCO3+            ,   11.435   1  1  1
+CaOH+              ,  -12.57   -1  1  0
+CO2                ,   16.68    2  0  1
+CO2(g)             ,   18.152   2  0  1
+H2CO3              ,   13.859   2  0  1
+HCO3-              ,   10.327   1  0  1
+OH-                ,  -14.002  -1  0  0
+Ca(OH)2(cr)        ,  -22.75   -2  1  0 /portlandite
+CaCO3(am)          ,   6.39     0  1  1
+CaCO3(cr)          ,   8.48     0  1  1 /calcite
+CaO(cr)            ,  -32.7    -2  1  0

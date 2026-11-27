@@ -1,0 +1,18 @@
+# The upstream clone has its own repository
+/eq-diagr/
+# Build outputs and downloaded libraries
+/build/
+/jars/
+/jars-split/
+/webpoc/build/
+/webpoc/teavm-lib/
+__pycache__/
+*.class
+.DS_Store
+/node_modules/
+# Local files: outputs of the early command-line work, and the history of
+# the development before this repository was started
+/results/
+/test-runs/
+/test-split/
+/history-before-fresh-start.bundle

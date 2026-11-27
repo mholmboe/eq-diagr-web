@@ -1,0 +1,23 @@
+carb|25|1|0|true|true|true|false|Reactions.db|H+;CO3 2-
+calcite|25|1|0|true|true|true|false|Reactions.db|Ca 2+;H+;CO3 2-
+fe_redox|25|1|0|true|true|true|false|Reactions.db|Fe 2+;e-;H+
+fe_s_redox|25|1|0|true|true|true|false|Reactions.db|H+;e-;Fe 2+;SO4 2-
+fe_s_noSredox|25|1|0|true|false|true|false|Reactions.db|H+;e-;Fe 2+;SO4 2-
+n_redox|25|1|0|true|true|true|false|Reactions.db|H+;e-;NO3-
+n_noredox|25|1|0|false|true|true|false|Reactions.db|H+;e-;NO3-
+p_noredox|25|1|0|true|true|false|false|Reactions.db|H+;e-;PO4 3-;Fe 2+
+al_solids1|25|1|1|true|true|true|false|Reactions.db|H+;Al 3+;Si(OH)4
+al_solids2|25|1|2|true|true|true|false|Reactions.db|H+;Al 3+;Si(OH)4
+al_solids3|25|1|3|true|true|true|false|Reactions.db|H+;Al 3+;Si(OH)4
+calcite_80C|80|1|0|true|true|true|false|Reactions.db|H+;CO3 2-;Ca 2+
+calcite_200C|200|15.549|0|true|true|true|false|Reactions.db|H+;CO3 2-;Ca 2+
+cu_h2o|25|1|0|true|true|true|true|Reactions.db|H+;Cu 2+;Cl-
+wateq_U|25|1|0|true|true|true|false|Wateq4F.db|H+;e-;UO2 2+;CO3 2-
+hydra_Hg|25|1|0|true|true|true|false|Medusa-Hydra.db|H+;Hg 2+;Cl-;e-
+minteq_Cu|25|1|0|true|true|true|false|MintEQ-v4.db|H+;Cu 2+;CO3 2-;EDTA 4-
+soltherm_Au|250|39.762|0|true|true|true|false|Soltherm.txt|H+;Au+;Cl-;HS-
+two_dbs|25|1|0|true|true|true|false|Reactions.db,Wateq4F.db|H+;Ca 2+;SO4 2-;CO3 2-
+fe2_fe3|25|1|0|true|true|true|false|Reactions.db|H+;Fe 2+;Fe 3+
+kth_calcite|25|1|0|true|true|true|false|KD1280.skv|Ca 2+;H+;CO3 2-
+kth_fe_redox|25|1|0|true|true|true|false|KD1280.skv|Fe 2+;e-;H+
+kth_cu_nh3|25|1|0|true|true|true|false|KD1280.skv|Cu 2+;NH3;H+

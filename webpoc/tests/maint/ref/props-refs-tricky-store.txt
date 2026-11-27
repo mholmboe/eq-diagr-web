@@ -1,0 +1,14 @@
+#Thu Nov 26 11:02:05 CET 2026
+=empty key
+\#k10=hash key
+k11=colon value
+k12=\= starts with equals
+k13=\!bang
+k3=v3
+k4=line onecontinued \\
+k5=trailing backslash \\\\
+k6=
+k7=a\tb\nc éA ö
+k9=\#not a comment
+key\ with\ spaces=val\:ue\=x
+key1=value one  

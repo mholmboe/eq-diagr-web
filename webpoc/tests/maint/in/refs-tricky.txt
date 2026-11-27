@@ -1,0 +1,17 @@
+# comment
+! other comment
+   key1 = value one  
+key\ with\ spaces:val:ue=x
+k3	v3
+k4=line one\
+    continued \\
+k5 = trailing backslash \\\\
+=empty key
+k6
+k7 = a\tb\nc \u00e9\u0041 ö
+#k8=no
+k9=#not a comment
+\#k10=hash key
+  k11 : colon value
+k12== starts with equals
+k13 = !bang

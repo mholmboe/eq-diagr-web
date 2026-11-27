@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Working with the app</title>
+<link rel="stylesheet" href="1_.css">
+<link rel="stylesheet" href="1_web.css">
+</head>
+<body>
+<div class="crumb"><a href="0_Index.htm"><img src="images/thco35_s.gif" width="32" height="32" alt="Chem.Eq.Diagr"></a>
+<span><a href="S_0_Main.htm">SPANA</a></span></div>
+
+<h3>Working with the app</h3>
+
+<p>The program runs in one browser window with a menu bar at the top, a list of files on the left, tabs in the
+middle and a status line at the bottom.</p>
+
+<h4>Tabs</h4>
+<ul class="plain">
+<li><span class="ui">Chemical system</span>: the database search (the desktop DATABASE), always open. See
+<a href="DB_Working_with.htm">searching the database</a>.</li>
+<li>One tab for each data file that is open, named after the file: the diagram settings and the diagram (the
+desktop SPANA). See <a href="S_Making_Diagrams.htm">making a diagram</a>. A dot before the name means that the
+tab has changes not yet saved in this browser.</li>
+<li><span class="ui">Database tools</span> <span class="adv">(advanced mode)</span>: statistics, conversion,
+merging and editing of databases and references (the desktop DataMaintenance and AddShowReferences).</li>
+<li><span class="ui">Help</span>: these pages. The field above the contents searches all of them: type one or
+several words to list the pages that have all of them, those with the words in the title first; the Escape key
+brings the contents back.</li>
+</ul>
+<p>Close a tab with its &times;, or with <span class="ui">File &gt; Close tab</span>.</p>
+
+<h4>The file list</h4>
+<p><span class="ui">Data files</span> lists the data files saved in this browser; click one to open it, and click
+its &times; to remove it. <span class="ui">Databases</span> shows the database in use. The button
+<span class="ui">&#9776;</span> at the top left hides or shows the list. See
+<a href="S_Interacting_w_Windows.htm">files in the browser</a>.</p>
+
+<h4>Two kinds of files</h4>
+<ul class="plain">
+<li><b>Data files</b> (<code>.dat</code>) hold a chemical system and the settings of a diagram. They are made by
+the database search, and they are the files the desktop programs use too. See the
+<a href="SP_Data_File_Format.htm">data file format</a>.</li>
+<li><b>Plot files</b> (<code>.plt</code>) hold a diagram, as SED and PREDOM write it. In
+<a href="S_Menu_Prefs.htm">advanced mode</a> you can download the plot file of a diagram, for example to change
+it by hand or to open it in the desktop Spana. See the <a href="SP_Plot-File_Format.htm">plot file format</a>.</li>
+</ul>
+
+<h4>Opening a data file</h4>
+<ul class="plain">
+<li>From a search: <span class="ui">Create a diagram</span> in the Chemical system tab.</li>
+<li>From this browser: click the file under <span class="ui">Data files</span>.</li>
+<li>From your computer: <span class="ui">File &gt; Open data or plot file&hellip;</span> (or <span class="ui">Open&hellip;</span>
+above the file list), for example a <code>.dat</code> file made with the desktop programs.</li>
+<li>A plot file (<code>.plt</code>) opens the same way, from the menu or by dragging. It is shown in a tab with
+the drawing alone, without settings: it can be exported, copied and printed, and the diagram style applies to it,
+but it cannot be calculated again without its data file.</li>
+<li>By dragging: drop one or several <code>.dat</code> files from your computer anywhere on the window. Database
+files dropped on the window are loaded as with <span class="ui">Database &gt; Load database files&hellip;</span>.</li>
+<li>From a link made with <span class="ui">File &gt; Copy a link to this diagram</span>, see
+<a href="S_Interacting_w_Windows.htm#Link">sharing a diagram with a link</a>.</li>
+<li>An example: <span class="ui">File &gt; Open an example&hellip;</span>, see
+<a href="Tut_Example_Files.htm">example files</a>.</li>
+</ul>
+
+<h4 id="Colours">Colours</h4>
+<p><span class="ui">View &gt; Colours</span> sets the colours of the program:</p>
+<ul class="plain">
+<li><span class="ui">As the computer</span> follows the light or dark appearance chosen in the operating system or
+the browser;</li>
+<li><span class="ui">Light</span> and <span class="ui">Dark</span> keep one of the two;</li>
+<li><span class="ui">Original</span> has the greys, the dark blue titles and the square buttons of the desktop
+programs, with the periodic table on the yellow panel of DATABASE.</li>
+</ul>
+<p>The diagram itself stays black on white in all of them, as on paper; its colours are set with the
+<a href="S_Diagram_Window.htm#Style">diagram style</a>. The help pages also stay light.</p>
+
+<h4>Keyboard</h4>
+<table class="opts">
+<tr><td><kbd>Ctrl</kbd>+<kbd>Enter</kbd> (<kbd>&#8984;</kbd>+<kbd>Enter</kbd> on a Mac)</td><td>make the diagram</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>P</kbd> (<kbd>&#8984;</kbd>+<kbd>P</kbd> on a Mac)</td><td>print the diagram of the tab shown</td></tr>
+<tr><td><kbd>Tab</kbd>, <kbd>Shift</kbd>+<kbd>Tab</kbd></td><td>move between fields and buttons</td></tr>
+<tr><td><kbd>Space</kbd>, <kbd>Enter</kbd></td><td>click the button in focus</td></tr>
+<tr><td>arrow keys</td><td>move within and between the menus once a menu is open</td></tr>
+<tr><td><kbd>Esc</kbd></td><td>close a menu or a question</td></tr>
+</table>
+
+<h4>On a phone or tablet</h4>
+<p>On a narrow screen the file list becomes a drawer, opened with <span class="ui">&#9776;</span>, and the diagram
+is shown below its settings. In <a href="S_Making_Diagrams.htm#Live">live mode</a> the diagram stays in the upper
+part of the tab instead, with the settings under it. Touch the diagram to read values off it.</p>
+
+<p>The command-line programs can also be run on their own, see <a href="SP_Batch_Mode.htm">batch mode</a>.</p>
+<p>&nbsp;</p>
+</body>
+</html>

@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Equilibrium diagrams</title>
+<script src="theme.js"></script>
+<link rel="stylesheet" href="theme.css">
+<style>
+  main { max-width: 820px; }
+  .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--space-6); margin: 18px 0; }
+  .step { border: 1px solid var(--line); border-radius: 10px; padding: var(--space-6) var(--space-6); background: var(--panel); }
+  .step h2 { font-size: var(--text-lg); margin: 0 0 var(--space-3); }
+  .step p { margin: 0 0 var(--space-5); font-size: var(--text-base); color: var(--muted); }
+  a.go { font-weight: 600; color: var(--accent); }
+  ul.more { font-size: var(--text-base); padding-left: 18px; }
+  ul.more li { margin: var(--space-2) 0; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Chemical equilibrium diagrams in the browser</h1>
+  <p class="lede">The eq-diagr programs by Ignasi Puigdomènech (DataBase, Spana, SED, Predom and their tools), compiled from Java to JavaScript and run in your browser. The calculations are the same as in the desktop programs; your files and databases stay on this computer.</p>
+  <nav><a href="database.html">Database</a><a href="maintenance.html">Maintenance</a><a href="spana.html">Diagram</a><a href="sed.html">SED</a><a href="predom.html">Predom</a><a href="help.html">Help</a><a href="ec-tests.html">EC tests</a></nav>
+  <p><a class="go" href="app.html" style="font-size:17px">Open the app →</a> <span class="hint">One window with menus, a file list and tabs for the chemical system, the diagrams, the database tools and the help. Normal mode shows what most diagrams need; advanced mode shows all the options of the programs.</span></p>
+  <p class="hint">The pages below are the same tools, one page each.</p>
+  <div class="steps">
+    <div class="step"><h2>1. Chemical system</h2><p>Choose the components in a periodic table, search the thermodynamic database for all complexes and solids, and leave out species you do not want.</p><a class="go" href="database.html">Database search →</a></div>
+    <div class="step"><h2>2. Diagram</h2><p>Choose the diagram type, the axes and the concentrations, edit log <i>K</i> values or the components, and make the diagram. Download it as SVG, PNG, PDF or EPS.</p><a class="go" href="spana.html">Diagram setup →</a></div>
+  </div>
+  <ul class="more">
+    <li><a href="sed.html">SED</a> and <a href="predom.html">Predom</a>: run the diagram programs directly on a data file, with their command-line options.</li>
+    <li><a href="maintenance.html">Database maintenance</a>: statistics and checks of the databases, the data for a single component, conversion between binary and text databases, merging databases, adding your own reactions and components, and editing the literature references (the desktop DataMaintenance and AddShowReferences).</li>
+    <li><a href="help.html">Help</a>: the help pages of the desktop programs, with tutorials and the format of the data files.</li>
+    <li><a href="ec-tests.html">EC tests</a>: the equilibrium calculator on its regression cases, compared with the reference results.</li>
+  </ul>
+</main>
+</body>
+</html>

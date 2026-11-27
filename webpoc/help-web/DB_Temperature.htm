@@ -1,0 +1,85 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=iso-8859-1">
+<title>Temperature in DATABASE and SPANA</title>
+<style type="text/css"> <!-- @import url(1_.css);   --> </style>
+<link disabled rel="stylesheet" type="text/css" href="1_.css">
+</head>
+
+<body bgcolor="#ffffff" text="#000000" link="#008000" vlink="#008000" alink="#008000">
+<a name="Top"></a>
+<table cellspacing="0" cellpadding="0" border="0" width="100%">
+  <tr>
+    <td align="center" width="50">
+    <a href="DB_0_Main.htm"><img src="images/database0.gif" border="0" width="32" height="32" alt="DataBase"></a>&nbsp;</td>
+    <td align="left"><font size="-1"><a href="DB_0_Main.htm">DATABASE</a>&nbsp;/ <a href="DB_Databases.htm">Databases</a>&nbsp;/ <a href="DB_Create_your_database.htm">Create&nbsp;databases</a>&nbsp;/ <a href="DB_logK_files.htm"><nobr>logK-files</nobr></a></font></td>
+  </tr>
+  <tr>
+    <td align="center" valign="top">
+    &nbsp;<a href="S_0_Main.htm"><img src="images/Spana.gif" width="30" height="30" border="0" alt="Spana"></a>&nbsp;</td>
+    <td align="left" valign="middle"><font size="-1"><a href="S_0_Main.htm">SPANA</a>&nbsp;/ <a href="S_Making_Diagrams.htm">Making a diagram</a></font></td>
+  </tr>
+</table>
+
+<h3>Temperature in DATABASE and SPANA</h3>
+
+<p><ul>
+<li><a href="#MakingDataFile">Temperature when making an input data file with DATABASE</a></li>
+<li><a href="#MakingDiagrams">Temperature when making a diagram in SPANA</a></li>
+</ul></p>
+
+
+<a name="MakingDataFile"></a>
+<h4>Temperature when making an input data file with <a href="DB_0_Main.htm">DATABASE</a></h4>
+
+<p>In <a href="DB_0_Main.htm">DATABASE</a> the <a href="DB_logK_files.htm">logK-files</a>
+contain equilibrium constants at <nobr>25&deg;C,</nobr> and 1 bar, and temperature
+extrapolations are possible if data are available, for example <nobr>&#916;<i>H</i>&deg;,</nobr> <i>etc</i>.</p>
+
+<p>In the <b>Options</b> of the <a href="DB_Working_with.htm">Chemical system</a> tab you can give a
+temperature other than <nobr>25&deg;C,</nobr> and, in advanced mode, a pressure. The pressure is <b>pSat</b>
+unless you choose another: the saturation pressure of liquid water (at least 1&nbsp;bar), which is defined from
+0&nbsp;&deg;C up to the critical point of water, 373.946&nbsp;&deg;C; above that temperature choose one of the
+pressures in the list (advanced mode).
+If temperature data (enthalpies, <i>etc</i>) are missing for any of the species found, the search lists them
+and <b><u>no</u></b> data file is made: change the temperature back to <nobr>25&deg;C</nobr>, or leave
+those species out.</p>
+
+<p>The KTH course database has equilibrium constants at <nobr>25&deg;C</nobr> only. For other temperatures use
+the eq-diagr database (or, in advanced mode, the Soltherm database for high temperatures).</p>
+
+<p>If no data is available for temperature extrapolations,
+you may enter your own data, see:<br>
+<a href="DB_Create_your_database.htm">Create&nbsp;databases</a>&nbsp;/
+<a href="DB_logK_files.htm"><nobr>logK-files</nobr></a>&nbsp;/
+<a href="DB_logK_file_T.htm">Temperature effects</a>
+</p>
+
+
+<table width="100%" cellspacing="0" cellpadding="0" border="0">
+<tr><td><hr> <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+</td><td width="20" align="right">
+<a href="#Top">
+<img src="images/Upp.gif" alt="top" title="top" height="15" width="15" border="0"></a>
+</td></tr></table>
+
+<a name="MakingDiagrams"></a>
+<h4>Temperature when making a diagram in <a href="S_0_Main.htm">SPANA</a></h4>
+
+<p><a href="DB_0_Main.htm">DATABASE</a> writes the chosen temperature (and pressure)
+in the input data-file in a <a href="SP_Names_Numbers.htm">comment</a> at the
+end of the first line, and this information is used when
+<a href="S_Making_Diagrams.htm#Parameters">making a diagram</a>,
+for example if <a href="SP_Ionic_Strength.htm">ionic strength effects</a>
+are calculated, or if
+<a href="1_Eh_pe.htm">Eh</a> is displayed in diagrams. The diagram tab shows it in the summary of the
+<b>Chemical system</b> section. In advanced mode, the <b>Temperature</b> field of the diagram's <b>Options</b>
+gives another temperature for these calculations; the equilibrium constants in the data file are not
+changed by it.</p>
+
+<p style="text-align:right; line-height:0; margin-top:0; margin-bottom:0">
+<a href="#Top"><img src="images/Upp.gif" alt="top" title="top" height="15" width="15" border="0"></a>
+</p>
+</body>
+</html>

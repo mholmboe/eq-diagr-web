@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>DATABASE: removing or changing data</title>
+<link rel="stylesheet" href="1_.css">
+<link rel="stylesheet" href="1_web.css">
+</head>
+<body>
+<div class="crumb"><a href="0_Index.htm"><img src="images/thco35_s.gif" width="32" height="32" alt="Chem.Eq.Diagr"></a>
+<span><a href="DB_0_Main.htm">DATABASE</a> / <a href="DB_Databases.htm">Databases</a></span></div>
+
+<h3>Removing or changing data</h3>
+
+<p>The databases are read in order, and when two reactions have the same product, only the one read last is kept.
+Data are therefore removed or changed with a database of your own that is read after the others. The order is shown
+in the <span class="ui">Database tools</span> tab <span class="adv">(advanced mode)</span>, where the arrows
+&uarr; and &darr; change it.</p>
+
+<h4>For one diagram</h4>
+<p>To change a log&nbsp;<i>K</i> or leave out a species in one chemical system only, there is no need to change the
+database: do it in the diagram tab, see <a href="S_Modify_Chem_System.htm">changing the chemical system</a>, or untick
+the species in the search result (<a href="DB_Working_with.htm">searching the database</a>).</p>
+
+<h4>For all searches</h4>
+<p>Make a text database of your own as described in <a href="DB_Add_data.htm">adding data</a>, and:</p>
+<ul class="plain">
+<li><b>change a log&nbsp;<i>K</i></b> by adding the reaction again, with the same product name and the new
+value;</li>
+<li><b>remove a reaction</b> by adding a reaction product with the same name preceded by "@". For example, the
+product "@FeOH 2+" removes "FeOH 2+"; its log&nbsp;<i>K</i> is not used. See
+<a href="DB_Remove_reaction.htm">remove a reaction</a>;</li>
+<li><b>remove a component</b> from the list of an element by adding a component with the same name preceded by "@".
+For example, "@Fe 2+" linked to Fe removes Fe(II) from the components of iron.</li>
+</ul>
+
+<h4>For a class</h4>
+<p>Database files of your own are loaded with <span class="ui">Database &gt; Load database files&hellip;</span> and
+kept in the browser of each student (see <a href="S_Interacting_w_Windows.htm">files in the browser</a>). To give
+the same changes to a whole class, hand out the <code>.txt</code> and <code>.elt</code> files together with the
+database they change, so that they are loaded together. Alternatively, the files can be added to the databases that
+come with the program by those who run the web site.</p>
+<p>&nbsp;</p>
+</body>
+</html>

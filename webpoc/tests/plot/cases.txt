@@ -1,0 +1,9 @@
+co3_pdf|plotpdf|CO3_log|pdf|-noh
+co3_pdf_opts|plotpdf|CO3_log|pdf|-noh -clr -s=60 -f=2 -o=L
+h3po4_pdf|plotpdf|H3PO4_fract|pdf|-noh -bw -f=3
+fe_pdf|plotpdf|Fe_Eh-pH|pdf|-noh -clr
+co3_ps|plotps|CO3_log|ps|-noh
+co3_eps|plotps|CO3_log|eps|-noh -clr -f=3
+fe_ps|plotps|Fe_Eh-pH|ps|-noh -clr -s=80 -o=L
+fe_eps|plotps|Fe_Eh-pH|eps|-noh -clr
+h3po4_eps|plotps|H3PO4_fract|eps|-noh -bw -s=70

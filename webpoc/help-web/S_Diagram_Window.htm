@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>SPANA: the diagram</title>
+<link rel="stylesheet" href="1_.css">
+<link rel="stylesheet" href="1_web.css">
+</head>
+<body>
+<div class="crumb"><a href="0_Index.htm"><img src="images/thco35_s.gif" width="32" height="32" alt="Chem.Eq.Diagr"></a>
+<span><a href="S_0_Main.htm">SPANA</a></span></div>
+
+<h3>The diagram</h3>
+
+<p>When SED or PREDOM has finished, the diagram is drawn on the right of the diagram tab (below the settings on a
+narrow screen). It is drawn from the plot file that the program wrote, the same file the desktop Spana displays,
+and it is scaled to the space available. The labels are drawn as text, with charges as superscripts and
+indices as subscripts as in the desktop Spana; see <a href="#Style">the diagram style</a>.</p>
+
+<p>Each diagram tab shows the diagram of its own data file, so several diagrams can be compared by switching
+between tabs. When a setting is changed, the diagram is dimmed and marked "Settings changed – Plot the diagram"
+until it is made again; the diagram style is the only setting that changes the diagram at once. In
+<a href="S_Making_Diagrams.htm#Live">live mode</a> the diagram is instead made again after each change.</p>
+
+<h4 id="Style">The diagram style</h4>
+<p><span class="ui">Style…</span> above the diagram (or <span class="ui">View &gt; Diagram style…</span>) sets how
+all diagrams are drawn. The style is remembered in this browser and used by every diagram tab.</p>
+<table class="opts">
+<tr><td><b>Labels</b></td><td>sans-serif (Helvetica, Arial; the default), serif (Times), monospaced (Courier), or the
+plotter lines of the plot file, as the desktop programs draw them without a font.</td></tr>
+<tr><td><b>Text size</b></td><td>80 to 150 % of the size in the plot file. To give the diagram larger texts and room
+for them, use <b>Text height</b> in the Options (advanced mode) instead.</td></tr>
+<tr><td><b>Curve colours</b></td><td>the colours of the desktop programs, a palette that can be told apart with
+colour-vision deficiencies (Okabe and Ito), black and white, white on black, or your own colours: with
+<b>my own colours</b>, a colour can be chosen for each of the eleven pens of the plot files (pen 1 draws the axes
+and the texts).</td></tr>
+<tr><td><b>Texts above the diagram</b></td><td>the programs write the fixed concentrations, the temperature and
+the ionic strength above the diagram. Untick the ones you do not want in the drawing and in the exported
+files.</td></tr>
+<tr><td><b>Width</b></td><td>75 to 150 % of the width the programs give the diagram. The lettering keeps its
+shape; only the positions along the X-axis change.</td></tr>
+<tr><td><b>Lines</b></td><td>the curves: thin, normal or thick.</td></tr>
+<tr><td><b>Tick marks</b></td><td>inside the diagram (as the programs draw them), outside, or crossing the axis.</td></tr>
+<tr><td><b>Minor ticks</b></td><td>none, or 2 or 5 for each step between the numbers.</td></tr>
+<tr><td><b>Grid lines</b></td><td>none, at the numbers, or at all ticks.</td></tr>
+<tr><td><b>Frame</b></td><td>as the programs draw it (SED: the two axes; PREDOM: a box), the axes only, or a box, with
+the ticks repeated on the top and right sides.</td></tr>
+<tr><td><b>Axis lines</b></td><td>thin, normal or thick.</td></tr>
+</table>
+<p>The axis options need labels drawn with a font. With the plotter lines, the axes are those of the programs.</p>
+
+<h4 id="Keep">Comparing diagrams: what if&hellip;</h4>
+<p><span class="ui">Keep</span> above the diagram (or <span class="ui">Run &gt; Keep the diagram for
+comparison</span>) keeps the diagram shown. Change a setting, for example a total concentration, the ionic strength
+or a log&nbsp;<i>K</i>, or untick a reaction, and make the diagram again: the kept diagram stays in the drawing with
+broken lines, in lighter colours and without its labels, under the new one. Up to six diagrams can be kept, each
+with its own line pattern, and <a href="S_Making_Diagrams.htm#Live">live mode</a> shows the new diagram move over
+the kept ones while you drag a slider.</p>
+<p>A legend under the diagram says what differs: the present diagram first, then each kept one, for example
+&ldquo;Fe 2+ total 1e-5&rdquo; against &ldquo;Fe 2+ total 0.001&rdquo;. The same names are listed under the
+drawing, where a click on a name lets you type one of your own and &times; removes that diagram.
+The kept diagrams and the legend are part of the SVG, PNG and PDF files, of the copied image and of the print.
+The <span class="ui">.csv</span> file of a SED diagram then has the table of the diagram shown followed by the
+tables of the kept diagrams, each under a line with its name. The <span class="ui">.dat</span> file is always the
+data file as it is now; the data files of the kept diagrams are not exported.</p>
+<p>A kept diagram is drawn in the axes of the present one, also when the ranges of the axes have changed. A diagram
+of another kind (other quantities on the axes) cannot be drawn in it and is only named in the legend. The kept
+diagrams belong to the tab and are gone when it is closed.</p>
+
+<h4 id="Ticks">The step between the numbers of an axis</h4>
+<p>The programs choose the numbers on the axes. In <a href="S_Menu_Prefs.htm">advanced mode</a>, the Options of a
+diagram have <span class="ui">Tick step, X-axis</span> and <span class="ui">Tick step, Y-axis</span>: give a step in
+the units of the axis (for example 1 for every pH unit, or 0.1 for Eh in volts), or leave it empty for the program's
+choice. The step changes the drawing at once, without a new calculation. It is kept in this browser for the data
+file, not in the data file itself, and it is not used in normal mode.</p>
+<p>The range of an axis is part of the calculation: change the range of the component in the X-axis (under
+Concentrations) or of the <span class="ui">Y-axis</span> row of the same table, and make the diagram again.</p>
+<p><span class="ui">PNG image</span>, in the same dialog, sets the size of the PNG file and of the image copied
+to the clipboard: 800 to 4800 pixels on the longest side (1600 unless changed).</p>
+<p>The style applies to the screen and to the SVG, PNG and PDF files (the PDF with the standard PDF fonts, which are
+not embedded). EPS files (advanced mode) and plot files keep the plotter lettering of the programs, whatever the
+style; EPS is in black and white when the style is black and white.</p>
+
+<p>Below the diagram:</p>
+<ul class="plain">
+<li><span class="ui">Program messages</span>: the output of SED or PREDOM, with warnings and the points where the
+calculation failed (see <a href="SP_Failures.htm">the programs fail?</a> and
+<a href="SP_Strange_Results.htm">strange results?</a>);</li>
+<li><span class="ui">Data file (.dat)</span> <span class="adv">(advanced mode)</span>: the data file as it was
+used;</li>
+<li><span class="ui">Table (.csv, SED)</span> <span class="adv">(advanced mode)</span>: the values of the curves
+as a table, see <a href="SP_Table_Output.htm">table output</a>.</li>
+</ul>
+
+<h4 id="Displ_Coord">Reading values from the diagram</h4>
+<p>Point at the diagram with the mouse, or touch it, to read the coordinates of the point. They are shown under
+the diagram in the units of the axes, for example pH and E<sub>SHE</sub> in volts, and a cross-hair marks the point.
+The cross-hair is drawn on the screen only, and is not in the exported or printed diagram.</p>
+
+<p>For the SED diagrams that show fractions, solubilities, logarithmic concentrations or logarithmic activities, a
+second line lists the species at the X-value of the pointer, with the largest value first (at most six, and only
+those inside the range of the Y-axis). The values are interpolated between the points of the
+<a href="SP_Table_Output.htm">table of results</a>, so with few calculation steps they are approximate near a sharp
+bend of a curve, for instance where a solid starts to form. The line is not shown when the table is not in the units
+of the axis (for example total concentrations drawn in mM), or when the table format was changed in the Options.</p>
+
+<p>For exact values, download the table of results (<span class="ui">.csv</span> above the diagram, SED diagrams)
+and open it in a spreadsheet.</p>
+
+<p>To keep the diagram, see <a href="S_Printing.htm">exporting and printing</a>.</p>
+<p>&nbsp;</p>
+</body>
+</html>

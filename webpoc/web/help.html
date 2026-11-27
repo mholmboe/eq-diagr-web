@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Help</title>
+<script src="theme.js"></script>
+<link rel="stylesheet" href="theme.css">
+<script src="app-view.js"></script>
+<style>
+  .help { display: grid; grid-template-columns: minmax(0, 300px) minmax(0, 1fr); gap: var(--space-6); }
+  @media (max-width: 700px) { .help { grid-template-columns: minmax(0, 1fr); } }
+  .side { display: flex; flex-direction: column; gap: var(--space-4); min-width: 0; }
+  .side input { flex: none; }
+  .results a { font-weight: 600; }
+  .results li { margin: 0 0 var(--space-5); }
+  .results .snip { font-size: var(--text-sm); color: var(--muted); margin-top: var(--space-1); }
+  .results mark { background: color-mix(in srgb, var(--accent) 25%, transparent); color: inherit; }
+  .results p { margin: 0; font-size: var(--text-sm); color: var(--muted); }
+  .toc { font-size: var(--text-base); max-height: 80vh; overflow: auto; border: 1px solid var(--line); border-radius: 8px; padding: var(--space-4) var(--space-5); }
+  .toc ul { list-style: none; margin: 0; padding-left: var(--space-6); }
+  .toc > ul { padding-left: 0; }
+  .toc li { margin: var(--space-2) 0; }
+  .toc summary { font-weight: 400; font-size: var(--text-base); }
+  .toc a { color: var(--accent); }
+  iframe { width: 100%; height: 80vh; border: 1px solid var(--line); border-radius: 8px; background: #fff; }
+  html.embedded main { padding: var(--space-5) var(--space-6); }
+  @media (min-width: 701px) { html.embedded .side, html.embedded iframe { height: calc(100vh - 20px); max-height: none; } html.embedded .toc { flex: 1; min-height: 0; max-height: none; } }
+</style>
+</head>
+<body>
+<main>
+  <h1>Help</h1>
+  <p class="lede">The help system of the eq-diagr programs (Spana, DataBase, SED, Predom), by I. Puigdom&egrave;nech. The pages on using the programs describe this web version; the pages on chemistry, calculations and file formats are those of the desktop programs.</p>
+  <nav><a href="database.html">Database</a><a href="maintenance.html">Maintenance</a><a href="spana.html">Diagram</a><a href="sed.html">SED</a><a href="predom.html">Predom</a><a href="help.html" aria-current="page">Help</a><a href="ec-tests.html">EC tests</a></nav>
+  <div class="help">
+    <div class="side">
+      <input id="q" type="text" inputmode="search" autocomplete="off" spellcheck="false" placeholder="Search the help" aria-label="Search the help" aria-controls="results">
+      <div class="toc" id="toc"><ul><li><a href="help/0_Index.htm" target="topic">Chemical Equilibrium Diagram Software</a></li><li><a href="help/Tut_Make_1st_Diag.htm" target="topic">Make your first diagram</a></li><li><details><summary><a href="help/Tut_0_Tutorials.htm" target="topic">Tutorials</a></summary><ul><li><a href="help/Tut_CO2.htm" target="topic">logP(CO2) constant</a></li><li><a href="help/Tut_Redox.htm" target="topic">Redox reactions</a></li><li><a href="help/Tut_Titr.htm" target="topic">Titrations</a></li><li><a href="help/Tut_H_aff_spectr.htm" target="topic">H+ affinity diagrams</a></li><li><a href="help/Tut_Example_Files.htm" target="topic">Example files</a></li></ul></details></li><li><details><summary><a href="help/ChEq_0_Contents.htm" target="topic">Chemical Equilibrium Reactions</a></summary><ul><li><a href="help/ChEq_Definitions.htm" target="topic">What are chemical equilibria?</a></li><li><details><summary><a href="help/ChEq_Def_System.htm" target="topic">How to define the Chemical System</a></summary><ul><li><a href="help/ChEq_Components.htm" target="topic">Chemical Components</a></li></ul></details></li><li><details><summary><a href="help/ChEq_Special_Cases.htm" target="topic">Special Cases</a></summary><ul><li><a href="help/ChEq_H2O.htm" target="topic">Water</a></li><li><a href="help/ChEq_Redox_React.htm" target="topic">Redox reactions</a></li><li><a href="help/ChEq_Solids.htm" target="topic">Solids</a></li><li><a href="help/ChEq_Gases.htm" target="topic">Gases</a></li></ul></details></li><li><details><summary><a href="help/ChEq_Sources.htm" target="topic">Sources of data</a></summary><ul><li><a href="help/ChEq_Sources_logK.htm" target="topic">Sources of equilibrium constants</a></li><li><a href="help/ChEq_Sources_Data.htm" target="topic">Sources of thermodynamic data</a></li></ul></details></li></ul></details></li><li><details><summary><a href="help/DB_0_Main.htm" target="topic">Chemical system (DATABASE)</a></summary><ul><li><a href="help/DB_Working_with.htm" target="topic">Searching the database</a></li><li><a href="help/DB_Temperature.htm" target="topic">Temperature</a></li><li><a href="help/DB_Solid_solub.htm" target="topic">Solids</a></li><li><details><summary><a href="help/DB_Databases.htm" target="topic">Databases</a></summary><ul><li><details><summary><a href="help/DB_Supplied.htm" target="topic">Supplied database files</a></summary><ul><li><a href="help/DB_Organics.htm" target="topic">Organic ligands</a></li></ul></details></li><li><a href="help/DB_Remove_change_data.htm" target="topic">Remove/Change data</a></li><li><details><summary><a href="help/DB_Create_your_database.htm" target="topic">Create a database</a></summary><ul><li><a href="help/DB_Add_data.htm" target="topic">Add data</a></li><li><a href="help/DB_Element_files.htm" target="topic">Element files</a></li><li><details><summary><a href="help/DB_logK_files.htm" target="topic">logK files</a></summary><ul><li><a href="help/DB_Remove_reaction.htm" target="topic">Remove a reaction</a></li><li><a href="help/DB_Complex_formation_Hydrolysis.htm" target="topic">Complexation &amp; Hydrolysis</a></li><li><a href="help/DB_Redox_React.htm" target="topic">Redox</a></li><li><a href="help/DB_Solids.htm" target="topic">Solids</a></li><li><a href="help/DB_Gases.htm" target="topic">Gases</a></li><li><a href="help/ChEq_H2O.htm" target="topic">Water</a></li></ul></details></li><li><a href="help/DB_Names_Numbers.htm" target="topic">Names &amp; numbers</a></li></ul></details></li></ul></details></li></ul></details></li><li><details><summary><a href="help/S_0_Main.htm" target="topic">Diagrams (SPANA)</a></summary><ul><li><a href="help/S_Working_with.htm" target="topic">Working with the app</a></li><li><a href="help/S_Modify_Chem_System.htm" target="topic">Changing the chemical system</a></li><li><details><summary><a href="help/S_Making_Diagrams.htm" target="topic">Making a diagram</a></summary><ul><li><a href="help/1_Eh_pe.htm" target="topic">Eh and pe</a></li><li><a href="help/SP_Act_Coeff.htm" target="topic">Ionic Strength Corrections</a></li></ul></details></li><li><a href="help/S_Diagram_Window.htm" target="topic">The diagram</a></li><li><details><summary><a href="help/S_Printing.htm" target="topic">Exporting and printing</a></summary><ul><li><a href="help/SP_Plot-File_Format.htm#Make_Changes" target="topic">Making it pretty</a></li><li><a href="help/SP_PDF.htm" target="topic">PDF</a></li><li><details><summary><a href="help/SP_PostScript.htm" target="topic">PostScript</a></summary><ul><li><details><summary><a href="help/S_PostScript_Commands.htm" target="topic">PostScript File Description</a></summary><ul><li><a href="help/S_PostScript_Chars_Fig.htm" target="topic">PS Character Codes</a></li></ul></details></li></ul></details></li></ul></details></li><li><a href="help/S_Interacting_w_Windows.htm" target="topic">Files in the browser</a></li><li><a href="help/S_Menu_Prefs.htm" target="topic">Normal and advanced mode</a></li></ul></details></li><li><details><summary><a href="help/SP_0_Main.htm" target="topic">SED and PREDOM</a></summary><ul><li><a href="help/SP_Haltafall.htm" target="topic">HALTAFALL</a></li><li><details><summary><a href="help/SP_Ionic_Strength.htm" target="topic">Ionic Strength</a></summary><ul><li><a href="help/SP_Molality.htm" target="topic">molality</a></li><li><a href="help/SP_Activity.htm" target="topic">activity</a></li></ul></details></li><li><details><summary><a href="help/SP_SED.htm" target="topic">SED</a></summary><ul><li><a href="help/SP_Diagr_Fract.htm" target="topic">Fraction diagrams</a></li><li><a href="help/SP_Diagr_Log.htm" target="topic">Logarithmic diagrams</a></li><li><a href="help/SP_Diagr_Solubl.htm" target="topic">Solubility diagrams</a></li><li><a href="help/SP_SED_Input_File_Format.htm" target="topic">Format of input Data File</a></li></ul></details></li><li><details><summary><a href="help/SP_PREDOM.htm" target="topic">PREDOM</a></summary><ul><li><a href="help/SP_Diagr_Predom.htm" target="topic">Predominance Area Diagrams</a></li><li><a href="help/SP_PREDOM_How.htm" target="topic">How it works</a></li><li><a href="help/SP_PREDOM_Input_File_Format.htm" target="topic">Format of input Data File</a></li></ul></details></li><li><details><summary><a href="help/SP_Data_File_Format.htm" target="topic">Data File Format</a></summary><ul><li><details><summary><a href="help/SP_Names_Numbers.htm" target="topic">Names and Numbers in data files</a></summary><ul><li><a href="help/SP_Phase_Indicator.htm" target="topic">Phase indicators</a></li><li><a href="help/SP_Charges_in_Names.htm" target="topic">Electric charge</a></li><li><a href="help/SP_Removing_Species.htm" target="topic">Removing a species with a &quot;*&quot;</a></li></ul></details></li><li><a href="help/SP_Data_File_Chemical_System.htm" target="topic">The Chemical System</a></li><li><a href="help/SP_Data_File_Plot.htm" target="topic">Plot definition</a></li><li><a href="help/SP_Data_File_Concs.htm" target="topic">Concentrations</a></li></ul></details></li><li><details><summary><a href="help/SP_Special_Cases.htm" target="topic">Special Cases</a></summary><ul><li><a href="help/ChEq_Solids.htm" target="topic">Solids</a></li><li><details><summary><a href="help/SP_Species_Zero_Conc.htm" target="topic">Species with zero concentration</a></summary><ul><li><a href="help/SP_Removing_Species.htm" target="topic">Removing a species with a &quot;*&quot;</a></li></ul></details></li><li><a href="help/SP_Strange_Results.htm" target="topic">Strange results?</a></li><li><a href="help/SP_Failures.htm" target="topic">The programs fail?</a></li></ul></details></li><li><details><summary><a href="help/SP_Plot-Files.htm" target="topic">Plot Files</a></summary><ul><li><a href="help/SP_Plot-File_Format.htm" target="topic">Plot-File Format</a></li><li><a href="help/SP_Plot-File_Format.htm#Make_Changes" target="topic">Making it Pretty</a></li><li><details><summary>Convert to other formats</summary><ul><li><a href="help/SP_PDF.htm" target="topic">Convert to PDF</a></li><li><details><summary><a href="help/SP_PostScript.htm" target="topic">Convert to PostScript</a></summary><ul><li><details><summary><a href="help/S_PostScript_Commands.htm" target="topic">PostScript File Description</a></summary><ul><li><a href="help/S_PostScript_Chars_Fig.htm" target="topic">PS Character Codes</a></li></ul></details></li></ul></details></li></ul></details></li></ul></details></li><li><a href="help/SP_Batch_Mode.htm" target="topic">Run in Batch Mode</a></li></ul></details></li><li><a href="help/1_Install_Uninstall.htm" target="topic">Running in the browser</a></li><li><a href="help/1_Acknowledgements.htm" target="topic">Credits</a></li><li><a href="help/1_License.htm" target="topic">License</a></li><li><a href="help/1_License.htm#Disclaimer" target="topic">Disclaimer</a></li></ul></div>
+      <div class="toc results" id="results" role="region" aria-live="polite" aria-label="Search results" hidden></div>
+    </div>
+    <iframe name="topic" src="help/0_Index.htm" title="Help topic"></iframe>
+  </div>
+</main>
+<script>
+if (window.EqView) EqView.openTopic = path => { frames.topic.location.href = path; };
+// Search: the pages that contain all the words typed, those with the words in
+// the title first. The index (help/search.json, by make_help.py) is read at
+// the first search.
+(function () {
+  const q = document.getElementById("q"), toc = document.getElementById("toc"), results = document.getElementById("results");
+  const esc = t => t.replace(/&/g, "&amp;").replace(/</g, "&lt;");
+  let index = null, timer = null;
+  async function load() {
+    if (!index) { index = await (await fetch("help/search.json")).json(); for (const p of index) { p.tl = p.t.toLowerCase(); p.xl = p.x.toLowerCase(); } }
+    return index;
+  }
+  function snippet(p, words) {
+    let at = -1;
+    for (const w of words) { const i = p.xl.indexOf(w); if (i >= 0 && (at < 0 || i < at)) at = i; }
+    if (at < 0) at = 0;
+    const from = Math.max(0, at - 60), to = Math.min(p.x.length, at + 140);
+    const text = (from > 0 ? "… " : "") + p.x.slice(from, to) + (to < p.x.length ? " …" : ""), low = text.toLowerCase(), spans = [];
+    for (const w of words) { let i = -1; while ((i = low.indexOf(w, i + 1)) >= 0) spans.push([i, i + w.length]); }
+    spans.sort((a, b) => a[0] - b[0]);
+    let out = "", pos = 0;
+    for (const [a, b] of spans) { if (a < pos) continue; out += esc(text.slice(pos, a)) + "<mark>" + esc(text.slice(a, b)) + "</mark>"; pos = b; }
+    return out + esc(text.slice(pos));
+  }
+  async function search() {
+    const words = [...new Set(q.value.toLowerCase().split(" ").filter(w => w.length > 1))];
+    if (!words.length) { results.hidden = true; toc.hidden = false; return; }
+    let ix;
+    try { ix = await load(); } catch (e) { results.innerHTML = "<p>The search index could not be read.</p>"; results.hidden = false; toc.hidden = true; return; }
+    const hits = [];
+    for (const p of ix) {
+      let score = 0;
+      for (const w of words) {
+        const inTitle = p.tl.includes(w);
+        let n = 0, i = -1;
+        while (n < 20 && (i = p.xl.indexOf(w, i + 1)) >= 0) n++;
+        if (!inTitle && !n) { score = -1; break; }
+        score += (inTitle ? 100 : 0) + n;
+      }
+      if (score >= 0) hits.push([score, p]);
+    }
+    hits.sort((a, b) => b[0] - a[0] || a[1].t.localeCompare(b[1].t));
+    results.innerHTML = hits.length
+      ? "<p>" + hits.length + (hits.length === 1 ? " page" : " pages") + "</p><ul>" + hits.slice(0, 50).map(([, p]) =>
+          '<li><a href="' + esc(p.u) + '" target="topic">' + esc(p.t) + '</a><div class="snip">' + snippet(p, words) + "</div></li>").join("") + "</ul>"
+      : "<p>No page has " + (words.length > 1 ? "all these words" : "this word") + ".</p>";
+    results.hidden = false; toc.hidden = true; results.scrollTop = 0;
+  }
+  q.addEventListener("input", () => { clearTimeout(timer); timer = setTimeout(search, 150); });
+  q.addEventListener("keydown", e => { if (e.key === "Escape" && q.value) { q.value = ""; search(); } });
+})();
+</script>
+</body>
+</html>

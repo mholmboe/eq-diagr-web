@@ -1,0 +1,533 @@
+%!PS-Adobe-2.0 EPSF-2.0
+%%Title: h3po4_eps.plt; 
+%%Creator: PlotPS [java],  version: 2021-Mar-08
+%%CreationDate: Nov 25, 2026, 4:42:35 PM
+%%For: anonymous
+%%DocumentNeededResources: font Helvetica Helvetica-Bold Helvetica-Oblique
+%%BoundingBox: -11 -6 560 398
+%%EndComments
+% to change the "BoundingBox" given above: add margins in cm * 28.4
+%%BeginProlog
+% ------- Prolog:  defining procedures and variables -------
+/ChemEqDict 60 dict def   % create a dictionary
+ChemEqDict begin          % push dictionary in dictionary stack
+/Mv {moveto} def
+/Ln {lineto} def
+/_sn {stroke newpath} def
+/_csn {closepath stroke newpath} def
+/_setWidth {/linWidth exch def linWidth setlinewidth}  def
+% --- dash-line types:
+/Lt0 {stroke linWidth setlinewidth [] 0 setdash} def
+/Lt1 {stroke linWidth setlinewidth [30 10] 0 setdash} def
+/Lt2 {stroke linWidth setlinewidth [15 15] 0 setdash} def
+/Lt3 {stroke linWidth setlinewidth [5 10] 0 setdash} def
+/Lt4 {stroke linWidth setlinewidth [30 10 5 10] 0 setdash } def
+/Lt5 {stroke linWidth setlinewidth [15 10 5 10] 0 setdash} def
+%--------------------  Font related stuff:  ---------------------------------
+/rShow {dup stringwidth pop 0 exch        % right-show
+        sub 0 rmoveto show} def
+/lShow {show} def                         % left-show
+/cShow {dup stringwidth pop -2 div -0.5   % center-show (both
+        getSize siz mul rmoveto show} def %  vertically & horizontally)
+/_angle 0 def                 % angle to rotate text
+/TxtRotate                    % Procedure to rotate text. Usage:
+    {gsave                    %   /_angle nn def  TxtRotate
+     currentpoint translate   %   x y moveto (text1) show
+     _angle rotate} def       %   x y moveto (text2) show  grestore
+/fontScale  1.40 def
+/_setSize     % scale current font (parameter: font size in 0.01 cm units)
+          {fontScale mul /UserFont currentfont def
+           /UserFont findfont exch scalefont setfont} def
+/getSize  {gsave newpath 0 0 moveto (X)       % find current font size
+           true charpath flattenpath pathbbox %   and store result in "siz"
+           /siz exch def pop pop pop grestore} def
+%----------------------------------------------------------------------------
+%          -----        additions for PostScript output            -----
+%          -----  which allow printing math and chemical formulas  -----
+%----------------------------------------------------------------------------
+% ---- super/sub-scripts.
+%      Both "^" and "_^" take two arguments: the string to output and
+%      the vertical shift (positive or negative as fraction of letter
+%      size). The difference: "_^" does not advance the cursor (allowing
+%      subs- and super-scripts on the same letter).
+%      For example, to output UO2(CO3)3-4:
+%        (UO) show (2) -0.5 ^ (\(CO) show (3) -0.5 ^
+%        (\)) show (3) -0.5 ^ (4-) 0.5 _^
+%      "_f" takes one argument (spacing as fraction of letter size)
+%      and moves the cursor forward or backward. Useful in math formulas.
+/^  {/regFont currentfont def /ssFont currentfont [.7 0 0 .7 0 0] makefont def
+    getSize dup 0 exch siz mul rmoveto ssFont setfont
+    exch show 0 exch siz neg mul rmoveto regFont setfont } def
+/_^ {/regFont currentfont def /ssFont currentfont [.7 0 0 .7 0 0] makefont def
+    getSize dup 0 exch siz mul rmoveto ssFont setfont
+    exch dup stringwidth pop neg exch show 
+    0 rmoveto 0 exch siz neg mul rmoveto regFont setfont } def
+/_f {getSize siz mul 0 rmoveto} def
+%
+% ----- printing symbols and/or change to Bold and Italic.
+%  *1*  bold, italics, etc:  "_norm", "_bold", "_em" and "_sym" take
+%       no arguments and they are used before a "(text) show".
+%       Because the Roman fonts use here the ISOLatin1 encoding,
+%       one can plot some symbols with them.  Examples:
+%           _norm (normal) show _bold (bold) show _em (italics) show _norm
+%           _norm (T=25 \260C, [Cu]=1\265M) show
+%  *2*  the Symbol font may be used with octal codes (\nnn).
+%       Example formula (- delta-r-Cp0m):
+%              _sym (-\104) show _norm (r) -0.4 ^ 0.05 _f _em (C) show
+%              _sym (\260) 0.3 _^ _norm (p,m) -0.4 ^
+%       another example (log_10 pCO2(g)):
+%              _norm (log) show (10) -0.4 ^ 0.1 _f _em (p) show
+%              _norm (CO) -0.4 ^ (2) -0.8 ^ (\(g\)) -0.4 ^
+%       Tables with the octal encoding vectors for the Roman and Symbol
+%       fonts are given in PostScript manuals.
+%
+/_norm     {/Helvetica findfont dup length dict begin
+            {1 index /FID ne {def} {pop pop} ifelse} forall
+            /Encoding ISOLatin1Encoding def currentdict end
+            /UserFont exch definefont pop
+            getSize /UserFont findfont 1.43 siz mul scalefont setfont} def
+/_bold     {/Helvetica-Bold findfont dup length dict begin
+            {1 index /FID ne {def} {pop pop} ifelse} forall
+            /Encoding ISOLatin1Encoding def currentdict end
+            /UserFont exch definefont pop
+            getSize /UserFont findfont 1.43 siz mul scalefont setfont} def
+/_em       {/Helvetica-Oblique findfont dup length dict begin
+            {1 index /FID ne {def} {pop pop} ifelse} forall
+            /Encoding ISOLatin1Encoding def currentdict end
+            /UserFont exch definefont pop
+            getSize /UserFont findfont 1.43 siz mul scalefont setfont} def
+/_normS    {/Helvetica findfont dup length dict begin
+            {1 index /FID ne {def} {pop pop} ifelse} forall
+            /Encoding StandardEncoding def currentdict end
+            /UserFont exch definefont pop
+            getSize /UserFont findfont 1.43 siz mul scalefont setfont} def
+/_boldS    {/Helvetica-Bold findfont dup length dict begin
+            {1 index /FID ne {def} {pop pop} ifelse} forall
+            /Encoding StandardEncoding def currentdict end
+            /UserFont exch definefont pop
+            getSize /UserFont findfont 1.43 siz mul scalefont setfont} def
+/_emS      {/Helvetica-Oblique findfont dup length dict begin
+            {1 index /FID ne {def} {pop pop} ifelse} forall
+            /Encoding StandardEncoding def currentdict end
+            /UserFont exch definefont pop
+            getSize /UserFont findfont 1.43 siz mul scalefont setfont} def
+/_sym      {getSize /Symbol findfont 1.43 siz mul scalefont setfont} def
+%
+end   % pop ChemEqDict from dictionary stack
+% ------------------------------- end Prolog --------------------------------
+%%EndProlog
+% ----------------------------- PlotPS options:
+% size: 70%; left- and bottom-margin: 0.0 0.0
+% black on white;   portrait;   font: Helvetica
+% ---- Initialize the page ----
+ChemEqDict begin  % push dictionary in dictionary stack
+gsave
+% ---- set landscape/portrait orientation
+0 rotate 16 12 translate
+% ----  re-scale to 100 = 1 cm; (1 inch * 2.54) cm /72 points * 100
+0.283465 0.283465 scale
+1 setlinejoin  0 setgray  2.82 _setWidth    % set defaults for line drawing
+% ---- set initial font size (0.35 cm). Needed before "_norm", "rShow", etc
+%      (which call "getSize", and require a font size)
+/Helvetica findfont 35 scalefont setfont
+_norm
+%-------------------------- plot file starts here --------------------------
+newpath 1.97 _setWidth
+184.10 798 Mv
+184.10 98 Ln
+1234.10 98 Ln
+% text at X,Y= 249 75;  size = 0.35;  angle = 0;  is formula: true;  alignment:centre
+%     text is: 0
+25 _setSize
+_sn
+186.55 64.75 Mv
+(0)cShow
+% text at X,Y= 463 75;  size = 0.35;  angle = 0;  is formula: true;  alignment:centre
+%     text is: 2
+336.35 64.75 Mv
+(2)cShow
+% text at X,Y= 677 75;  size = 0.35;  angle = 0;  is formula: true;  alignment:centre
+%     text is: 4
+486.15 64.75 Mv
+(4)cShow
+% text at X,Y= 891 75;  size = 0.35;  angle = 0;  is formula: true;  alignment:centre
+%     text is: 6
+635.95 64.75 Mv
+(6)cShow
+% text at X,Y= 1106 75;  size = 0.35;  angle = 0;  is formula: true;  alignment:centre
+%     text is: 8
+786.45 64.75 Mv
+(8)cShow
+% text at X,Y= 1302 75;  size = 0.35;  angle = 0;  is formula: true;  alignment:centre
+%     text is: 10
+935.90 64.75 Mv
+(10)cShow
+% text at X,Y= 1517 75;  size = 0.35;  angle = 0;  is formula: true;  alignment:centre
+%     text is: 12
+1086.40 64.75 Mv
+(12)cShow
+% text at X,Y= 1731 75;  size = 0.35;  angle = 0;  is formula: true;  alignment:centre
+%     text is: 14
+1236.20 64.75 Mv
+(14)cShow
+184.10 98 Mv
+184.10 110.60 Ln
+_sn
+259 98 Mv
+259 110.60 Ln
+_sn
+333.90 98 Mv
+333.90 110.60 Ln
+_sn
+408.80 98 Mv
+408.80 110.60 Ln
+_sn
+483.70 98 Mv
+483.70 110.60 Ln
+_sn
+558.60 98 Mv
+558.60 110.60 Ln
+_sn
+633.50 98 Mv
+633.50 110.60 Ln
+_sn
+709.10 98 Mv
+709.10 110.60 Ln
+_sn
+784 98 Mv
+784 110.60 Ln
+_sn
+858.90 98 Mv
+858.90 110.60 Ln
+_sn
+933.80 98 Mv
+933.80 110.60 Ln
+_sn
+1008.70 98 Mv
+1008.70 110.60 Ln
+_sn
+1083.60 98 Mv
+1083.60 110.60 Ln
+_sn
+1158.50 98 Mv
+1158.50 110.60 Ln
+_sn
+1234.10 98 Mv
+1234.10 110.60 Ln
+% text at X,Y= 135 144;  size = 0.35;  angle = 0;  is formula: true;  alignment:right
+%     text is: 0.0
+_sn
+168 100.80 Mv
+(0.0)rShow
+% text at X,Y= 135 323;  size = 0.35;  angle = 0;  is formula: true;  alignment:right
+%     text is: 0.2
+168 226.10 Mv
+(0.2)rShow
+% text at X,Y= 135 523;  size = 0.35;  angle = 0;  is formula: true;  alignment:right
+%     text is: 0.4
+168 366.10 Mv
+(0.4)rShow
+% text at X,Y= 135 723;  size = 0.35;  angle = 0;  is formula: true;  alignment:right
+%     text is: 0.6
+168 506.10 Mv
+(0.6)rShow
+% text at X,Y= 135 923;  size = 0.35;  angle = 0;  is formula: true;  alignment:right
+%     text is: 0.8
+168 646.10 Mv
+(0.8)rShow
+% text at X,Y= 135 1123;  size = 0.35;  angle = 0;  is formula: true;  alignment:right
+%     text is: 1.0
+168 786.10 Mv
+(1.0)rShow
+184.10 98 Mv
+196 98 Ln
+_sn
+184.10 168 Mv
+196 168 Ln
+_sn
+184.10 238 Mv
+196 238 Ln
+_sn
+184.10 308 Mv
+196 308 Ln
+_sn
+184.10 378 Mv
+196 378 Ln
+_sn
+184.10 448 Mv
+196 448 Ln
+_sn
+184.10 518 Mv
+196 518 Ln
+_sn
+184.10 588 Mv
+196 588 Ln
+_sn
+184.10 658 Mv
+196 658 Ln
+_sn
+184.10 728 Mv
+196 728 Ln
+_sn
+184.10 798 Mv
+196 798 Ln
+_sn
+% text at X,Y= 32 458;  size = 0.35;  angle = 90;  is formula: true;  alignment:centre
+%     text is: Fraction
+22.40 349.02 Mv
+/_angle 90 def TxtRotate
+(Fraction)lShow
+grestore
+% text at X,Y= 972 14;  size = 0.35;  angle = 0;  is formula: true;  alignment:centre
+%     text is: pH
+687.51 9.80 Mv
+(pH)lShow
+901.60 98 Mv
+939.40 102.20 Ln
+950.60 103.60 Ln
+961.10 105.70 Ln
+971.60 108.50 Ln
+982.10 112 Ln
+991.90 117.60 Ln
+1003.10 124.60 Ln
+1013.60 134.40 Ln
+1024.10 147.70 Ln
+1034.60 164.50 Ln
+1044.40 186.20 Ln
+1055.60 214.20 Ln
+1066.10 249.20 Ln
+1076.60 290.50 Ln
+1087.10 338.80 Ln
+1096.90 392 Ln
+1108.10 448 Ln
+1118.60 504 Ln
+1129.10 557.20 Ln
+1139.60 605.50 Ln
+1149.40 646.80 Ln
+1159.90 681.80 Ln
+1171.10 709.80 Ln
+1181.60 731.50 Ln
+1192.10 748.30 Ln
+1201.90 761.60 Ln
+1212.40 771.40 Ln
+1223.60 778.40 Ln
+1234.10 784 Ln
+_sn
+523.60 98 Mv
+561.40 102.90 Ln
+572.60 104.30 Ln
+583.10 107.10 Ln
+592.90 109.90 Ln
+604.10 114.80 Ln
+613.90 121.10 Ln
+625.10 129.50 Ln
+635.60 140.70 Ln
+645.40 155.40 Ln
+656.60 175 Ln
+666.40 199.50 Ln
+677.60 231 Ln
+688.10 268.80 Ln
+697.90 314.30 Ln
+709.10 364.70 Ln
+719.60 420 Ln
+730.10 476 Ln
+740.60 531.30 Ln
+751.10 581.70 Ln
+761.60 627.20 Ln
+772.10 665 Ln
+782.60 696.50 Ln
+793.10 721 Ln
+803.60 740.60 Ln
+814.10 755.30 Ln
+824.60 766.50 Ln
+834.40 774.90 Ln
+845.60 781.20 Ln
+856.10 785.40 Ln
+866.60 788.90 Ln
+877.10 791 Ln
+886.90 792.40 Ln
+898.10 793.80 Ln
+908.60 793.80 Ln
+919.10 793.80 Ln
+929.60 793.80 Ln
+939.40 793.10 Ln
+950.60 791.70 Ln
+961.10 789.60 Ln
+971.60 787.50 Ln
+982.10 783.30 Ln
+991.90 778.40 Ln
+1003.10 771.40 Ln
+1013.60 761.60 Ln
+1024.10 748.30 Ln
+1034.60 731.50 Ln
+1044.40 709.80 Ln
+1055.60 681.80 Ln
+1066.10 646.80 Ln
+1076.60 605.50 Ln
+1087.10 557.20 Ln
+1096.90 504 Ln
+1108.10 448 Ln
+1118.60 392 Ln
+1129.10 338.80 Ln
+1139.60 290.50 Ln
+1149.40 249.20 Ln
+1159.90 214.20 Ln
+1171.10 186.20 Ln
+1181.60 164.50 Ln
+1192.10 147.70 Ln
+1201.90 134.40 Ln
+1212.40 124.60 Ln
+1223.60 117.60 Ln
+1234.10 112 Ln
+_sn
+184.10 102.90 Mv
+194.60 104.30 Ln
+205.10 107.10 Ln
+215.60 110.60 Ln
+226.10 115.50 Ln
+236.60 121.80 Ln
+247.10 130.20 Ln
+257.60 141.40 Ln
+268.10 156.80 Ln
+278.60 176.40 Ln
+289.10 201.60 Ln
+299.60 233.10 Ln
+309.40 272.30 Ln
+319.90 317.80 Ln
+331.10 368.90 Ln
+341.60 424.20 Ln
+352.10 480.20 Ln
+362.60 534.80 Ln
+373.10 585.20 Ln
+383.60 630 Ln
+394.10 667.80 Ln
+404.60 698.60 Ln
+415.10 723.10 Ln
+425.60 742 Ln
+436.10 756.70 Ln
+446.60 767.20 Ln
+457.10 775.60 Ln
+467.60 781.20 Ln
+478.10 785.40 Ln
+488.60 788.90 Ln
+499.10 791 Ln
+508.90 792.40 Ln
+520.10 793.10 Ln
+530.60 793.80 Ln
+541.10 793.80 Ln
+551.60 793.10 Ln
+561.40 792.40 Ln
+572.60 791 Ln
+583.10 788.90 Ln
+592.90 785.40 Ln
+604.10 781.20 Ln
+613.90 774.90 Ln
+625.10 766.50 Ln
+635.60 755.30 Ln
+645.40 740.60 Ln
+656.60 721 Ln
+666.40 696.50 Ln
+677.60 665 Ln
+688.10 627.20 Ln
+697.90 581.70 Ln
+709.10 531.30 Ln
+719.60 476 Ln
+730.10 420 Ln
+740.60 364.70 Ln
+751.10 314.30 Ln
+761.60 268.80 Ln
+772.10 231 Ln
+782.60 199.50 Ln
+793.10 175 Ln
+803.60 155.40 Ln
+814.10 140.70 Ln
+824.60 129.50 Ln
+834.40 121.10 Ln
+845.60 114.80 Ln
+856.10 109.90 Ln
+866.60 107.10 Ln
+877.10 104.30 Ln
+886.90 102.90 Ln
+925.40 98 Ln
+_sn
+184.10 793.10 Mv
+194.60 791.70 Ln
+205.10 788.90 Ln
+215.60 785.40 Ln
+226.10 780.50 Ln
+236.60 774.20 Ln
+247.10 765.80 Ln
+257.60 754.60 Ln
+268.10 739.20 Ln
+278.60 719.60 Ln
+289.10 694.40 Ln
+299.60 662.90 Ln
+309.40 623.70 Ln
+319.90 578.20 Ln
+331.10 527.10 Ln
+341.60 471.80 Ln
+352.10 415.80 Ln
+362.60 361.20 Ln
+373.10 310.80 Ln
+383.60 266 Ln
+394.10 228.20 Ln
+404.60 197.40 Ln
+415.10 172.90 Ln
+425.60 154 Ln
+436.10 139.30 Ln
+446.60 128.80 Ln
+457.10 120.40 Ln
+467.60 114.10 Ln
+478.10 109.90 Ln
+488.60 106.40 Ln
+499.10 104.30 Ln
+508.90 102.90 Ln
+547.40 98 Ln
+% text at X,Y= 1675 1137;  size = 0.35;  angle = 0;  is formula: true;  alignment:left
+%     text is: PO4 3-
+_sn
+1172.50 795.90 Mv
+(PO)lShow
+(4)-0.40 ^
+(3\055)0.40 ^
+% text at X,Y= 1208 1152;  size = 0.35;  angle = 0;  is formula: true;  alignment:left
+%     text is: HPO4 2-
+845.60 806.40 Mv
+(HPO)lShow
+(4)-0.40 ^
+(2\055)0.40 ^
+% text at X,Y= 652 1151;  size = 0.35;  angle = 0;  is formula: true;  alignment:left
+%     text is: H2PO4-
+456.40 805.70 Mv
+(H)lShow
+(2)-0.40 ^
+(PO)lShow
+(4)-0.40 ^
+(\055)0.40 ^
+% text at X,Y= 277 1151;  size = 0.35;  angle = 0;  is formula: true;  alignment:left
+%     text is: H3PO4
+193.90 805.70 Mv
+(H)lShow
+(3)-0.40 ^
+(PO)lShow
+(4)-0.40 ^
+% text at X,Y= 18 1245;  size = 0.35;  angle = 0;  is formula: true;  alignment:left
+%     text is: [PO4 3-]`TOT' =  100.00 mM
+12.60 871.50 Mv
+([PO)lShow
+(4)-0.40 ^
+(3\055)0.40 ^
+(])lShow
+(TOT)-0.50 ^
+( =  100.00 mM)lShow
+% text at X,Y= 1173 1245;  size = 0.35;  angle = 0;  is formula: true;  alignment:left
+%     text is: t= 25~C
+821.10 871.50 Mv
+(t= 25\260C)lShow
+stroke
+%-------------------------- plot file ends here --------------------------
+grestore
+end  % pop ChemEqDict from dictionary stack
+showpage
+%%Trailer
+%%EOF

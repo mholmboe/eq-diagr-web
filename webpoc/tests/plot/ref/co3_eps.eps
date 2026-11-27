@@ -1,0 +1,823 @@
+%!PS-Adobe-2.0 EPSF-2.0
+%%Title: co3_eps.plt; 
+%%Creator: PlotPS [java],  version: 2021-Mar-08
+%%CreationDate: Nov 25, 2026, 4:41:45 PM
+%%For: anonymous
+%%DocumentNeededResources: font Helvetica Helvetica-Bold Helvetica-Oblique
+%%BoundingBox: -11 -6 560 398
+%%EndComments
+% to change the "BoundingBox" given above: add margins in cm * 28.4
+%%BeginProlog
+% ------- Prolog:  defining procedures and variables -------
+/ChemEqDict 60 dict def   % create a dictionary
+ChemEqDict begin          % push dictionary in dictionary stack
+/Mv {moveto} def
+/Ln {lineto} def
+/_sn {stroke newpath} def
+/_csn {closepath stroke newpath} def
+/_setWidth {/linWidth exch def linWidth setlinewidth}  def
+% --- dash-line types:
+/Lt0 {stroke linWidth setlinewidth [] 0 setdash} def
+/Lt1 {stroke linWidth setlinewidth [30 10] 0 setdash} def
+/Lt2 {stroke linWidth setlinewidth [15 15] 0 setdash} def
+/Lt3 {stroke linWidth setlinewidth [5 10] 0 setdash} def
+/Lt4 {stroke linWidth setlinewidth [30 10 5 10] 0 setdash } def
+/Lt5 {stroke linWidth setlinewidth [15 10 5 10] 0 setdash} def
+%--------------------  Font related stuff:  ---------------------------------
+/rShow {dup stringwidth pop 0 exch        % right-show
+        sub 0 rmoveto show} def
+/lShow {show} def                         % left-show
+/cShow {dup stringwidth pop -2 div -0.5   % center-show (both
+        getSize siz mul rmoveto show} def %  vertically & horizontally)
+/_angle 0 def                 % angle to rotate text
+/TxtRotate                    % Procedure to rotate text. Usage:
+    {gsave                    %   /_angle nn def  TxtRotate
+     currentpoint translate   %   x y moveto (text1) show
+     _angle rotate} def       %   x y moveto (text2) show  grestore
+/fontScale  1.40 def
+/_setSize     % scale current font (parameter: font size in 0.01 cm units)
+          {fontScale mul /UserFont currentfont def
+           /UserFont findfont exch scalefont setfont} def
+/getSize  {gsave newpath 0 0 moveto (X)       % find current font size
+           true charpath flattenpath pathbbox %   and store result in "siz"
+           /siz exch def pop pop pop grestore} def
+%----------------------------------------------------------------------------
+%          -----        additions for PostScript output            -----
+%          -----  which allow printing math and chemical formulas  -----
+%----------------------------------------------------------------------------
+% ---- super/sub-scripts.
+%      Both "^" and "_^" take two arguments: the string to output and
+%      the vertical shift (positive or negative as fraction of letter
+%      size). The difference: "_^" does not advance the cursor (allowing
+%      subs- and super-scripts on the same letter).
+%      For example, to output UO2(CO3)3-4:
+%        (UO) show (2) -0.5 ^ (\(CO) show (3) -0.5 ^
+%        (\)) show (3) -0.5 ^ (4-) 0.5 _^
+%      "_f" takes one argument (spacing as fraction of letter size)
+%      and moves the cursor forward or backward. Useful in math formulas.
+/^  {/regFont currentfont def /ssFont currentfont [.7 0 0 .7 0 0] makefont def
+    getSize dup 0 exch siz mul rmoveto ssFont setfont
+    exch show 0 exch siz neg mul rmoveto regFont setfont } def
+/_^ {/regFont currentfont def /ssFont currentfont [.7 0 0 .7 0 0] makefont def
+    getSize dup 0 exch siz mul rmoveto ssFont setfont
+    exch dup stringwidth pop neg exch show 
+    0 rmoveto 0 exch siz neg mul rmoveto regFont setfont } def
+/_f {getSize siz mul 0 rmoveto} def
+%
+% ----- printing symbols and/or change to Bold and Italic.
+%  *1*  bold, italics, etc:  "_norm", "_bold", "_em" and "_sym" take
+%       no arguments and they are used before a "(text) show".
+%       Because the Roman fonts use here the ISOLatin1 encoding,
+%       one can plot some symbols with them.  Examples:
+%           _norm (normal) show _bold (bold) show _em (italics) show _norm
+%           _norm (T=25 \260C, [Cu]=1\265M) show
+%  *2*  the Symbol font may be used with octal codes (\nnn).
+%       Example formula (- delta-r-Cp0m):
+%              _sym (-\104) show _norm (r) -0.4 ^ 0.05 _f _em (C) show
+%              _sym (\260) 0.3 _^ _norm (p,m) -0.4 ^
+%       another example (log_10 pCO2(g)):
+%              _norm (log) show (10) -0.4 ^ 0.1 _f _em (p) show
+%              _norm (CO) -0.4 ^ (2) -0.8 ^ (\(g\)) -0.4 ^
+%       Tables with the octal encoding vectors for the Roman and Symbol
+%       fonts are given in PostScript manuals.
+%
+/_norm     {/Helvetica findfont dup length dict begin
+            {1 index /FID ne {def} {pop pop} ifelse} forall
+            /Encoding ISOLatin1Encoding def currentdict end
+            /UserFont exch definefont pop
+            getSize /UserFont findfont 1.43 siz mul scalefont setfont} def
+/_bold     {/Helvetica-Bold findfont dup length dict begin
+            {1 index /FID ne {def} {pop pop} ifelse} forall
+            /Encoding ISOLatin1Encoding def currentdict end
+            /UserFont exch definefont pop
+            getSize /UserFont findfont 1.43 siz mul scalefont setfont} def
+/_em       {/Helvetica-Oblique findfont dup length dict begin
+            {1 index /FID ne {def} {pop pop} ifelse} forall
+            /Encoding ISOLatin1Encoding def currentdict end
+            /UserFont exch definefont pop
+            getSize /UserFont findfont 1.43 siz mul scalefont setfont} def
+/_normS    {/Helvetica findfont dup length dict begin
+            {1 index /FID ne {def} {pop pop} ifelse} forall
+            /Encoding StandardEncoding def currentdict end
+            /UserFont exch definefont pop
+            getSize /UserFont findfont 1.43 siz mul scalefont setfont} def
+/_boldS    {/Helvetica-Bold findfont dup length dict begin
+            {1 index /FID ne {def} {pop pop} ifelse} forall
+            /Encoding StandardEncoding def currentdict end
+            /UserFont exch definefont pop
+            getSize /UserFont findfont 1.43 siz mul scalefont setfont} def
+/_emS      {/Helvetica-Oblique findfont dup length dict begin
+            {1 index /FID ne {def} {pop pop} ifelse} forall
+            /Encoding StandardEncoding def currentdict end
+            /UserFont exch definefont pop
+            getSize /UserFont findfont 1.43 siz mul scalefont setfont} def
+/_sym      {getSize /Symbol findfont 1.43 siz mul scalefont setfont} def
+%
+end   % pop ChemEqDict from dictionary stack
+% ------------------------------- end Prolog --------------------------------
+%%EndProlog
+% ----------------------------- PlotPS options:
+% size: 100%; left- and bottom-margin: 0.0 0.0
+% colours;   portrait;   font: Helvetica
+% ---- Initialize the page ----
+ChemEqDict begin  % push dictionary in dictionary stack
+gsave
+% ---- set landscape/portrait orientation
+0 rotate 16 12 translate
+% ----  re-scale to 100 = 1 cm; (1 inch * 2.54) cm /72 points * 100
+0.283465 0.283465 scale
+1 setlinejoin  0 setgray  2.82 _setWidth    % set defaults for line drawing
+% ---- set initial font size (0.35 cm). Needed before "_norm", "rShow", etc
+%      (which call "getSize", and require a font size)
+/Helvetica findfont 35 scalefont setfont
+_norm
+%-------------------------- plot file starts here --------------------------
+newpath 0 0 0 setrgbcolor 2.82 _setWidth
+263 1140 Mv
+263 140 Ln
+1763 140 Ln
+% text at X,Y= 385 75;  size = 0.35;  angle = 0;  is formula: true;  alignment:centre
+%     text is: 2
+35 _setSize
+_sn
+402.50 92.50 Mv
+(2)cShow
+% text at X,Y= 658 75;  size = 0.35;  angle = 0;  is formula: true;  alignment:centre
+%     text is: 4
+675.50 92.50 Mv
+(4)cShow
+% text at X,Y= 930 75;  size = 0.35;  angle = 0;  is formula: true;  alignment:centre
+%     text is: 6
+947.50 92.50 Mv
+(6)cShow
+% text at X,Y= 1203 75;  size = 0.35;  angle = 0;  is formula: true;  alignment:centre
+%     text is: 8
+1220.50 92.50 Mv
+(8)cShow
+% text at X,Y= 1458 75;  size = 0.35;  angle = 0;  is formula: true;  alignment:centre
+%     text is: 10
+1493 92.50 Mv
+(10)cShow
+% text at X,Y= 1731 75;  size = 0.35;  angle = 0;  is formula: true;  alignment:centre
+%     text is: 12
+1766 92.50 Mv
+(12)cShow
+263 140 Mv
+263 158 Ln
+_sn
+399 140 Mv
+399 158 Ln
+_sn
+535 140 Mv
+535 158 Ln
+_sn
+672 140 Mv
+672 158 Ln
+_sn
+808 140 Mv
+808 158 Ln
+_sn
+944 140 Mv
+944 158 Ln
+_sn
+1081 140 Mv
+1081 158 Ln
+_sn
+1217 140 Mv
+1217 158 Ln
+_sn
+1353 140 Mv
+1353 158 Ln
+_sn
+1490 140 Mv
+1490 158 Ln
+_sn
+1626 140 Mv
+1626 158 Ln
+_sn
+1763 140 Mv
+1763 158 Ln
+% text at X,Y= 170 222;  size = 0.35;  angle = 0;  is formula: true;  alignment:right
+%     text is: -8
+_sn
+240 222 Mv
+(\0558)rShow
+% text at X,Y= 170 422;  size = 0.35;  angle = 0;  is formula: true;  alignment:right
+%     text is: -6
+240 422 Mv
+(\0556)rShow
+% text at X,Y= 170 622;  size = 0.35;  angle = 0;  is formula: true;  alignment:right
+%     text is: -4
+240 622 Mv
+(\0554)rShow
+% text at X,Y= 170 822;  size = 0.35;  angle = 0;  is formula: true;  alignment:right
+%     text is: -2
+240 822 Mv
+(\0552)rShow
+% text at X,Y= 205 1023;  size = 0.35;  angle = 0;  is formula: true;  alignment:right
+%     text is: 0
+240 1023 Mv
+(0)rShow
+263 140 Mv
+280 140 Ln
+_sn
+263 240 Mv
+280 240 Ln
+_sn
+263 340 Mv
+280 340 Ln
+_sn
+263 440 Mv
+280 440 Ln
+_sn
+263 540 Mv
+280 540 Ln
+_sn
+263 640 Mv
+280 640 Ln
+_sn
+263 740 Mv
+280 740 Ln
+_sn
+263 840 Mv
+280 840 Ln
+_sn
+263 940 Mv
+280 940 Ln
+_sn
+263 1040 Mv
+280 1040 Ln
+_sn
+263 1140 Mv
+280 1140 Ln
+_sn
+% text at X,Y= 32 435;  size = 0.35;  angle = 90;  is formula: true;  alignment:centre
+%     text is: Log Conc.
+32 480.68 Mv
+/_angle 90 def TxtRotate
+(log Conc.)lShow
+grestore
+% text at X,Y= 972 14;  size = 0.35;  angle = 0;  is formula: true;  alignment:centre
+%     text is: pH
+982.15 14 Mv
+(pH)lShow
+263 940 Mv
+278 929 Ln
+293 918 Ln
+308 907 Ln
+323 896 Ln
+338 885 Ln
+353 874 Ln
+368 863 Ln
+383 852 Ln
+398 841 Ln
+413 830 Ln
+428 819 Ln
+443 808 Ln
+457 797 Ln
+473 786 Ln
+488 775 Ln
+503 764 Ln
+518 753 Ln
+533 742 Ln
+548 731 Ln
+563 720 Ln
+578 709 Ln
+593 698 Ln
+608 687 Ln
+623 676 Ln
+638 665 Ln
+653 654 Ln
+668 643 Ln
+683 632 Ln
+698 621 Ln
+713 610 Ln
+728 599 Ln
+743 588 Ln
+758 577 Ln
+773 566 Ln
+788 555 Ln
+802 544 Ln
+818 533 Ln
+833 522 Ln
+848 511 Ln
+863 500 Ln
+877 489 Ln
+893 478 Ln
+908 467 Ln
+923 456 Ln
+938 445 Ln
+952 434 Ln
+968 423 Ln
+983 412 Ln
+998 401 Ln
+1013 390 Ln
+1028 379 Ln
+1043 368 Ln
+1058 357 Ln
+1073 346 Ln
+1088 335 Ln
+1103 324 Ln
+1118 313 Ln
+1133 302 Ln
+1148 291 Ln
+1163 280 Ln
+1178 269 Ln
+1193 258 Ln
+1208 247 Ln
+1223 236 Ln
+1238 225 Ln
+1253 214 Ln
+1268 203 Ln
+1283 192 Ln
+1298 181 Ln
+1313 170 Ln
+1328 159 Ln
+1343 148 Ln
+1353 140 Ln
+_sn 1 0 0 setrgbcolor
+787 140 Mv
+788 141 Ln
+802 162 Ln
+818 184 Ln
+833 205 Ln
+848 226 Ln
+863 247 Ln
+877 268 Ln
+893 289 Ln
+908 309 Ln
+923 328 Ln
+938 347 Ln
+952 366 Ln
+968 384 Ln
+983 401 Ln
+998 418 Ln
+1013 434 Ln
+1028 449 Ln
+1043 464 Ln
+1058 478 Ln
+1073 491 Ln
+1088 504 Ln
+1103 517 Ln
+1118 529 Ln
+1133 541 Ln
+1148 553 Ln
+1163 565 Ln
+1178 576 Ln
+1193 587 Ln
+1208 599 Ln
+1223 610 Ln
+1238 621 Ln
+1253 632 Ln
+1268 643 Ln
+1283 654 Ln
+1298 665 Ln
+1313 676 Ln
+1328 687 Ln
+1343 697 Ln
+1358 708 Ln
+1373 718 Ln
+1388 728 Ln
+1403 739 Ln
+1418 748 Ln
+1433 758 Ln
+1448 767 Ln
+1463 776 Ln
+1478 784 Ln
+1493 792 Ln
+1508 799 Ln
+1523 805 Ln
+1538 811 Ln
+1553 816 Ln
+1568 820 Ln
+1583 824 Ln
+1598 827 Ln
+1613 830 Ln
+1628 832 Ln
+1642 833 Ln
+1658 835 Ln
+1673 836 Ln
+1688 837 Ln
+1703 838 Ln
+1717 838 Ln
+1733 838 Ln
+1748 839 Ln
+1763 839 Ln
+_sn 0.5843 0.2627 0 setrgbcolor
+263 840 Mv
+278 840 Ln
+293 840 Ln
+308 840 Ln
+323 840 Ln
+338 840 Ln
+353 840 Ln
+368 840 Ln
+383 840 Ln
+398 840 Ln
+413 840 Ln
+428 840 Ln
+443 840 Ln
+457 840 Ln
+473 840 Ln
+488 840 Ln
+503 840 Ln
+518 840 Ln
+533 840 Ln
+548 840 Ln
+563 840 Ln
+578 840 Ln
+593 840 Ln
+608 840 Ln
+623 840 Ln
+638 840 Ln
+653 840 Ln
+668 840 Ln
+683 840 Ln
+698 840 Ln
+713 840 Ln
+728 839 Ln
+743 839 Ln
+758 839 Ln
+773 839 Ln
+788 839 Ln
+802 838 Ln
+818 838 Ln
+833 837 Ln
+848 836 Ln
+863 835 Ln
+877 834 Ln
+893 833 Ln
+908 831 Ln
+923 828 Ln
+938 825 Ln
+952 822 Ln
+968 818 Ln
+983 813 Ln
+998 808 Ln
+1013 802 Ln
+1028 795 Ln
+1043 788 Ln
+1058 780 Ln
+1073 771 Ln
+1088 762 Ln
+1103 753 Ln
+1118 743 Ln
+1133 733 Ln
+1148 723 Ln
+1163 713 Ln
+1178 702 Ln
+1193 691 Ln
+1208 681 Ln
+1223 670 Ln
+1238 659 Ln
+1253 648 Ln
+1268 637 Ln
+1283 626 Ln
+1298 615 Ln
+1313 604 Ln
+1328 593 Ln
+1343 581 Ln
+1358 570 Ln
+1373 558 Ln
+1388 546 Ln
+1403 535 Ln
+1418 522 Ln
+1433 510 Ln
+1448 497 Ln
+1463 484 Ln
+1478 470 Ln
+1493 456 Ln
+1508 441 Ln
+1523 425 Ln
+1538 409 Ln
+1553 392 Ln
+1568 374 Ln
+1583 356 Ln
+1598 337 Ln
+1613 318 Ln
+1628 298 Ln
+1642 277 Ln
+1658 257 Ln
+1673 236 Ln
+1688 215 Ln
+1703 194 Ln
+1717 172 Ln
+1733 150 Ln
+1740 140 Ln
+_sn 0 0.502 0 setrgbcolor
+263 563 Mv
+278 563 Ln
+293 563 Ln
+308 563 Ln
+323 563 Ln
+338 563 Ln
+353 563 Ln
+368 563 Ln
+383 563 Ln
+398 563 Ln
+413 563 Ln
+428 563 Ln
+443 563 Ln
+457 563 Ln
+473 563 Ln
+488 563 Ln
+503 563 Ln
+518 563 Ln
+533 563 Ln
+548 563 Ln
+563 563 Ln
+578 563 Ln
+593 563 Ln
+608 563 Ln
+623 563 Ln
+638 563 Ln
+653 563 Ln
+668 563 Ln
+683 563 Ln
+698 563 Ln
+713 563 Ln
+728 562 Ln
+743 562 Ln
+758 562 Ln
+773 562 Ln
+788 562 Ln
+802 561 Ln
+818 561 Ln
+833 560 Ln
+848 559 Ln
+863 558 Ln
+877 557 Ln
+893 556 Ln
+908 554 Ln
+923 551 Ln
+938 548 Ln
+952 545 Ln
+968 541 Ln
+983 536 Ln
+998 531 Ln
+1013 525 Ln
+1028 518 Ln
+1043 511 Ln
+1058 503 Ln
+1073 494 Ln
+1088 485 Ln
+1103 476 Ln
+1118 466 Ln
+1133 456 Ln
+1148 446 Ln
+1163 436 Ln
+1178 425 Ln
+1193 414 Ln
+1208 404 Ln
+1223 393 Ln
+1238 382 Ln
+1253 371 Ln
+1268 360 Ln
+1283 349 Ln
+1298 338 Ln
+1313 327 Ln
+1328 316 Ln
+1343 304 Ln
+1358 293 Ln
+1373 281 Ln
+1388 269 Ln
+1403 258 Ln
+1418 245 Ln
+1433 233 Ln
+1448 220 Ln
+1463 207 Ln
+1478 193 Ln
+1493 179 Ln
+1508 164 Ln
+1523 148 Ln
+1530 140 Ln
+_sn 0.7843 0.549 0 setrgbcolor
+263 305 Mv
+278 316 Ln
+293 327 Ln
+308 338 Ln
+323 349 Ln
+338 360 Ln
+353 371 Ln
+368 382 Ln
+383 393 Ln
+398 404 Ln
+413 415 Ln
+428 426 Ln
+443 437 Ln
+457 448 Ln
+473 459 Ln
+488 470 Ln
+503 481 Ln
+518 492 Ln
+533 503 Ln
+548 514 Ln
+563 525 Ln
+578 536 Ln
+593 547 Ln
+608 558 Ln
+623 569 Ln
+638 580 Ln
+653 591 Ln
+668 602 Ln
+683 613 Ln
+698 624 Ln
+713 635 Ln
+728 645 Ln
+743 656 Ln
+758 667 Ln
+773 678 Ln
+788 689 Ln
+802 699 Ln
+818 710 Ln
+833 720 Ln
+848 730 Ln
+863 740 Ln
+877 750 Ln
+893 760 Ln
+908 769 Ln
+923 777 Ln
+938 785 Ln
+952 793 Ln
+968 800 Ln
+983 806 Ln
+998 812 Ln
+1013 817 Ln
+1028 821 Ln
+1043 825 Ln
+1058 828 Ln
+1073 830 Ln
+1088 832 Ln
+1103 834 Ln
+1118 835 Ln
+1133 836 Ln
+1148 837 Ln
+1163 838 Ln
+1178 838 Ln
+1193 838 Ln
+1208 839 Ln
+1223 839 Ln
+1238 839 Ln
+1253 839 Ln
+1268 839 Ln
+1283 839 Ln
+1298 839 Ln
+1313 839 Ln
+1328 839 Ln
+1343 838 Ln
+1358 838 Ln
+currentpoint stroke moveto
+1373 837 Ln
+1388 836 Ln
+1403 836 Ln
+1418 834 Ln
+1433 833 Ln
+1448 831 Ln
+1463 829 Ln
+1478 826 Ln
+1493 823 Ln
+1508 819 Ln
+1523 814 Ln
+1538 809 Ln
+1553 803 Ln
+1568 796 Ln
+1583 789 Ln
+1598 781 Ln
+1613 773 Ln
+1628 764 Ln
+1642 754 Ln
+1658 745 Ln
+1673 735 Ln
+1688 725 Ln
+1703 715 Ln
+1717 704 Ln
+1733 693 Ln
+1748 683 Ln
+1763 672 Ln
+_sn 1 0 1 setrgbcolor
+808 140 Mv
+818 147 Ln
+833 158 Ln
+848 169 Ln
+863 180 Ln
+877 191 Ln
+893 202 Ln
+908 213 Ln
+923 224 Ln
+938 235 Ln
+952 246 Ln
+968 257 Ln
+983 268 Ln
+998 279 Ln
+1013 290 Ln
+1028 301 Ln
+1043 312 Ln
+1058 323 Ln
+1073 334 Ln
+1088 345 Ln
+1103 356 Ln
+1118 367 Ln
+1133 378 Ln
+1148 389 Ln
+1163 400 Ln
+1178 411 Ln
+1193 422 Ln
+1208 433 Ln
+1223 444 Ln
+1238 455 Ln
+1253 466 Ln
+1268 477 Ln
+1283 488 Ln
+1298 499 Ln
+1313 510 Ln
+1328 521 Ln
+1343 532 Ln
+1358 543 Ln
+1373 554 Ln
+1388 565 Ln
+1403 576 Ln
+1418 587 Ln
+1433 598 Ln
+1448 609 Ln
+1463 620 Ln
+1478 631 Ln
+1493 642 Ln
+1508 653 Ln
+1523 664 Ln
+1538 675 Ln
+1553 686 Ln
+1568 697 Ln
+1583 708 Ln
+1598 719 Ln
+1613 730 Ln
+1628 741 Ln
+1642 752 Ln
+1658 763 Ln
+1673 774 Ln
+1688 785 Ln
+1703 796 Ln
+1717 807 Ln
+1733 818 Ln
+1748 829 Ln
+1763 840 Ln
+_sn 0 0 0 setrgbcolor
+% text at X,Y= 277 958;  size = 0.35;  angle = 0;  is formula: true;  alignment:left
+%     text is: H+
+277 958 Mv
+(H)lShow
+(+)0.40 ^
+1 0 0 setrgbcolor
+% text at X,Y= 1675 857;  size = 0.35;  angle = 0;  is formula: true;  alignment:left
+%     text is: CO3 2-
+1675 857 Mv
+(CO)lShow
+(3)-0.40 ^
+(2\055)0.40 ^
+0.5843 0.2627 0 setrgbcolor
+% text at X,Y= 277 857;  size = 0.35;  angle = 0;  is formula: true;  alignment:left
+%     text is: CO2
+277 857 Mv
+(CO)lShow
+(2)-0.40 ^
+0 0.502 0 setrgbcolor
+% text at X,Y= 277 580;  size = 0.35;  angle = 0;  is formula: true;  alignment:left
+%     text is: H2CO3
+277 580 Mv
+(H)lShow
+(2)-0.40 ^
+(CO)lShow
+(3)-0.40 ^
+0.7843 0.549 0 setrgbcolor
+% text at X,Y= 1180 857;  size = 0.35;  angle = 0;  is formula: true;  alignment:left
+%     text is: HCO3-
+1180 857 Mv
+(HCO)lShow
+(3)-0.40 ^
+(\055)0.40 ^
+1 0 1 setrgbcolor
+% text at X,Y= 1710 910;  size = 0.35;  angle = 0;  is formula: true;  alignment:left
+%     text is: OH-
+1710 910 Mv
+(OH)lShow
+(\055)0.40 ^
+0 0 0 setrgbcolor
+% text at X,Y= 18 1245;  size = 0.35;  angle = 0;  is formula: true;  alignment:left
+%     text is: [CO3 2-]`TOT' =   10.00 mM
+18 1245 Mv
+([CO)lShow
+(3)-0.40 ^
+(2\055)0.40 ^
+(])lShow
+(TOT)-0.50 ^
+( =   10.00 mM)lShow
+% text at X,Y= 1173 1245;  size = 0.35;  angle = 0;  is formula: true;  alignment:left
+%     text is: t= 25~C
+1173 1245 Mv
+(t= 25\260C)lShow
+stroke
+%-------------------------- plot file ends here --------------------------
+grestore
+end  % pop ChemEqDict from dictionary stack
+showpage
+%%Trailer
+%%EOF

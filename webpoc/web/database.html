@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Database search in the browser</title>
+<script src="theme.js"></script>
+<link rel="stylesheet" href="theme.css">
+<script src="app-view.js"></script>
+<style>
+  .ptable { display: grid; grid-template-columns: repeat(18, minmax(0, 1fr)); gap: var(--space-2); margin: var(--space-4) 0 var(--space-2); }
+  .ptable button { padding: var(--space-2) 0; font-size: var(--text-sm); font-weight: 600; min-width: 0; border-radius: 4px; }
+  .ptable button.has { background: var(--panel); }
+  .ptable button.none { opacity: 0.35; cursor: default; border-style: dashed; }
+  .ptable button.sel { outline: 2px solid var(--accent); }
+  /* an element with a selected component */
+  .ptable button.picked { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+  :root[data-theme="original"] .ptable { background: #ffff99; border: 1px solid var(--line); padding: var(--space-3); }
+  :root[data-theme="original"] .ptable button.has:not(.picked) { background: linear-gradient(#ffffff, #e4e4e4); }
+  .ptable .gap { grid-column: 1 / -1; height: 6px; }
+  @media (max-width: 520px) { .ptable { gap: 1px; } .ptable button { font-size: 9px; padding: var(--space-2) 0; border-radius: 2px; } }
+  /* e- is a cell (row of H, column of Ti); the other non-elements (advanced) are under it */
+  .ptable button.elec { font-family: var(--font-sans); }
+  .ptable .extra { grid-row: 2; grid-column: 4 / 11; display: flex; gap: var(--space-3); align-items: center; }
+  .ptable .extra button { padding: var(--space-2) var(--space-5); font-size: var(--text-sm); background: var(--panel); white-space: nowrap; }
+  .ptable .extra button.sel { outline: 2px solid var(--accent); }
+  .chips { display: flex; gap: var(--space-3); flex-wrap: wrap; min-height: 30px; margin-top: var(--space-3); }
+  .chip { font: var(--text-md) var(--font-mono); border: 1px solid var(--line); border-radius: 14px; padding: var(--space-2) var(--space-5); background: var(--panel); cursor: pointer; color: var(--fg); font-weight: 400; }
+  .chip.avail::before { content: "+ "; color: var(--accent); }
+  .chip.chosen::after { content: " ×"; color: var(--muted); }
+  .opts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-2) var(--space-6); }
+  .opts label { margin: var(--space-3) 0 var(--space-1); }
+  fieldset { border: 1px solid var(--line); border-radius: 6px; margin: var(--space-5) 0 0; padding: var(--space-2) var(--space-5) var(--space-5); }
+  legend { font-size: var(--text-md); font-weight: 600; color: var(--muted); padding: 0 var(--space-2); }
+  .check { margin-top: var(--space-3); }
+  #dbstatus { font-size: var(--text-md); color: var(--muted); margin: var(--space-3) 0 0; }
+  .species { columns: 3 160px; font: var(--text-md) var(--font-mono); margin: var(--space-3) 0 0; padding: 0; list-style: none; }
+  .note { font-size: var(--text-sm); color: var(--muted); }
+  table.sp { width: 100%; border-collapse: collapse; font-size: var(--text-md); margin-top: var(--space-3); }
+  table.sp td, table.sp th { padding: var(--space-2) var(--space-3); border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+  table.sp th { color: var(--muted); font-size: var(--text-sm); }
+  table.sp td.n { font-family: var(--font-mono); white-space: nowrap; }
+  table.sp tr.off td { opacity: 0.45; }
+  /* a species name opens the details of its reaction */
+  table.sp td.n a { color: inherit; text-decoration: none; cursor: pointer; }
+  table.sp td.n a:hover, table.sp td.n a:focus-visible { color: var(--accent); text-decoration: underline; }
+  dialog.detaildlg { max-width: min(600px, calc(100vw - 32px)); width: 600px; }
+  dialog.detaildlg h3 { margin: 0 0 var(--space-4); font: 600 var(--text-lg) var(--font-mono); }
+  dialog.detaildlg table { border-collapse: collapse; width: 100%; font-size: var(--text-base); }
+  dialog.detaildlg th { text-align: left; vertical-align: top; font-weight: 600; color: var(--muted); font-size: var(--text-md); white-space: nowrap; padding: var(--space-2) var(--space-5) var(--space-2) 0; }
+  dialog.detaildlg td { padding: var(--space-2) 0; vertical-align: top; }
+  dialog.detaildlg td.eq { font-family: var(--font-mono); font-size: var(--text-md); }
+  dialog.detaildlg .reftext { white-space: pre-wrap; font-size: var(--text-sm); color: var(--muted); margin: var(--space-2) 0 0; max-height: 30vh; overflow: auto; }
+  .spwrap { max-height: 360px; overflow: auto; }
+  html.embedded #status { display: none; }
+  #chosen:empty::before { content: "None yet: click an element, then a component."; font-size: var(--text-sm); color: var(--muted); }
+  html.embedded .grid > section:last-child > label:first-child { margin-top: var(--space-1); }
+  /* between 701 and 860 px the periodic table has smaller cells */
+  @media (min-width: 701px) and (max-width: 860px) { .ptable { gap: var(--space-1); } .ptable button { font-size: var(--text-xs); } html.embedded .grid > section { padding-left: var(--space-5); padding-right: var(--space-5); } }
+  @media (min-width: 701px) { html.embedded .grid { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); } html.embedded .spwrap { max-height: calc(100vh - 260px); } }
+</style>
+</head>
+<body>
+<main>
+  <h1>Database search running in the browser</h1>
+  <p class="lede">The eq-diagr DataBase search (<code>DBSearch</code> and the database library), compiled from Java to JavaScript with TeaVM and run in a Web Worker. Choose the components, search the database for all complexes and solids they form, and save the chemical system as a <code>.dat</code> file, as the desktop DataBase program does. The database files are read by this page only; nothing is sent to a server.</p>
+  <nav><a href="database.html" aria-current="page">Database</a><a href="maintenance.html">Maintenance</a><a href="spana.html">Diagram</a><a href="sed.html">SED</a><a href="predom.html">Predom</a><a href="help.html">Help</a><a href="ec-tests.html">EC tests</a></nav>
+  <div class="grid">
+    <section>
+      <label>Database</label>
+      <div class="row" style="margin-top:0">
+        <select id="builtin" style="width:auto; flex:0 1 26em; min-width:0" title="The databases that come with the program"></select>
+        <button id="pickFiles" class="adv-only">Load your own files…</button>
+        <input id="files" type="file" multiple accept=".db,.elb,.txt,.skv,.csv,.elt,.elm" hidden>
+      </div>
+      <p id="dbstatus">Loading the database…</p>
+      <div class="row adv-only" style="margin-top:4px">
+        <label class="check"><input id="remember" type="checkbox" checked> remember your own database files in this browser</label>
+      </div>
+      <p class="note adv-only">Three databases come with the program: the database of the KTH course KD1280 (the default; log <i>K</i> at 25 °C only), the database of the eq-diagr release (with its literature references and data for other temperatures), and a small sample. To use your own, load a <code>.db</code> file together with its <code>.elb</code> file (or a text <code>.txt</code> or <code>.skv</code> database with its <code>.elt</code> or <code>.elm</code> file), and a references file (<code>References.txt</code>) to see the literature references.</p>
+
+      <label>Elements <span class="note">(click an element, then a component)</span></label>
+      <div id="ptable" class="ptable"></div>
+      <label id="availLabel">Available components</label>
+      <div id="avail" class="chips"></div>
+    </section>
+    <section>
+      <label>Selected components <span class="note">(click to remove)</span></label>
+      <div id="chosen" class="chips"></div>
+
+      <fieldset>
+        <legend>Options</legend>
+        <div class="opts">
+          <div><label for="t">Temperature (°C)</label><input id="t" type="number" value="25" step="any"></div>
+          <div class="adv-only"><label for="p">Pressure (bar)</label>
+            <select id="p" title="pSat: the saturation pressure of water (at least 1 bar)"><option value="pSat" title="the saturation pressure of water, at least 1 bar">pSat</option><option>250</option><option>500</option><option>750</option><option>1000</option><option>2000</option><option>3000</option><option>4000</option><option>5000</option></select></div>
+        </div>
+        <div class="adv-only">
+        <label for="solids">Solids</label>
+        <select id="solids">
+          <option value="0">include all solids</option>
+          <option value="1">exclude (cr) solids</option>
+          <option value="2">exclude (c) solids</option>
+          <option value="3">exclude (cr) and (c) solids</option>
+        </select>
+        <label>Redox equilibria (when e⁻ is a component)</label>
+        <div class="row" style="margin-top:2px">
+          <label class="check"><input id="redoxN" type="checkbox" checked> nitrogen</label>
+          <label class="check"><input id="redoxS" type="checkbox" checked> sulfur</label>
+          <label class="check"><input id="redoxP" type="checkbox" checked> phosphorus</label>
+        </div>
+        </div>
+        <label class="check adv-only" id="h2oRow" style="margin-top:8px" title="Needed only to model ionic-medium effects on water, for example for gypsum, CaSO4·2H2O(cr); otherwise the activity of water is taken as 1"><input id="h2o" type="checkbox"> <span>include H<sub>2</sub>O as a component</span></label>
+      </fieldset>
+      <div class="row">
+        <button id="search" class="primary cta" disabled>Search reactions</button>
+      </div>
+      <p id="status"></p>
+      <div id="found"></div>
+      <label for="dat" class="adv-only">Data file (<code>.dat</code>)</label>
+      <textarea id="dat" class="adv-only" spellcheck="false" readonly placeholder="The chemical system appears here after a search."></textarea>
+      <div class="row">
+        <button id="toDiagram" class="cta" disabled>Create a diagram</button>
+        <button id="download" class="adv-only" disabled>Download .dat</button>
+      </div>
+      <p class="note adv-only">The data file holds the chemical system. "Create a diagram" saves it in this browser and opens the diagram setup, where you choose the diagram type, the axes and the concentrations.</p>
+      <details id="logDetails"><summary>Search messages</summary><pre id="log"></pre></details>
+      <details class="standalone-only"><summary>Database tools</summary>
+        <p class="note">Convert a loaded binary database (<code>.db</code> with <code>.elb</code>) to the text format (<code>.txt</code> with <code>.elt</code>), as DataMaintenance does. The text files can be edited, for example to add your own reactions, and loaded here again. Note that the text format keeps fewer digits of the enthalpy data, so log <i>K</i> away from 25 °C can differ in the third decimal.</p>
+        <div class="row"><select id="convertDb" style="width:auto"></select><button id="convert">Convert to text</button></div>
+      </details>
+    </section>
+  </div>
+</main>
+<dialog id="detailDlg" class="eqdlg detaildlg">
+  <form method="dialog">
+    <h3 id="dtName"></h3>
+    <table id="dtTable"></table>
+    <div class="btns"><button value="close" class="primary">Close</button></div>
+  </form>
+</dialog>
+<script src="engine-client.js"></script>
+<script src="store.js"></script>
+<script src="builtin-db.js"></script>
+<script src="dialogs.js"></script>
+<script src="database.js"></script>
+</body>
+</html>

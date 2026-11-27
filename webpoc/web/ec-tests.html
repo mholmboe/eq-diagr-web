@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EC in the browser</title>
+<style>
+  :root { --fg: #1d1d1f; --muted: #6e6e73; --line: #d2d2d7; --pass: #1a7f37; --fail: #c62828; --bg: #ffffff; }
+  @media (prefers-color-scheme: dark) {
+    :root { --fg: #f5f5f7; --muted: #a1a1a6; --line: #3a3a3c; --pass: #3fb950; --fail: #ff6b6b; --bg: #1c1c1e; }
+  }
+  body { font: var(--text-lg)/1.45 var(--font-sans); color: var(--fg); background: var(--bg); margin: 0; padding: 24px var(--space-6); }
+  main { max-width: 900px; margin: 0 auto; }
+  h1 { font-size: var(--text-xl); margin: 0 0 var(--space-2); }
+  p.lede { color: var(--muted); margin: 0 0 20px; }
+  table { border-collapse: collapse; width: 100%; margin-bottom: 20px; }
+  th, td { text-align: left; padding: var(--space-4) var(--space-5); border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font-weight: 600; font-size: var(--text-md); color: var(--muted); }
+  td.num { font-variant-numeric: tabular-nums; }
+  .pass { color: var(--pass); font-weight: 600; }
+  .fail { color: var(--fail); font-weight: 600; }
+  code { font: var(--text-md) var(--font-mono); }
+  pre { font: var(--text-sm)/1.35 var(--font-mono); overflow-x: auto; border: 1px solid var(--line); padding: var(--space-5); max-height: 360px; }
+  nav a { color: #0a62c9; margin-right: var(--space-6); font-size: var(--text-base); } nav a[aria-current] { color: inherit; font-weight: 600; text-decoration: none; }
+  #summary { font-size: 17px; margin: 0 0 var(--space-6); }
+</style>
+</head>
+<body>
+<main>
+  <h1>EC (HaltaFall) running in the browser</h1>
+  <p class="lede">The eq-diagr calculation code (LibChemDiagr and EC), compiled from Java to JavaScript with TeaVM and run in a Web Worker, run on the three EC regression cases and compared with the reference CSV tables committed in <code>eq-diagr/EC/tests</code> (relative tolerance 1e-6, absolute 1e-12, as in <code>test-cli.sh</code>). The numerical code is unchanged; the build only replaces the AWT message box, the program exit and the <code>%e</code>/<code>%f</code>/<code>%g</code>/<code>%n</code> formatting that TeaVM lacks.</p>
+  <nav style="margin:0 0 16px"><a href="tools.html">Start</a><a href="database.html">Database</a><a href="maintenance.html">Maintenance</a><a href="spana.html">Diagram</a><a href="sed.html">SED</a><a href="predom.html">Predom</a><a href="help.html">Help</a><a href="ec-tests.html" aria-current="page">EC tests</a></nav>
+  <p id="summary">Running…</p>
+  <table>
+    <thead><tr><th>Case</th><th>Options</th><th>Time</th><th>pH (first point)</th><th>Result</th></tr></thead>
+    <tbody id="rows"></tbody>
+  </table>
+  <div id="details"></div>
+</main>
+<script src="tests-data.js"></script>
+<script>
+  // Same comparison as test-cli.sh: numeric cells within tolerance, text cells identical.
+  function parseCsv(text) {
+    return text.split(/\r?\n/).filter(l => l.length > 0)
+      .map(l => l.replace(/,\s*$/, "").split(",").map(c => c.trim()));
+  }
+  function compare(refText, newText) {
+    const ref = parseCsv(refText), cur = parseCsv(newText), problems = [];
+    if (ref.length !== cur.length) problems.push(`row count ${ref.length} vs ${cur.length}`);
+    for (let i = 0; i < Math.min(ref.length, cur.length); i++) {
+      for (let j = 0; j < Math.min(ref[i].length, cur[i].length); j++) {
+        const x = ref[i][j], y = cur[i][j], fx = Number(x), fy = Number(y);
+        if (x === "" || isNaN(fx) || isNaN(fy)) {
+          if (x !== y) problems.push(`row ${i + 1} col ${j + 1}: "${x}" vs "${y}"`);
+        } else if (Math.abs(fx - fy) > Math.max(1e-12, 1e-6 * Math.max(Math.abs(fx), Math.abs(fy)))) {
+          problems.push(`row ${i + 1} col ${j + 1}: ${x} vs ${y}`);
+        }
+      }
+      if (ref[i].length !== cur[i].length) problems.push(`row ${i + 1}: ${ref[i].length} vs ${cur[i].length} columns`);
+    }
+    return problems;
+  }
+  function firstPH(csvText) {
+    const rows = parseCsv(csvText);
+    if (rows.length < 2) return "";
+    const k = rows[0].indexOf("pH");
+    return k >= 0 ? rows[1][k] : "";
+  }
+  const esc = s => s.replace(/[&<>]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;"}[c]));
+  let passed = 0, reported = 0;
+  window.ecReport = function (i, csv, out, ms, error) {
+    const t = window.ecTests[i];
+    const problems = error ? [error] : compare(t.refCsv, csv);
+    const ok = problems.length === 0;
+    if (ok) passed++;
+    reported++;
+    document.getElementById("rows").insertAdjacentHTML("beforeend",
+      `<tr><td><code>${t.dir}/${t.name}</code></td><td><code>${t.options}</code></td>` +
+      `<td class="num">${ms.toFixed(0)} ms</td><td class="num">${firstPH(csv)}</td>` +
+      `<td class="${ok ? "pass" : "fail"}">${ok ? "PASS" : "FAIL"}</td></tr>`);
+    document.getElementById("details").insertAdjacentHTML("beforeend",
+      `<details${ok ? "" : " open"}><summary>${t.dir}/${t.name}: ${ok ? "CSV matches reference" : problems.length + " difference(s)"}</summary>` +
+      (ok ? "" : `<pre>${esc(problems.slice(0, 30).join("\n"))}</pre>`) +
+      `<pre>${esc(out || "(no .out file)")}</pre></details>`);
+    document.getElementById("summary").innerHTML = reported < window.ecTests.length
+      ? `Running… ${reported} of ${window.ecTests.length} done`
+      : `<span class="${passed === reported ? "pass" : "fail"}">${passed} of ${reported} cases match the reference</span>`;
+    window.ecResults = window.ecResults || [];
+    window.ecResults.push({ name: t.dir + "/" + t.name, ok, ms, problems: problems.slice(0, 5) });
+  };
+</script>
+<script src="engine-client.js"></script>
+<script>
+  // each test case runs EC in the engine (Web Worker), with its input files in /tests/
+  (async () => {
+    const engine = new EqDiagrEngine();
+    for (let i = 0; i < window.ecTests.length; i++) {
+      const t = window.ecTests[i], dir = `/tests/${t.dir}`, base = `${dir}/${t.name}`;
+      const files = { [`${base}.dat`]: t.dat };
+      if (t.sit) files[`${dir}/SIT-coefficients.dta`] = t.sit;
+      const t0 = performance.now();
+      const r = await engine.run("ec", [`${base}.dat`, ...t.options.trim().split(/\s+/).filter(x => x)],
+                                 { files, outputs: [`${base}.csv`, `${base}.out`] });
+      window.ecReport(i, r.files[`${base}.csv`] || "", r.files[`${base}.out`] || "", performance.now() - t0,
+                      r.ok ? "" : (r.error || "EC failed"));
+    }
+  })().catch(e => { document.getElementById("summary").innerHTML = `<span class="fail">Error: ${esc(String(e))}</span>`; });
+</script>
+</body>
+</html>

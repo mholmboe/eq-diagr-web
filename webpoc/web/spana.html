@@ -1,0 +1,392 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Diagram setup in the browser</title>
+<script src="theme.js"></script>
+<link rel="stylesheet" href="theme.css">
+<script src="app-view.js"></script>
+<style>
+  h2 { font-size: var(--text-lg); margin: 0; }
+  details.panel { border: 1px solid var(--line); border-radius: 8px; padding: var(--space-4) var(--space-5); margin: var(--space-5) 0 0; }
+  details.panel > summary { font-size: var(--text-lg); }
+  /* fields under labels of one or two lines stay on one line */
+  .two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 var(--space-6); align-items: end; }
+  .three { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0 var(--space-5); align-items: end; }
+  .two > .wide { grid-column: 1 / -1; }
+  /* (display: the class "grid" is also the two-column layout of the page, theme.css) */
+  table.grid { display: table; width: 100%; border-collapse: collapse; font-size: var(--text-md); margin-top: var(--space-3); }
+  table.grid th, table.grid td { text-align: left; padding: var(--space-2) var(--space-2); border-bottom: 1px solid var(--line); vertical-align: middle; }
+  table.grid th { color: var(--muted); font-weight: 600; font-size: var(--text-sm); }
+  table.grid td.name { font-family: var(--font-mono); white-space: nowrap; }
+  table.grid input, table.grid select { width: 100%; min-width: 0; font-size: var(--text-sm); }
+  table.grid input:not([type=checkbox], [type=range]), table.grid select { height: var(--ctl-h-sm); padding: 0 var(--space-3); }
+  /* fixed columns, so that the type list keeps room for its longest name */
+  #concTable { table-layout: fixed; }
+  #concTable col:nth-child(1) { width: 24%; } #concTable col:nth-child(2) { width: 37%; } #concTable col:nth-child(3), #concTable col:nth-child(4) { width: 19.5%; }
+  /* a fixed value has no second field */
+  #concTable input[data-high]:disabled { visibility: hidden; }
+  #concTable td.name { white-space: normal; overflow-wrap: anywhere; }
+  #concTable tr.yrow td.ytype { color: var(--muted); font-size: var(--text-sm); }
+  #concTable .ax { display: block; }
+  /* room for values such as 2.5e-6: no spin buttons, less padding */
+  #concTable input[type=number] { padding-left: var(--space-2); padding-right: var(--space-2); -moz-appearance: textfield; appearance: textfield; }
+  #concTable input[type=number]::-webkit-inner-spin-button, #concTable input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+  table.grid tr.slide td { padding-top: 0; }
+  table.grid tr:has(+ tr.slide) td { border-bottom: 0; }
+  table.grid input[type=range] { width: 100%; padding: 0; margin: 0; accent-color: var(--accent); display: block; }
+  /* live mode: sliders under the ionic strength and the temperature, and a note on where the sliders are */
+  .optslide, .live-only { display: none; }
+  html.live .optslide { display: block; width: 100%; margin: var(--space-2) 0 0; padding: 0; accent-color: var(--accent); }
+  html.live .live-only { display: block; }
+  html.live .three { align-items: start; }
+  /* log K: the field, and a button back to the value of the file when it was changed */
+  #specTable .kcell { display: flex; gap: var(--space-2); align-items: center; }
+  #specTable tr.changed input[type=number] { border-color: var(--accent); font-weight: 600; }
+  #specTable tr.slide input[type=range] { max-width: 210px; }
+  #compTable td.exch select { min-width: 12em; }
+  #specTable tr.off td.name { color: var(--muted); text-decoration: line-through; }
+  #specTable td:first-child { width: 1.5em; }
+  #specTable input[type=number] { max-width: 150px; }
+  table.grid button { padding: var(--space-2) var(--space-4); font-size: var(--text-sm); font-weight: 400; }
+  .scroll { max-height: 300px; overflow: auto; }
+  .note { font-size: var(--text-sm); color: var(--muted); }
+  .warn { color: var(--fail); font-size: var(--text-md); margin: var(--space-3) 0 0; }
+  #concWarn span { display: block; margin-top: var(--space-2); }
+  #concWarn .wrn { color: var(--warn); }
+  #concWarn .err::before { content: "Error: "; font-weight: 600; }
+  #concWarn .wrn::before { content: "Warning: "; font-weight: 600; }
+  .ax { font-size: var(--text-xs); color: var(--accent); font-weight: 600; }
+  #fileName { font-weight: 600; }
+  .row.tight { margin-top: var(--space-4); gap: var(--space-4); }
+  .hidden { display: none !important; }
+  fieldset { border: 1px solid var(--line); border-radius: 6px; margin: var(--space-5) 0 0; padding: var(--space-2) var(--space-5) var(--space-5); }
+  legend { font-size: var(--text-md); color: var(--muted); padding: 0 var(--space-2); }
+  table.grid button.mv { padding: var(--space-2) var(--space-3); min-width: 26px; }
+  table.grid button.mv + button.mv { margin-left: var(--space-1); }
+  /* in the app window: a toolbar above the plot, which fills the pane */
+  html.embedded #status { display: none; }
+  html.embedded #plotPane { display: flex; flex-direction: column; }
+  html.embedded #exportBar { order: -1; margin: 0 0 var(--space-4); gap: var(--space-3); }
+  html.embedded #exportBar button { padding: var(--space-2) 9px; font-size: var(--text-md); font-weight: 400; }
+  html.embedded #exportBar .lbl { font-size: var(--text-sm); color: var(--muted); margin-right: var(--space-1); }
+  /* the plot keeps its own proportions and is as large as the pane allows */
+  #plot svg { height: auto; max-height: calc(100vh - 140px); }
+  @media (min-width: 701px) { html.embedded #plot .empty { padding-top: 30vh; } }
+  #exportBar .lbl { display: none; } html.embedded #exportBar .lbl { display: inline; }
+  /* the diagram shown was made with other settings than those in the form */
+  #plot.stale svg { opacity: .35; filter: grayscale(.7); transition: opacity .15s; }
+  /* in the toolbar row, at its right, so that it never covers the plot */
+  #exportBar .stale-badge { background: var(--accent); border-color: var(--accent); color: var(--on-accent); font-weight: 600; white-space: nowrap; }
+  .stale-badge[hidden] { display: none; }
+  #exportBar .spacer { flex: 1; }
+  #readout { margin: var(--space-3) var(--space-2) 0; min-height: 1.5em; font-variant-numeric: tabular-nums; }
+  #readout sub, #readout sup { font-size: 80%; line-height: 0; }
+  /* the diagrams kept for comparison: a line sample, what differs, rename and remove */
+  #kept { margin: var(--space-3) var(--space-2) 0; display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-4); align-items: center; }
+  #kept[hidden] { display: none; }
+  #kept .k { display: inline-flex; align-items: center; gap: var(--space-2); border: 1px solid var(--line); border-radius: 12px; padding: 1px var(--space-2) 1px var(--space-4); background: var(--panel); max-width: 100%; }
+  #kept .k svg { flex: none; }
+  #kept .k button { border: 0; background: none; padding: 0 var(--space-2); font-size: var(--text-sm); font-weight: 400; color: var(--fg); min-width: 0; }
+  #kept .k button.nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: left; }
+  #kept .k button.rm { color: var(--muted); }
+  #kept > button { font-size: var(--text-sm); padding: 1px var(--space-4); font-weight: 400; }
+  @media print { #kept { display: none !important; } }
+  #readout .at { display: block; min-height: 1.5em; }
+  #readout .sp { display: inline-block; margin-left: var(--space-5); white-space: nowrap; }
+  /* live mode on a narrow screen: the diagram stays in the upper part of the
+     view while the settings are scrolled under it */
+  @media screen and (max-width: 700px) {
+    html.embedded.live, html.embedded.live body, html.embedded.live main { height: 100%; }
+    html.embedded.live body { overflow: hidden; }
+    html.embedded.live .grid { display: flex; flex-direction: column; height: 100%; }
+    html.embedded.live #plotPane { order: -1; flex: none; max-height: 52%; overflow: auto; border-bottom: 1px solid var(--line); padding-top: var(--space-4); padding-bottom: var(--space-4); }
+    html.embedded.live #settings { flex: 1; min-height: 0; overflow: auto; border-bottom: 0; }
+    html.embedded.live #plot svg { width: auto; max-width: 100%; max-height: 38vh; margin: 0 auto; }
+    /* (the messages are shown when opened with View > Program messages) */
+    html.embedded.live #plotPane > #status, html.embedded.live #plotPane > details:not([open]) { display: none; }
+  }
+  /* printing (File > Print the diagram): the diagram alone, on the width of the page */
+  @media print {
+    #settings, #exportBar, #status, #readout, #plotPane > details, main > h1, p.lede, nav { display: none !important; }
+    html, body, main, .grid, #plotPane { display: block !important; height: auto !important; overflow: visible !important; padding: 0 !important; margin: 0 !important; background: #fff !important; }
+    .paper { border: 0 !important; padding: 0 !important; }
+    #plot.stale svg { opacity: 1; filter: none; }
+    #plot svg .cross { display: none; }
+    #plot svg { max-height: 96vh; }
+  }
+  #plot svg .cross line { stroke: #777; stroke-width: 1; stroke-dasharray: 4 3; pointer-events: none; }
+  #plot svg { touch-action: pan-y; }
+  dialog.styledlg { max-width: min(560px, calc(100vw - 32px)); }
+  dialog.mergedlg { max-width: min(520px, calc(100vw - 32px)); }
+  dialog.mergedlg h3 { margin: 0 0 var(--space-2); font-size: var(--text-lg); }
+  dialog.mergedlg .note { white-space: pre-wrap; }
+  ul.pick { list-style: none; margin: var(--space-2) 0 0; padding: 0; max-height: 40vh; overflow: auto; border: 1px solid var(--line); border-radius: 6px; }
+  ul.pick li button { display: block; width: 100%; text-align: left; border: 0; border-radius: 0; background: none; font: var(--text-md) var(--font-mono); font-weight: 400; padding: var(--space-3) var(--space-4); }
+  ul.pick li button:hover, ul.pick li button:focus-visible { background: var(--accent); color: var(--on-accent); }
+  ul.pick li.empty { padding: var(--space-3) var(--space-4); color: var(--muted); font-size: var(--text-sm); }
+  dialog.editdlg { max-width: min(820px, calc(100vw - 32px)); width: 820px; }
+  dialog.editdlg h3 { margin: 0 0 var(--space-2); font-size: var(--text-lg); }
+  dialog.editdlg textarea { display: block; width: 100%; box-sizing: border-box; height: min(56vh, 520px); margin-top: var(--space-4);
+    font: 13px/1.45 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; white-space: pre; overflow: auto; resize: vertical; tab-size: 4; }
+  dialog.editdlg #editErr { white-space: pre-wrap; color: var(--fail); margin: var(--space-4) 0 0; }
+  /* a plot file opened on its own: the drawing without the settings */
+  html.plotonly #settings, html.plotonly #dlCsv, html.plotonly #dlDat, html.plotonly #editDat { display: none; }
+  html.plotonly .grid { grid-template-columns: minmax(0, 1fr) !important; }
+  dialog.styledlg form { max-height: calc(100vh - 90px); overflow: auto; padding-right: var(--space-2); }
+  dialog.styledlg .pens { display: flex; flex-wrap: wrap; gap: var(--space-3); margin: var(--space-2) 0 var(--space-4); }
+  dialog.styledlg .pens input { width: 34px; height: 28px; padding: 1px; border: 1px solid var(--line); border-radius: 4px; background: var(--bg); cursor: pointer; }
+  dialog.styledlg #stColors > button { font-size: var(--text-sm); padding: var(--space-1) var(--space-4); }
+  dialog.styledlg h4 { margin: var(--space-5) 0 0; font-size: var(--text-base); }
+  dialog.styledlg h3 { margin: 0 0 var(--space-2); font-size: var(--text-lg); }
+  /* "Plot the diagram" is above the settings and stays in view at the top of the column */
+  .makebar { position: sticky; top: 0; z-index: 2; margin: var(--space-3) 0 0; padding: var(--space-4) 0;
+    background: var(--bg); border-bottom: 1px solid transparent; transition: box-shadow .15s, border-color .15s; }
+  /* settings scrolled under the bar: a border and a shadow below it */
+  .makebar.stuck { border-bottom-color: var(--line); box-shadow: 0 8px 12px -8px rgba(0, 0, 0, .22); }
+  #makebarTop { height: 1px; }
+  /* (top: over the padding of the scrolling column, so that nothing shows above the bar) */
+  html.embedded .makebar { top: calc(-1 * var(--space-5)); margin-left: calc(-1 * var(--space-6)); margin-right: calc(-1 * var(--space-6)); padding-left: var(--space-6); padding-right: var(--space-6); background: var(--panel); }
+  @media (max-width: 700px) { html.embedded .makebar { background: var(--bg); } html.embedded:not(.live) .makebar { top: 0; } }
+</style>
+</head>
+<body>
+<main>
+  <h1>Chemical equilibrium diagrams in the browser</h1>
+  <p class="lede">Spana's diagram setup on top of the eq-diagr programs (SED, Predom, PlotPDF, PlotPS, ModChemSyst, ModReaction), compiled from Java to JavaScript with TeaVM and run in a Web Worker. Open a data file, or make one with the <a href="database.html">database search</a>; choose the diagram, the concentrations and the options; and make the diagram. Files stay in this browser.</p>
+  <nav><a href="database.html">Database</a><a href="maintenance.html">Maintenance</a><a href="spana.html" aria-current="page">Diagram</a><a href="sed.html">SED</a><a href="predom.html">Predom</a><a href="help.html">Help</a><a href="ec-tests.html">EC tests</a></nav>
+  <div class="grid">
+    <section id="settings">
+      <div class="row standalone-only" style="margin-top:0">
+        <button id="open">Open .dat…</button>
+        <input id="openFile" type="file" accept=".dat,.txt,.plt" hidden>
+        <select id="myFiles" style="width:auto; flex:1"><option value="">My files…</option></select>
+        <button id="saveMy" disabled>Save in browser</button>
+      </div>
+      <p class="note" style="margin:6px 0 0">File: <span id="fileName">none</span> <span id="fileNote"></span></p>
+      <div id="makebarTop" aria-hidden="true"></div>
+      <div class="row makebar" id="makebar">
+        <button id="make" class="primary cta" disabled>Plot the diagram</button>
+        <label class="check" title="The diagram is plotted again when a setting changes; sliders are shown for the fixed concentrations, the log K values and the ionic strength"><input type="checkbox" id="live"> Live</label>
+        <button id="stop" hidden>Stop</button>
+      </div>
+
+      <details class="panel" id="sysPanel">
+        <summary>Chemical system</summary>
+        <p class="note" id="sysSummary"></p>
+        <label>Components</label>
+        <div class="scroll"><table class="grid" id="compTable"></table></div>
+        <label>Reactions <span class="note">(log <i>K</i> can be edited; switched-off reactions are kept in the file with a "*")</span></label>
+        <div class="scroll"><table class="grid" id="specTable"></table></div>
+        <div class="row tight adv-only">
+          <button id="mergeBtn" type="button">Merge with another data file…</button>
+          <button id="editDat2" type="button" title="Edit the text of the data file">Edit as text…</button>
+          <button id="delOff" type="button" hidden title="Remove the reactions that are switched off from the data file">Delete the unticked reactions…</button>
+          <input id="mergeFile" type="file" accept=".dat,.txt" hidden>
+        </div>
+      </details>
+
+      <details class="panel" open>
+        <summary>Diagram</summary>
+        <label for="ptype">Type</label>
+        <select id="ptype"></select>
+        <div class="two">
+          <div><label for="compX">X-axis component</label><select id="compX"></select></div>
+          <div id="compYBox"><label for="compY" id="compYLabel">Y-axis component</label><select id="compY"></select></div>
+          <div id="compMainBox"><label for="compMain">Main component</label><select id="compMain"></select></div>
+        </div>
+        <!-- the range of the Y-axis: shown in the Y-axis row of the table of concentrations (spana.js drawConcs) -->
+        <div id="yHolder" hidden><input id="yLow" type="number" step="any" aria-label="Y-axis, from" title="Y-axis, from"><input id="yHigh" type="number" step="any" aria-label="Y-axis, to" title="Y-axis, to"></div>
+        <label class="check" id="ehBox" style="margin-top:8px"><input id="eh" type="checkbox"> show Eh instead of pe</label>
+        <div class="adv-only"><label for="title">Title</label>
+        <input id="title" class="txt" type="text"></div>
+        <div class="adv-only"><label for="diagName" title="The name of the exported files (SVG, PNG, PDF, table); empty: the name of the data file">Diagram name</label>
+        <input id="diagName" class="txt" type="text" spellcheck="false"></div>
+      </details>
+
+      <details class="panel" open>
+        <summary>Concentrations</summary>
+        <p class="note" title="For H⁺ give the pH, for e⁻ the pe (or Eh in volts), for a gas log P, and for the other components the total concentration or the log activity.">Total concentrations in mol/kg. The component of an axis must be varied.</p>
+        <table class="grid" id="concTable"></table>
+        <p class="note live-only">Live mode has more sliders: each log <i>K</i> under Chemical system, and the ionic strength under Options.</p>
+        <p class="warn" id="concWarn"></p>
+      </details>
+
+      <details class="panel">
+        <summary>Options</summary>
+        <div class="three">
+          <div class="adv-only"><label for="nsteps">Steps</label><input id="nsteps" type="number" min="4" step="1"></div>
+          <div class="adv-only"><label for="temp">Temperature (°C)</label><input id="temp" type="number" step="any" placeholder="from file" title="The temperature of the calculation: it changes the activity coefficients and the Eh scale. The log K values of the data file stay as they are.">
+            <input type="range" class="optslide" data-for="temp" min="0" max="100" step="1" aria-label="Temperature"></div>
+          <div><label for="ionic">Ionic strength</label><input id="ionic" type="number" step="any" placeholder="0" title="-1: calculated at each point">
+            <input type="range" class="optslide" data-for="ionic" min="0" max="1" step="0.01" aria-label="Ionic strength"></div>
+        </div>
+        <div class="two adv-only">
+          <div><label for="model">Activity coefficients</label>
+            <select id="model"><option value="">default (HKF)</option><option value="0">Davies</option><option value="1">SIT</option><option value="2">simplified HKF</option></select></div>
+          <div><label for="tol">Tolerance in HaltaFall</label>
+            <select id="tol"><option value="">default (1E-4)</option><option>1E-2</option><option>1E-3</option><option>1E-5</option><option>1E-6</option><option>1E-7</option><option>1E-8</option><option>1E-9</option><option>1E-10</option></select></div>
+          <div><label for="tolA" title="Tolerance for the activity coefficients">Tolerance, activity coeffs.</label>
+            <select id="tolA"><option value="">default (1E-3)</option><option>1E-2</option><option>1E-4</option><option>1E-5</option><option>1E-6</option><option>1E-7</option><option>1E-8</option><option>1E-9</option><option>1E-10</option></select></div>
+          <div><label for="units">Concentration units</label>
+            <select id="units"><option value="">molal (default)</option><option value="1">mol/kg<sub>w</sub></option><option value="2">M</option><option value="-1">none</option></select></div>
+          <div><label for="notation">Notation</label>
+            <select id="notation"><option value="">default</option><option value="-sci">scientific</option><option value="-eng">engineering</option></select></div>
+          <div><label for="height">Text height</label><input id="height" type="number" step="0.1" min="0.3" max="10" placeholder="1"></div>
+          <div class="sedOnly"><label for="thr">Fraction threshold</label><input id="thr" type="number" step="0.001" min="0.001" max="0.1" placeholder="0.03"></div>
+          <div><label for="tickX" title="The step between the numbers of the X-axis, in its units; empty: chosen by the program. Changes the drawing only, at once.">Tick step, X-axis</label><input id="tickX" type="number" step="any" min="0" placeholder="automatic"></div>
+          <div><label for="tickY" title="The step between the numbers of the Y-axis, in its units; empty: chosen by the program. Changes the drawing only, at once.">Tick step, Y-axis</label><input id="tickY" type="number" step="any" min="0" placeholder="automatic"></div>
+        </div>
+        <div class="row tight">
+          <label class="check predOnly adv-only"><input id="aqu" type="checkbox"> aqueous species only</label>
+          <label class="check predOnly adv-only"><input id="ph" type="checkbox"> neutral pH line</label>
+          <label class="check adv-only"><input id="rev" type="checkbox"> allow reversed axes</label>
+        </div>
+        <fieldset class="sedOnly adv-only">
+          <legend>Table of results (SED)</legend>
+          <label class="check" style="margin-top:8px"><input id="tblOn" type="checkbox" checked> write the table of results</label>
+          <div class="two">
+            <div><label for="tblExt">File name extension</label>
+              <select id="tblExt"><option>csv</option><option>dta</option><option>lst</option><option>txt</option><option>out</option><option>prn</option></select></div>
+            <div><label for="tblSep">Column separator</label>
+              <select id="tblSep"><option value=",">, (comma)</option><option value=";">; (semicolon)</option><option value="\t">tab</option><option value=" ">space</option></select></div>
+            <div><label for="tblCs" title="Comment lines start with">Comments start with</label><input id="tblCs" class="txt code" type="text" value='"'></div>
+            <div><label for="tblCe" title="Comment lines end with">Comments end with</label><input id="tblCe" class="txt code" type="text" value='"'></div>
+          </div>
+        </fieldset>
+        <fieldset class="adv-only">
+          <legend>Debugging</legend>
+          <label class="check" style="margin-top:8px"><input id="dbg" type="checkbox"> write messages in SED and Predom</label>
+          <div>
+            <div><label for="dbgH">Debugging in HaltaFall</label>
+              <select id="dbgH"><option value="0">0 - none</option><option value="1" selected>1 - errors only</option><option value="2">2 - errors + results</option><option value="3">3 - errors + results + input</option><option value="4">4 = 3 + output from Fasta</option><option value="5">5 = 4 + output from activity coeffs.</option><option value="6">6 = 5 + lots of output</option></select></div>
+          </div>
+          <p class="note">The messages are under "Program messages". Levels above 2 write several lines for every point of the diagram; use few steps.</p>
+        </fieldset>
+        <div class="row tight adv-only">
+          <button id="saveDef" type="button" title="Use these options for the diagram tabs opened from now on in this browser">Save as defaults</button>
+          <button id="resetDef" type="button" title="Back to the options of the programs">Program defaults</button>
+        </div>
+      </details>
+    </section>
+    <section id="plotPane">
+      <p id="status"></p>
+      <div class="paper" id="plot"><div class="empty">Open a data file, or make one with the database search.</div></div>
+      <p id="readout" class="note" hidden aria-live="off"></p>
+      <div id="kept" class="note" hidden></div>
+      <div class="row" id="exportBar">
+        <span class="lbl">Export</span>
+        <button id="dlSvg" disabled>SVG</button>
+        <button id="dlPng" disabled>PNG</button>
+        <button id="dlPdf" disabled>PDF</button>
+        <button id="dlEps" class="adv-only" disabled>EPS</button>
+        <button id="dlPlt" class="adv-only" disabled>.plt</button>
+        <button id="dlCsv" disabled>.csv</button>
+        <button id="dlDat" disabled>.dat</button>
+        <button id="editDat" class="adv-only" disabled title="Edit the text of the data file">Edit .dat…</button>
+        <span class="spacer"></span>
+        <button id="staleBadge" class="stale-badge" hidden title="The settings differ from those of the diagram shown">Settings changed – Plot the diagram</button>
+        <button id="keepBtn" disabled title="Keep this diagram in the drawing, with broken lines, to compare it with the next ones (what if…)">Keep</button>
+        <button id="copyImg" disabled title="Copy the diagram to the clipboard as an image, to paste it in a document">Copy</button>
+        <button id="styleBtn" title="Font, text size, colours and lines of the diagrams">Style…</button>
+      </div>
+      <details id="logDetails"><summary>Program messages</summary><pre id="log"></pre></details>
+      <details class="adv-only"><summary>Data file (<code>.dat</code>)</summary><pre id="datText"></pre></details>
+      <details class="adv-only"><summary>Table (<code>.csv</code>, SED)</summary><pre id="csv"></pre></details>
+    </section>
+  </div>
+</main>
+<dialog id="mergeDlg" class="eqdlg mergedlg">
+  <form method="dialog">
+    <h3>Merge with another data file</h3>
+    <p class="note" id="mergeNote"></p>
+    <label>Data files in this browser</label>
+    <ul id="mergeList" class="pick"></ul>
+    <div class="btns"><button value="cancel">Cancel</button><button type="button" id="mergeDisk">A file on this computer…</button></div>
+  </form>
+</dialog>
+<dialog id="editDlg" class="eqdlg editdlg">
+  <form method="dialog">
+    <h3>Edit the data file</h3>
+    <p class="note">The text of <b id="editName"></b> with the settings of the form. "Apply" reads it as a data file is opened and writes it again in the format of the programs, which keeps the comments after the reactions. The format is described under Help, "Format of the data files".</p>
+    <textarea id="editText" spellcheck="false" autocapitalize="off" autocomplete="off" wrap="off" aria-label="Text of the data file"></textarea>
+    <p class="note fail" id="editErr" role="alert" hidden></p>
+    <div class="btns"><button type="button" id="editApply" class="primary">Apply</button><button type="button" id="editCancel">Cancel</button></div>
+  </form>
+</dialog>
+<dialog id="styleDlg" class="eqdlg styledlg">
+  <form method="dialog">
+    <h3>Diagram style</h3>
+    <p class="note">For all diagrams, on the screen and in the SVG, PNG and PDF files. EPS and plot files keep the lines of the programs.</p>
+    <div class="two">
+      <div><label for="stFont">Labels</label>
+        <select id="stFont"><option value="sans">Sans-serif (Helvetica)</option><option value="serif">Serif (Times)</option><option value="mono">Monospaced (Courier)</option><option value="plotter">Plotter lines (as the programs)</option></select></div>
+      <div><label for="stSize">Text size</label>
+        <select id="stSize"><option value="0.8">80 %</option><option value="0.9">90 %</option><option value="1">100 %</option><option value="1.15">115 %</option><option value="1.3">130 %</option><option value="1.5">150 %</option></select></div>
+      <div><label for="stPalette">Curve colours</label>
+        <select id="stPalette"><option value="eqdiagr">eq-diagr colours</option><option value="safe">colour-blind safe</option><option value="bw">black and white</option><option value="wb">white on black</option><option value="custom">my own colours</option></select></div>
+      <div><label for="stLines">Lines</label>
+        <select id="stLines"><option value="0.7">thin</option><option value="1">normal</option><option value="1.6">thick</option></select></div>
+    </div>
+    <div id="stColors" hidden>
+      <label>Colours of the pens 1 to 11 of the plot files (pen 1 draws the axes)</label>
+      <div class="pens" id="stPens"></div>
+      <button type="button" id="stColorsReset">eq-diagr colours</button>
+    </div>
+    <label>Texts above the diagram</label>
+    <div class="row tight" style="margin-top:2px">
+      <label class="check"><input id="stHeadConc" type="checkbox"> concentrations</label>
+      <label class="check"><input id="stHeadTemp" type="checkbox"> temperature</label>
+      <label class="check"><input id="stHeadIonic" type="checkbox"> ionic strength</label>
+    </div>
+    <div class="two">
+      <div><label for="stWidth" title="The width of the diagram relative to the one the programs draw; the lettering keeps its shape">Width</label>
+        <select id="stWidth"><option value="0.75">75 %</option><option value="0.85">85 %</option><option value="1">100 % (as the programs)</option><option value="1.15">115 %</option><option value="1.3">130 %</option><option value="1.5">150 %</option></select></div>
+    </div>
+    <h4>Axes</h4>
+    <div class="two" id="stAxes">
+      <div><label for="stTicks">Tick marks</label>
+        <select id="stTicks"><option value="in">inside</option><option value="out">outside</option><option value="cross">crossing</option></select></div>
+      <div><label for="stMinor">Minor ticks</label>
+        <select id="stMinor"><option value="0">none</option><option value="2">2 per step</option><option value="5">5 per step</option></select></div>
+      <div><label for="stGrid">Grid lines</label>
+        <select id="stGrid"><option value="none">none</option><option value="major">at the numbers</option><option value="all">at all ticks</option></select></div>
+      <div><label for="stFrame">Frame</label>
+        <select id="stFrame"><option value="program" title="SED: axes only; Predom: a box">as the programs</option><option value="axes">axes only</option><option value="box">box</option></select></div>
+      <div><label for="stAxis">Axis lines</label>
+        <select id="stAxis"><option value="0.7">thin</option><option value="1">normal</option><option value="1.6">thick</option></select></div>
+    </div>
+    <h4>PNG image</h4>
+    <div class="two">
+      <div><label for="stPng" title="The long side of the PNG file and of the image copied to the clipboard">Size (long side)</label>
+        <select id="stPng"><option value="800">800 pixels</option><option value="1200">1200 pixels</option><option value="1600">1600 pixels</option><option value="2400">2400 pixels</option><option value="3200">3200 pixels</option><option value="4800">4800 pixels</option></select></div>
+    </div>
+    <h4>PDF and PostScript page</h4>
+    <div class="two">
+      <div><label for="stPage">Page</label>
+        <select id="stPage"><option value="fit">the diagram alone</option><option value="a4">A4</option><option value="letter">Letter</option></select></div>
+      <div><label for="stOrient">Orientation</label>
+        <select id="stOrient"><option value="0">portrait</option><option value="1">landscape</option></select></div>
+      <div><label for="stScale">Size</label>
+        <select id="stScale"><option value="50">50 %</option><option value="75">75 %</option><option value="100">100 %</option><option value="125">125 %</option><option value="150">150 %</option><option value="200">200 %</option></select></div>
+      <div class="two" style="gap:0 8px">
+        <div><label for="stLeft" title="From the left edge of the page to the diagram, in cm">Left (cm)</label><input id="stLeft" type="number" min="0" max="20" step="0.1"></div>
+        <div><label for="stBottom" title="From the bottom edge of the page to the diagram, in cm">Bottom (cm)</label><input id="stBottom" type="number" min="0" max="25" step="0.1"></div>
+      </div>
+      <div><label for="stPs">PostScript file <span class="adv">(advanced mode)</span></label>
+        <select id="stPs"><option value="eps">EPS (encapsulated, the diagram alone)</option><option value="ps">PS (a page)</option></select></div>
+      <div><label class="check" style="margin-top:22px"><input id="stHeader" type="checkbox"> header line with name and date</label></div>
+    </div>
+    <p class="note" id="stAxesNote">The axis options need labels drawn with a font: with plotter lines, the axes are those of the programs. The step between the numbers of an axis is set for each diagram, under Options (advanced mode). The margins and the orientation are for an A4 or Letter page; PostScript files are made by PlotPS and follow the page, size and header, not the fonts and axes.</p>
+    <div class="btns"><button value="close" class="primary">Close</button><button type="button" id="stDefault">Default style</button></div>
+  </form>
+</dialog>
+<script src="engine-client.js"></script>
+<script src="store.js"></script>
+<script src="chemtext.js"></script>
+<script src="diagram.js"></script>
+<script src="dialogs.js"></script>
+<script src="spana.js"></script>
+</body>
+</html>

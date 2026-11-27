@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>SPANA: changing the chemical system</title>
+<link rel="stylesheet" href="1_.css">
+<link rel="stylesheet" href="1_web.css">
+</head>
+<body>
+<div class="crumb"><a href="0_Index.htm"><img src="images/thco35_s.gif" width="32" height="32" alt="Chem.Eq.Diagr"></a>
+<span><a href="S_0_Main.htm">SPANA</a></span></div>
+
+<h3>Changing the chemical system</h3>
+
+<p>Open the <span class="ui">Chemical system</span> section at the top of a diagram tab. It lists the components
+and the reactions of the data file; point at a reaction product to see its reaction. Each change is made at once
+with the programs of the desktop Spana (ModChemSyst and ModReaction), and the tab is marked as changed until the
+file is saved, which happens when you make the diagram.</p>
+
+<ul class="plain">
+<li><a href="#Deactivate">Untick a reaction, or change its log&nbsp;<i>K</i></a></li>
+<li><a href="#Delete">Delete a component</a></li>
+<li><a href="#Mod_Exch">Exchange a component for a reaction product</a></li>
+<li><a href="#Merge">Merge with another data file</a> <span class="adv">(advanced mode)</span></li>
+<li><a href="#Edit">Edit the data file as text</a> <span class="adv">(advanced mode)</span></li>
+</ul>
+
+<h4 id="Deactivate">Unticking reactions, and changing log&nbsp;<i>K</i></h4>
+<p>Each reaction has a tick box, as the species found in a database search. Untick a reaction to leave it out of
+the calculations. The reaction stays in the data file with a "*" before its name (see <a href="SP_Removing_Species.htm">removing
+a species with a "*"</a>), and it is listed, unticked and struck through, at the end of the table; tick it to use it
+again. This is how you leave out a solid that would not form in your experiment, for example a crystalline oxide
+that precipitates only slowly, see <a href="DB_Solid_solub.htm">solids</a>.</p>
+<p id="LogK">The log&nbsp;<i>K</i> of each reaction can be edited in its field; the new value is used from the next
+diagram. A changed value is shown in bold, and the button &#8634; beside it takes it back to the value of the file.
+In <a href="S_Making_Diagrams.htm#LiveK">live mode</a> each log&nbsp;<i>K</i> also has a slider.</p>
+<p>A changed log&nbsp;<i>K</i> is a trial: it is used for the diagrams of the tab, but it is <b>not</b> written to
+the file that is saved in the browser when a diagram is made. The saved file keeps its own values, the tab stays
+marked as changed, and the status line says that the file was saved without the changed log&nbsp;<i>K</i>. To keep
+the new values, choose <span class="ui">File &gt; Save data file in this browser</span>, or answer
+<span class="ui">Save</span> when you close the tab; they are then the values of the file. The downloaded
+<span class="ui">.dat</span> file and a link to the diagram have the values as they are shown. A log&nbsp;<i>K</i>
+changed in the <a href="#Edit">text of the data file</a> is part of the file and is saved as the rest of it.</p>
+<p>In advanced mode, <span class="ui">Delete the unticked reactions&hellip;</span> removes the reactions that are
+switched off from the data file for good, after a question. The database is not changed: a new search finds them
+again.</p>
+<p>Components cannot be switched off. A component can, however, be exchanged for a reaction product, and that
+product then unticked.</p>
+
+<h4 id="Delete">Deleting a component</h4>
+<p>Click <span class="ui">delete</span> in the row of a component. The component is removed together with all the
+reactions in which it takes part: removing Cu<sup>2+</sup>, for example, also removes CuOH<sup>+</sup>,
+CuO(cr) and the other copper species.</p>
+
+<h4 id="Mod_Exch">Exchanging a component for a reaction product</h4>
+<p>In the row of a component, choose a reaction product in the list <span class="ui">exchange for&hellip;</span>.
+The product becomes a component, and all reactions are rewritten with it. For example:</p>
+<ul class="plain">
+<li>Fe<sup>2+</sup> for Fe<sup>3+</sup>;</li>
+<li>CO<sub>3</sub><sup>2&minus;</sup> for CO<sub>2</sub>(g), when the equilibrium constants are given with
+CO<sub>3</sub><sup>2&minus;</sup> as the component but the diagram is for a given CO<sub>2</sub> pressure
+(<a href="Tut_CO2.htm">tutorial</a>);</li>
+<li>a metal ion for a solid, for diagrams of solutions saturated with that solid, or for corrosion
+(<a href="Tut_Redox.htm">tutorial</a>);</li>
+<li>H<sup>+</sup> for OH<sup>&minus;</sup>, or a ligand for its protonated form, for titrations
+(<a href="Tut_Titr.htm">tutorial</a>).</li>
+</ul>
+
+<h4 id="Merge">Merging with another data file <span class="adv">(advanced mode)</span></h4>
+<p>In advanced mode, the button <span class="ui">Merge with another data file&hellip;</span> (under the reactions)
+lists the data files saved in this browser; choose one, or <span class="ui">A file on this computer&hellip;</span>, to
+add its components and reactions. For example, a file with H<sup>+</sup>,
+e<sup>&minus;</sup> and Fe<sup>2+</sup> merged with a file with H<sup>+</sup>, e<sup>&minus;</sup> and
+Cr<sup>3+</sup> gives the system H<sup>+</sup>, e<sup>&minus;</sup>, Fe<sup>2+</sup>, Cr<sup>3+</sup>.</p>
+<p class="note">A merged system is probably incomplete: species formed by both Fe and Cr, for example
+FeCr<sub>2</sub>O<sub>4</sub>(s), are in neither file. It is usually better to search the database again with all
+the components.</p>
+
+<h4>Moving components <span class="adv">(advanced mode)</span></h4>
+<p>The arrows &uarr; and &darr; change the order of the components, within the soluble ones and within the solid
+ones, as in the desktop Spana. The order is that of the data file and of the tables of results.</p>
+
+<h4 id="Edit">Editing the data file as text <span class="adv">(advanced mode)</span></h4>
+<p>For any other change, for example a new reaction, a new component or a comment, click
+<span class="ui">Edit the data file as text&hellip;</span> under the reactions,
+<span class="ui">Edit .dat&hellip;</span> beside the export buttons above the diagram, or choose
+<span class="ui">File &gt; Edit the data file as text&hellip;</span>. The text of the data file is shown with the
+settings of the form, in the <a href="SP_Data_File_Format.htm">format of the data files</a>. Remember to change the
+numbers of the first line when you add or remove components, complexes or solids.</p>
+<p><span class="ui">Apply</span> (or Ctrl+Enter, &#8984;+Enter on a Mac) reads the text as a data file is opened.
+If the programs cannot read it, their message is shown under the text, the line they stopped at is selected, and
+nothing is changed. Otherwise the chemical system and the diagram settings are those of the new text, and a text
+without a diagram gets a default one. The file is written again in the format of the programs: the comments after
+the reactions are kept, the comment of the first line is not. As after the other changes, the tab is marked as changed
+and the file is saved when you make the diagram. <span class="ui">Cancel</span> and the Escape key ask before they
+discard changes to the text.</p>
+<p>The same can be done outside the app: download the file (<span class="ui">.dat</span>), edit it with a text
+editor, and open it again with <span class="ui">File &gt; Open data or plot file&hellip;</span>.</p>
+<p>&nbsp;</p>
+</body>
+</html>

@@ -1,0 +1,1249 @@
+From b2309c5a39ff8346a14037bba148b517c5ad4380 Mon Sep 17 00:00:00 2001
+From: Michael Holmboe <michael.holmboe@umu.se>
+Date: Wed, 25 Nov 2026 16:30:10 +0100
+Subject: [PATCH] Separate the database search from the DataBase window
+
+DBSearch no longer uses Swing, AWT or FrameDBmain. The search takes the
+list of selected components and reports progress and warnings through a
+small DBSearch.Display interface, which FrameDBmain implements; without
+a display the search runs without progress information and goes on
+after warnings. The options from the AskRedox and AskSolids dialogs
+(redox for N, S and P; which solids to exclude) are fields of DBSearch.
+
+Also moved into DBSearch, without dialogs: the temperature-pressure
+check (checkTemperature returns the species without data; FrameDBmain
+shows the message box), the order of the selected components
+(componentPosition, used by availableComponentClick), adding H2O
+(includeWater) and writing the chemical system as a data file
+(writeDataFile, used by ExitDialog).
+
+LibDB: the screenSize field, which needed a display as soon as the class
+was loaded, moved to FrameDBmain and FrameAddData; readElements reads
+the element files of a list of databases without message boxes.
+
+On 20 searches (five databases, binary and text, redox and solid
+options, 25-250 C, H2O included), the data files written through the
+DataBase window are identical to master, as are those written with the
+new methods without a display.
+---
+ DataBase/src/database/DBSearch.java           | 480 +++++++++++-------
+ DataBase/src/database/ExitDialog.java         |  60 +--
+ DataBase/src/database/FrameDBmain.java        | 166 ++++--
+ .../src/lib/database/FrameAddData.java        |  14 +-
+ LibDataBase/src/lib/database/LibDB.java       |  50 +-
+ 5 files changed, 502 insertions(+), 268 deletions(-)
+
+diff --git a/DataBase/src/database/DBSearch.java b/DataBase/src/database/DBSearch.java
+index 5b6eed1..afeb79b 100644
+--- a/DataBase/src/database/DBSearch.java
++++ b/DataBase/src/database/DBSearch.java
+@@ -5,10 +5,12 @@ import lib.common.Util;
+ import lib.database.Complex;
+ import lib.kemi.H2O.IAPWSF95;
+ import lib.database.LibDB;
+-import lib.database.ProgramDataDB;
+-import lib.huvud.ProgramConf;
+ 
+ /** Search reactions in the databases.
++ * <br>
++ * This class does not use Swing or AWT: the DataBase window uses it through
++ * the {@link Display} interface (progress bar, labels and message boxes),
++ * and it may also be used without a window.
+  * <br>
+  * Copyright (C) 2016-2021 I.Puigdomenech.
+  * 
+@@ -42,10 +44,53 @@ public class DBSearch {
+   /** number of solid components */
+   int solidC;
+ 
++  /** print debug information? */
++  public boolean dbg = false;
++  /** the name of the program, used in messages */
++  public String progName = "DataBase";
++  // ---- options, as set in the menu "Options" of the DataBase window
++  //      (and in the dialogs AskRedox and AskSolids)
++  /** ask about redox equilibria for N, S and P before the search */
++  public boolean redoxAsk = false;
++  /** include redox equilibria for nitrogen */
++  public boolean redoxN = true;
++  /** include redox equilibria for sulfur */
++  public boolean redoxS = true;
++  /** include redox equilibria for phosphorus */
++  public boolean redoxP = true;
++  /** 0=include all solids; 1=exclude (cr); 2=exclude (c); 3=exclude (cr)&amp;(c) */
++  public int allSolids = 0;
++
++  //<editor-fold defaultstate="collapsed" desc="Display">
++  /** What the search needs from a user interface. The DataBase window
++   * implements it; without a window the display is <code>null</code>:
++   * there is no progress information, and the search goes on after warnings. */
++  public interface Display {
++    /** @param text the text above the progress bar
++     * @param nLoop the database scan (redox systems need more than one) */
++    void progressLabel(String text, int nLoop);
++    /** @param percent how far the database file has been read */
++    void progress(int percent);
++    /** @param text which solids have been excluded from the search */
++    void solidsExcluded(String text);
++    /** Shows a warning and asks the user whether to go on with the search.
++     * @param msg the warning
++     * @param okText the text of the button to go on ("OK" or "Continue")
++     * @return true to go on with the search, false to cancel it */
++    boolean askContinue(String msg, String okText);
++  }
++  //</editor-fold>
++
+   //<editor-fold defaultstate="collapsed" desc="private fields">
+-  private ProgramConf pc;
+-  private ProgramDataDB pd;
+-  private FrameDBmain dbF;
++  /** the database files to search */
++  private final java.util.ArrayList<String> dataBasesList;
++  /** the components in the element files: chemical element, formula of the
++   * component and name of the component, for example {"C", "CN-", "cyanide"} */
++  private final java.util.ArrayList<String[]> elemCompList;
++  /** the user interface, or null */
++  private Display display;
++  /** the number of components selected by the user */
++  private int nUserComps;
+   /** counter: the database being read */
+   private int db;
+   /** name of the database being read */
+@@ -94,23 +139,30 @@ public class DBSearch {
+   
+   /** New-line character(s) to substitute "\n" */
+   private static final String nl = System.getProperty("line.separator");
++  private static final java.util.Locale engl = java.util.Locale.ENGLISH;
++  static final String LINE = "- - - - - - - - - - - - - - - - - - - - - - - - - - -";
+   //</editor-fold>
+ 
+  /** Constructor of a DBSearch instance
+-  * @param programConf configuration data about the "calling" program
+-  * @param programData data about the "calling" program, including the list of databases
++  * @param dataBasesList the database files to search
++  * @param elemComp the components in the element files of the databases
++  * (see {@link lib.database.LibDB#readElements readElements})
++  * @param temperature the temperature in degrees Celsius
++  * @param pressure the pressure in bar
+   * @throws DBSearch.SearchException   */
+-  public DBSearch(ProgramConf programConf, ProgramDataDB programData)
++  public DBSearch(java.util.ArrayList<String> dataBasesList,
++          java.util.ArrayList<String[]> elemComp,
++          double temperature, double pressure)
+           throws DBSearch.SearchException {
+     binaryOrText = 0;
+     noFilesFound = true;
+     openNextFile = true;
+-    if(programConf == null) {throw new SearchException("Error: programConf = null in \"DBSearch\" constructor");}
+-    this.pc = programConf;
+-    if(programData == null) {throw new SearchException("Error: programDataDB = null in \"DBSearch\" constructor");}
+-    this.pd = programData;
+-    this.temperature_C = pd.temperature_C;
+-    this.pressure_bar = pd.pressure_bar;
++    if(dataBasesList == null) {throw new SearchException("Error: dataBasesList = null in \"DBSearch\" constructor");}
++    this.dataBasesList = dataBasesList;
++    if(elemComp == null) {throw new SearchException("Error: elemComp = null in \"DBSearch\" constructor");}
++    this.elemCompList = elemComp;
++    this.temperature_C = temperature;
++    this.pressure_bar = pressure;
+   }
+ 
+   //<editor-fold defaultstate="collapsed" desc="searchComplexes">
+@@ -122,24 +174,26 @@ public class DBSearch {
+   * scan Fe+3 is found, and the databases must be scanned again for {Fe+2, Fe+3, e-}.
+   * 
+   * The reactions found in the search are stored in ArrayList "dat".
+-  * The progress bars in the lower half of the FrameDBmain show the search progress.
+-  * @param mainFrame
++  * The progress of the search is shown through the display, if any.
++  * @param selectedComponents the components selected by the user, in the
++  * order given by {@link #componentPosition componentPosition}
++  * @param display0 the user interface, or null
+   * @throws DBSearch.SearchException */
+-  void searchComplexes (FrameDBmain mainFrame) throws DBSearch.SearchException {
+-    if(mainFrame == null) {MsgExceptn.exception("Error: mainFrame = null in \"searchComplexes\""); throw new SearchException();}
+-    this.dbF = mainFrame;
+-    if(dbF.modelSelectedComps.size() <=0) {
++  public void searchComplexes (java.util.List<String> selectedComponents, Display display0) throws DBSearch.SearchException {
++    if(selectedComponents == null) {MsgExceptn.exception("Error: selectedComponents = null in \"searchComplexes\""); throw new SearchException();}
++    this.display = display0;
++    if(selectedComponents.size() <=0) {
+         MsgExceptn.exception("Error: modelSelectedComps.size() <=0 in \"searchComplexes\"");
+         throw new SearchException();
+     }
+-    if(pd.dataBasesList.size() <=0) {
++    if(dataBasesList.size() <=0) {
+         MsgExceptn.exception("Error: dataBasesList.size() <=0 in \"searchComplexes\"");
+         throw new SearchException();
+     }
+     boolean found;
+ 
+     try{
+-    if(pc.dbg) {System.out.println(FrameDBmain.LINE+nl+"--- Searching reactions");}
++    if(dbg) {System.out.println(LINE+nl+"--- Searching reactions");}
+ 
+ 
+     nx =0;
+@@ -152,9 +206,10 @@ public class DBSearch {
+     //  selectedComps[] contains the selected components, both the original,
+     //  selected by the user, and new redox components. For example, if the user
+     //  selects e- and Fe+2, then selectedComps[] contains Fe+2 and Fe+3)
+-    for(int i = 0; i < dbF.modelSelectedComps.size(); i++) {
+-        selectedComps.add(dbF.modelSelectedComps.get(i).toString());
++    for(int i = 0; i < selectedComponents.size(); i++) {
++        selectedComps.add(selectedComponents.get(i));
+     }
++    nUserComps = selectedComponents.size();
+ 
+     redox = isComponentSelected("e-");
+     na = selectedComps.size();
+@@ -162,10 +217,6 @@ public class DBSearch {
+     for(int i =0; i < na; i++) {
+         if(Util.isSolid(selectedComps.get(i))) {solidC++;}
+     }
+-    if(dbF.solidSelectedComps != solidC) {
+-        MsgExceptn.exception("Error in \"searchComplexes\":"+nl+
+-                "the number of solid components does not match!");
+-    }
+     } catch (Exception ex) {throw new SearchException(Util.stack2string(ex));}
+ // todo ?
+ /* advanced option: exclude some redox reactions?
+@@ -200,20 +251,20 @@ If redox And RedoxAsk Then  */
+       String[] elemComp; String selCompName; String el;
+       for(String selComp : selectedComps) {
+         selCompName = selComp.toString();
+-        for(int k0 =0; k0< pd.elemComp.size(); k0++) { //loop through all components in the database (CO3-2,SO4-2,HS-,etc)
+-          elemComp = pd.elemComp.get(k0);
++        for(int k0 =0; k0< elemCompList.size(); k0++) { //loop through all components in the database (CO3-2,SO4-2,HS-,etc)
++          elemComp = elemCompList.get(k0);
+           if(Util.nameCompare(elemComp[1],selCompName)) { //got the component selected by the user
+             //Note: array elemComp[0] contains: the name-of-the-element (e.g. "C"),
+             //  the formula-of-the-component ("CN-"), and
+             //  the name-of-the-component ("cyanide")
+               el = elemComp[0]; //get the element corresponding to the component: e.g. "S" for SO4-2
+-              for(int k1 =0; k1< pd.elemComp.size(); k1++) { //loop through all components in the database (CO3-2,SO4-2,HS-,etc)
+-                elemComp = pd.elemComp.get(k1);
++              for(int k1 =0; k1< elemCompList.size(); k1++) { //loop through all components in the database (CO3-2,SO4-2,HS-,etc)
++                elemComp = elemCompList.get(k1);
+                 if(elemComp[0].equals(el)) { //got the right element
+                   if(k1 != k0) {
+                     excluded = false;
+-                    if((el.equals("N") && !pd.redoxN) || (el.equals("S") && !pd.redoxS)
+-                            || (el.equals("P") && !pd.redoxP)) {
++                    if((el.equals("N") && !redoxN) || (el.equals("S") && !redoxS)
++                            || (el.equals("P") && !redoxP)) {
+                             excluded = true;
+                     }
+                     if(!excluded) {
+@@ -243,7 +294,7 @@ If redox And RedoxAsk Then  */
+           } //if elemComp[1] = selCompName
+         } //for k0;  list of all available components
+       } // for all selected components
+-      if(pc.dbg) {
++      if(dbg) {
+         int n = comps.size();
+         System.out.println("--- Possible new redox components:"+nl+"  comps[] size:"+n);
+         for(int j=0; j<n; j++) {System.out.println("    "+comps.get(j));}
+@@ -277,7 +328,7 @@ If redox And RedoxAsk Then  */
+         // ---------------------------------------------
+ 
+         if(!redox) {
+-            if(pc.dbg) {System.out.println("--- Search reactions ended.");}
++            if(dbg) {System.out.println("--- Search reactions ended.");}
+             return;
+         }
+ 
+@@ -435,115 +486,189 @@ If redox And RedoxAsk Then  */
+     //   end of database search
+     // ---------------------------------------------
+ 
+-    if(pc.dbg) {System.out.println("--- Search reactions ended.");}
++    if(dbg) {System.out.println("--- Search reactions ended.");}
+   } //searchComplexes
+   //</editor-fold>
+ 
+   //<editor-fold defaultstate="collapsed" desc="checkTemperature">
+-  /** Checks that for a given search (srch), where the temperature and
+-   * pressure are specified, each reaction has data that allows the calculation
+-   * of logK at the given temperature and pressure. If any of the reactions does
+-   * not have data, a message is displayed to the user, "false" is returned (not OK).
+-   * If all the reactions have adequate temperature-pressure data, "true" is returned (OK).
+-   * 
+-   * @param srch a search engine object, where the temperature and pressure are specified
+-   * @param parent a window to anchor messages
+-   * @param warning if true a "note" message will be displayed telling the user
+-   * that temperature extrapolations will be made
+-   * @return true if there are no problems with the temperature-pressure extrpolations,
+-   * false if some of the reactions do not have data at the required temperature
+-   */
+-  public static boolean checkTemperature(DBSearch srch, java.awt.Container parent, boolean warning) {
+-    boolean fnd = false, temperatureCorrectionsPossible = true;
+-    if(srch.temperature_C > 24.9 && srch.temperature_C < 25.1) {return temperatureCorrectionsPossible;}
+-    if(srch.nx+srch.nf < 1) {
++  /** The result of {@link #checkTemperature() checkTemperature} */
++  public static class TemperatureCheck {
++    /** false if some of the reactions do not have the data needed at the
++     * temperature and pressure of the search */
++    public boolean ok = true;
++    /** the species without the necessary temperature-pressure data */
++    public final java.util.ArrayList<String> species = new java.util.ArrayList<String>();
++    /** the lowest of the maximum temperatures (Celsius) of those species */
++    public double maxT = Double.MAX_VALUE;
++    /** the lowest of the maximum pressures (bar) of those species */
++    public double maxP = Double.MAX_VALUE;
++  }
++
++  /** Checks that each reaction found in the search has data that allows the
++   * calculation of logK at the temperature and pressure of the search.
++   * The species without data are listed on <code>System.out</code> and
++   * returned. (The DataBase window shows them in a message box.)
++   * @return the result of the check */
++  public TemperatureCheck checkTemperature() {
++    TemperatureCheck chk = new TemperatureCheck();
++    boolean fnd = false;
++    if(temperature_C > 24.9 && temperature_C < 25.1) {return chk;}
++    if(nx+nf < 1) {
+         MsgExceptn.exception("Programming error: checking temperature before \"searchComplexes\".");
+-        return temperatureCorrectionsPossible;
++        return chk;
+     }
+-    java.util.ArrayList<String> items = new java.util.ArrayList<String>();
+     // Is there T-P data for all reactions?
+-    double maxT = Double.MAX_VALUE, maxP = Double.MAX_VALUE;
+     String txt;
+-    long cnt = 0;
+-    for(int ix=0; ix < srch.nx+srch.nf; ix++) {
+-        if(srch.temperature_C > srch.dat.get(ix).tMax || srch.pressure_bar > srch.dat.get(ix).pMax
+-                || Double.isNaN(srch.dat.get(ix).logKatTandP(srch.temperature_C, srch.pressure_bar))) {
++    for(int ix=0; ix < nx+nf; ix++) {
++        if(temperature_C > dat.get(ix).tMax || pressure_bar > dat.get(ix).pMax
++                || Double.isNaN(dat.get(ix).logKatTandP(temperature_C, pressure_bar))) {
+             if(!fnd) {
+                 System.out.println("--------- Temperature-pressure extrapolations to "
+-                    +String.format("%.0f",srch.temperature_C)+" C, pressure = "+
+-                    String.format(java.util.Locale.ENGLISH,"%.2f",srch.pressure_bar)+" bar");
++                    +String.format("%.0f",temperature_C)+" C, pressure = "+
++                    String.format(java.util.Locale.ENGLISH,"%.2f",pressure_bar)+" bar");
+                 fnd = true;
+             }
+-            if(srch.dat.get(ix).pMax < 221) { // below critical point
+-                txt = String.format("%.3f",srch.dat.get(ix).pMax);
++            if(dat.get(ix).pMax < 221) { // below critical point
++                txt = String.format("%.3f",dat.get(ix).pMax);
+             } else {
+-                txt = String.format("%.0f",srch.dat.get(ix).pMax);
++                txt = String.format("%.0f",dat.get(ix).pMax);
+             }
+-            System.out.println("species \""+srch.dat.get(ix).name+
++            System.out.println("species \""+dat.get(ix).name+
+                     "\": missing T-P data, max temperature = "+
+-                    String.format("%.0f",srch.dat.get(ix).tMax)+", max pressure = "+txt);
+-            items.add(srch.dat.get(ix).name);
+-            maxT = Math.min(maxT, srch.dat.get(ix).tMax);
+-            maxP = Math.min(maxP, srch.dat.get(ix).pMax);
+-            cnt++;
++                    String.format("%.0f",dat.get(ix).tMax)+", max pressure = "+txt);
++            chk.species.add(dat.get(ix).name);
++            chk.maxT = Math.min(chk.maxT, dat.get(ix).tMax);
++            chk.maxP = Math.min(chk.maxP, dat.get(ix).pMax);
+         }
+     }
+-    if(cnt >0) {
++    if(chk.species.size() >0) {
+         System.out.println("---------");
+-        //javax.swing.DefaultListModel aModel = new javax.swing.DefaultListModel(); // java 1.6
+-        java.util.Iterator<String> iter = items.iterator();
+-        txt = "";
+-        while(iter.hasNext()) {txt = txt+iter.next()+"\n";}
+-        String msg = "<html><font size=\"+1\"><b>Error:</b></font><br>"+
+-                    "Temperature and pressure extrapolations are<br>"+
+-                    "requested to "+
+-                    String.format("%.0f",srch.temperature_C)+"°C and pressure = ";
+-        if(srch.pressure_bar > IAPWSF95.CRITICAL_pBar) {msg = msg + Util.formatNumAsInt(srch.pressure_bar);}
+-        else {msg = msg + String.format(java.util.Locale.ENGLISH,"%.2f",srch.pressure_bar);}
+-        msg = msg + " bar,<br>but the necessary temperature-pressure<br>"+
+-                    "data are missing for the following species:</html>";
+-        javax.swing.JLabel aLabel = new javax.swing.JLabel(msg);
+-        // javax.swing.JList aList = new javax.swing.JList(aModel); // java 1.6
+-        javax.swing.JTextArea aTextArea = new javax.swing.JTextArea(6,20);
+-        javax.swing.JScrollPane scrollPane = new javax.swing.JScrollPane(aTextArea);
+-        scrollPane.setVerticalScrollBarPolicy(javax.swing.JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+-        aTextArea.append(txt);
+-        aTextArea.setEditable(true);
+-        aTextArea.addKeyListener(new java.awt.event.KeyAdapter() {
+-            @Override
+-            public void keyPressed(java.awt.event.KeyEvent evt) {evt.consume();}
+-            @Override
+-            public void keyTyped(java.awt.event.KeyEvent evt) {evt.consume();}
+-        });
+-        aTextArea.setFocusable(true);
+-        String p = "\"pSat\" (vapor-liquid equilibrium)";
+-        if(maxP > IAPWSF95.CRITICAL_pBar) {p = Util.formatNumAsInt(maxP)+" bar";}
+-        javax.swing.JLabel endLabel = new javax.swing.JLabel(
+-                "<html>For these reactions the maximum extrapolation<br>"+
+-                      "temperature is "+Util.formatNumAsInt(maxT)+"°C, and maximum<br>"+
+-                      "pressure is "+p+".<br>&nbsp;<br>"+
+-                "Please change the temperature in the menu \"Options\".</html>");
+-        Object[] o = {aLabel, scrollPane, endLabel};
+-        javax.swing.JOptionPane.showMessageDialog(parent, o, "Temperature extrapolations",
+-                                        javax.swing.JOptionPane.ERROR_MESSAGE);
+-        temperatureCorrectionsPossible = false;
+-    } else { // cnt <= 0
+-        temperatureCorrectionsPossible = true;
+-        if(warning) {
+-            String msg = "Note:"+nl+"Equilibrium constants will be"+nl+
+-                    "extrapolated from 25 to "+Util.formatNumAsInt(srch.temperature_C)+"°C"+nl+"(pressure ";
+-            if(srch.pressure_bar > IAPWSF95.CRITICAL_pBar) {msg = msg + Util.formatNumAsInt(srch.pressure_bar);}
+-            else {msg = msg + String.format(java.util.Locale.ENGLISH,"%.2f",srch.pressure_bar);}
+-            msg = msg + " bar)"+nl+"when you save the data file.";
+-            javax.swing.JOptionPane.showMessageDialog(parent,msg,
+-                    "Selected Temperature = "+Util.formatNumAsInt(srch.temperature_C),
+-                    javax.swing.JOptionPane.WARNING_MESSAGE);
+-        } // if warning
+-    } // cnt >0?
+-    return temperatureCorrectionsPossible;
++        chk.ok = false;
++    }
++    return chk;
+   }
+   //</editor-fold>
+-  
++
++  //<editor-fold defaultstate="collapsed" desc="componentPosition">
++  /** Where a component chosen by the user goes in the list of selected
++   * components, as in the DataBase window: "H+" first, "e-" after "H+", and
++   * solid components at the end. The order of the components is the order
++   * in the data file.
++   * @param selected the components already selected
++   * @param nSolids the number of solid components among them
++   * @param comp the component to add
++   * @return the position (index) for <code>comp</code> in <code>selected</code> */
++  public static int componentPosition(java.util.List<String> selected, int nSolids, String comp) {
++    int position;
++    if(comp.equals("H+")) {
++        position = 0;
++    } else if(comp.equals("e-")) {
++        position = 0;
++        if(selected.size() >0 && selected.get(0).equals("H+")) {position = 1;}
++    } else {
++        if(Util.isSolid(comp)) {
++            position = -1;
++        } else { //not a solid
++            if(nSolids >0) {
++                position = selected.size() - nSolids;
++            } else { //no selected solid components yet
++                position = -1;
++            }
++        } //solid?
++    } //not H+ or e-
++    if(position == -1) {position = selected.size();}
++    return position;
++  }
++  //</editor-fold>
++
++  //<editor-fold defaultstate="collapsed" desc="speciesNames">
++  /** @return the names of the complexes and solids found in the search
++   * (soluble species first) */
++  public java.util.ArrayList<String> speciesNames() {
++    java.util.ArrayList<String> names = new java.util.ArrayList<String>();
++    for(int i = 0; i < nx+nf; i++) {names.add(dat.get(i).name);}
++    return names;
++  }
++  //</editor-fold>
++
++  //<editor-fold defaultstate="collapsed" desc="includeWater">
++  /** Adds "H2O" to the components (before any solid components) and
++   * increases <code>na</code>, as the DataBase window does when water is to
++   * be included in the data file.
++   * @param components the components selected by the user */
++  public void includeWater(java.util.List<String> components) {
++    components.add((na - solidC), "H2O");
++    na++;
++  }
++  //</editor-fold>
++
++  //<editor-fold defaultstate="collapsed" desc="writeDataFile">
++  /** Writes the chemical system found in the search, with logK at the
++   * temperature and pressure of the search, in the format of a data file.
++   * @param w where the data file is written
++   * @param components the <code>na</code> components, in the order they are
++   * written (the components selected by the user, and "H2O" if included)
++   * @throws java.io.IOException
++   * @throws DBSearch.SearchException if logK can not be calculated for a species */
++  public void writeDataFile(java.io.Writer w, java.util.List<String> components)
++          throws java.io.IOException, DBSearch.SearchException {
++      int nrSol = nf;
++      String m = ",   /DATABASE (HYDRA)";
++      if(!Double.isNaN(temperature_C)) {m = m + ", t="+Util.formatDbl3(temperature_C);}
++      if(!Double.isNaN(pressure_bar)) {m = m + ", p="+Util.formatDbl3(pressure_bar);}
++
++      w.write(" "+String.valueOf(na)+", "+
++          String.valueOf(nx)+", "+String.valueOf(nrSol)+", "+
++          String.valueOf(solidC) + m.trim()+nl);
++      for(int i=0; i < na; i++) {
++        w.write(String.format("%s",components.get(i))+nl);
++      } //for i
++
++      w.flush();
++      int j, jc, nTot;
++      Complex cmplx;
++      StringBuilder logB = new StringBuilder();
++      for(int ix=0; ix < nx+nf; ix++) {
++        cmplx = dat.get(ix);
++        if(cmplx.name.length()<=19) {
++            w.write(String.format(engl, "%-19s,  ",cmplx.name));
++        } else {w.write(String.format(engl, "%s,  ",cmplx.name));}
++        if(logB.length()>0) {logB.delete(0, logB.length());}
++        double lgK = cmplx.logKatTandP(temperature_C, pressure_bar);
++        if(Double.isNaN(lgK)) {
++          throw new SearchException("   species \""+cmplx.name+"\"  has logK = Not-a-Number.");
++        }
++        logB.append(Util.formatDbl3(lgK));
++        //make logB occupy at least 9 chars: padding with space
++        j = 9 - logB.length();
++        if(j>0) {for(int k=0;k<j;k++) {logB.append(' ');}}
++        else {logB.append(' ');} //add at least one space
++        w.write(logB.toString());
++        boolean fnd;
++        for(jc = 0; jc < na; jc++) {
++            fnd = false;
++            nTot = Math.min(cmplx.reactionComp.size(), cmplx.reactionCoef.size());
++            for(int jdat=0; jdat < nTot; jdat++) {
++                if(cmplx.reactionComp.get(jdat).equals(components.get(jc))) {
++                    w.write(Util.formatDbl4(cmplx.reactionCoef.get(jdat)));
++                    if(jc < na-1) {w.write(" ");}
++                    fnd = true; break;
++                }
++            } //for jdat
++            if(!fnd) {
++                w.write(" 0");
++                if(jc < na-1) {w.write(" ");}
++            }
++        }//for jc
++        if(cmplx.comment != null && cmplx.comment.length() >0) {
++            w.write(" /"+cmplx.comment);
++        }
++        w.write(nl);
++      }//for ix
++      w.flush();
++  } //writeDataFile
++  //</editor-fold>
++
+   //<editor-fold defaultstate="collapsed" desc="private methods">
+ 
+   //<editor-fold defaultstate="collapsed" desc="scanDataBases">
+@@ -551,12 +676,12 @@ If redox And RedoxAsk Then  */
+   * in the selectedComps[] list. The reactions found are stored in ArrayList "dat".
+   * @throws DBSearch.SearchInternalException */
+   private void scanDataBases() throws DBSearch.SearchInternalException {
+-    if(pc.dbg) {
++    if(dbg) {
+         System.out.println("--- \"scanDataBases\", nLoops = "+nLoops+",  Selected components:");
+         for (String selectedComp : selectedComps) {System.out.println("    " + selectedComp);}
+         System.out.println("---");
+     }
+-    int answer; String msg, t; boolean found; int i,j;
++    String msg, t; boolean found; int i,j;
+     boolean firstComplex = true;
+         Complex rr;
+     complxFileName = "";
+@@ -580,8 +705,8 @@ If redox And RedoxAsk Then  */
+                     if(s != null && s.length() >0) {
+                         found = false;
+                         String[] elemComp;
+-                        for(j=0; j < pd.elemComp.size(); j++) {
+-                            elemComp = pd.elemComp.get(j);
++                        for(j=0; j < elemCompList.size(); j++) {
++                            elemComp = elemCompList.get(j);
+                             if(Util.nameCompare(s,elemComp[1])) {found = true; break;}
+                         } //for j
+                         if(!found) {
+@@ -595,12 +720,7 @@ If redox And RedoxAsk Then  */
+                     System.out.println("---- Error \""+msg+"\""+nl+"      for complex \""+rr.name+"\", logK="+rr.constant+", ref.=\""+rr.reference+"\"");
+                     for(i=0; i< nTot; i++) {System.out.print(" "+rr.reactionComp.get(i)+" "+rr.reactionCoef.get(i)+";");}
+                     System.out.println();
+-                        Object[] opt = {"OK", "Cancel"};
+-                        answer = javax.swing.JOptionPane.showOptionDialog(dbF,
+-                                "Error in file \""+complxFileName+"\""+nl+"\""+msg+"\"",
+-                                pc.progName, javax.swing.JOptionPane.YES_NO_OPTION,
+-                                javax.swing.JOptionPane.WARNING_MESSAGE, null, opt, opt[1]);
+-                        if(answer != javax.swing.JOptionPane.YES_OPTION) {
++                        if(!askContinue("Error in file \""+complxFileName+"\""+nl+"\""+msg+"\"", "OK")) {
+                             try{
+                                 if(binaryOrText ==2 && dis != null) {dis.close();}
+                                 else if(binaryOrText ==1 && br != null) {br.close();}
+@@ -636,12 +756,12 @@ If redox And RedoxAsk Then  */
+                             if(Util.nameCompare(rr.name,selectedComps.get(k))) {found = true; break;}
+                         } //for k
+                         if(found) { //already selected: replace?
+-                            if(pc.dbg) {System.out.println("Complex already there (it was one of the components): "+rr.name);}
++                            if(dbg) {System.out.println("Complex already there (it was one of the components): "+rr.name);}
+                             include = false; //the complex was already there
+                             //-- Replace rRedox if same name + same stoichiometry
+                             for(i=0; i < rRedox.size(); i++) {
+                                 if(Complex.sameNameAndStoichiometry(rr, rRedox.get(i))) {
+-                                    if(pc.dbg) {System.out.println("Complex already there and same stoichiometry: "+rr.name);}
++                                    if(dbg) {System.out.println("Complex already there and same stoichiometry: "+rr.name);}
+                                     rRedox.set(i, rr); break;
+                                 }
+                             }//for i
+@@ -656,9 +776,9 @@ If redox And RedoxAsk Then  */
+                         ////    but for Fe(SO4)2- isRedoxComp=false)
+                         //boolean exclude = false;
+                         //if(isRedoxComp("C", rr.name) && !pd.redoxC) {exclude = true;}
+-                        //if(isRedoxComp("N", rr.name) && !pd.redoxN) {exclude = true;}
+-                        //if(isRedoxComp("S", rr.name) && !pd.redoxS) {exclude = true;}
+-                        //if(isRedoxComp("P", rr.name) && !pd.redoxP) {exclude = true;}
++                        //if(isRedoxComp("N", rr.name) && !redoxN) {exclude = true;}
++                        //if(isRedoxComp("S", rr.name) && !redoxS) {exclude = true;}
++                        //if(isRedoxComp("P", rr.name) && !redoxP) {exclude = true;}
+                         //if(exclude) {include = false;}
+ 
+                       } //if include
+@@ -677,16 +797,14 @@ If redox And RedoxAsk Then  */
+                         //allSolids:  0=include all solids; 1=exclude (cr); 2=exclude (c); 3=exclude (cr)&(c)
+                         boolean excludeSolid = true;
+                         if(!Util.is_cr_or_c_solid(rr.name) ||
+-                           pd.allSolids == 0 ||
+-                           (Util.is_cr_solid(rr.name) && pd.allSolids !=1 && pd.allSolids !=3) ||
+-                           (Util.is_c_solid(rr.name) && pd.allSolids <2)) {excludeSolid = false;}
++                           allSolids == 0 ||
++                           (Util.is_cr_solid(rr.name) && allSolids !=1 && allSolids !=3) ||
++                           (Util.is_c_solid(rr.name) && allSolids <2)) {excludeSolid = false;}
+                         if(excludeSolid) {
+-                            final String s; if(pd.allSolids == 1) {s="(cr) solids excluded!";}
+-                            else if(pd.allSolids == 2) {s="(c) solids excluded!";}
+-                            else if(pd.allSolids == 3) {s="(cr) & (c) solids excluded!";} else {s = " ";}
+-                            javax.swing.SwingUtilities.invokeLater(new Runnable() {@Override public void run() {
+-                              dbF.jLabel_cr_solids.setText(s);
+-                            }});
++                            final String s; if(allSolids == 1) {s="(cr) solids excluded!";}
++                            else if(allSolids == 2) {s="(c) solids excluded!";}
++                            else if(allSolids == 3) {s="(cr) & (c) solids excluded!";} else {s = " ";}
++                            if(display != null) {display.solidsExcluded(s);}
+                         } else { //include solid or not a solid
+                             if(Util.isSolid(rr.name)) {
+                                 dat.add(rr);
+@@ -718,7 +836,7 @@ If redox And RedoxAsk Then  */
+                 // if redox: remove any components that are equivalent to the @-complex
+                 if(redox) {
+                     int fnd = -1;
+-                    for(j = dbF.modelSelectedComps.size(); //search only new redox comps.
++                    for(j = nUserComps; //search only new redox comps.
+                             j < nSelectedComps; j++) {
+                         if(Util.nameCompare(rr.name,selectedComps.get(j))) {fnd = j; break;}
+                     }
+@@ -759,8 +877,8 @@ If redox And RedoxAsk Then  */
+         if(binaryOrText ==2 && dis != null) {dis.close();}
+         else if(binaryOrText ==1 && br != null) {br.close();}
+     } catch (java.io.IOException e) {}
+-    dbF.updateProgressBarLabel(" ", 0);
+-    dbF.updateProgressBar(0);
++    progressLabel(" ", 0);
++    progress(0);
+ 
+   } //scanDataBases()
+   //</editor-fold>
+@@ -791,12 +909,12 @@ If redox And RedoxAsk Then  */
+         db = 0;
+     }
+ 
+-    while (db < pd.dataBasesList.size()) {
++    while (db < dataBasesList.size()) {
+       if(openNextFile) {
+         try{
+             if(dis != null) {dis.close();} else if(br != null) {br.close();}
+         } catch (java.io.IOException ioe) {MsgExceptn.msg(ioe.getMessage());}
+-        complxFileName = pd.dataBasesList.get(db);
++        complxFileName = dataBasesList.get(db);
+         if(complxFileName == null || complxFileName.length() <=0) {continue;}
+         java.io.File dbf = new java.io.File(complxFileName);
+         if(!dbf.exists() || !dbf.canRead()) {
+@@ -808,8 +926,8 @@ If redox And RedoxAsk Then  */
+         }
+         complxFileNameSize = dbf.length();
+         cmplxNbr = 0;
+-        this.dbF.updateProgressBarLabel("Searching \""+complxFileName+"\"", nLoops);
+-        this.dbF.updateProgressBar(0);
++        progressLabel("Searching \""+complxFileName+"\"", nLoops);
++        progress(0);
+         //--- text or binary?
+         try{
+             if(binaryOrText ==2 && dis != null) {dis.close();}
+@@ -838,7 +956,7 @@ If redox And RedoxAsk Then  */
+         }
+         noFilesFound = false;
+         openNextFile = false;
+-        if(pc.dbg) {System.out.println("Scanning database \""+complxFileName+"\"");}
++        if(dbg) {System.out.println("Scanning database \""+complxFileName+"\"");}
+       } //if sd.openNextFile
+ 
+       Complex complex = null;
+@@ -848,7 +966,7 @@ If redox And RedoxAsk Then  */
+         if(binaryOrText ==2) { //Binary complex database
+             try {
+                 complex = LibDB.getBinComplex(dis);
+-                dbF.updateProgressBar((int)(100*(double)cmplxNbr*SIZE_FACTOR_BIN
++                progress((int)(100*(double)cmplxNbr*SIZE_FACTOR_BIN
+                         /(double)complxFileNameSize));
+             }
+             catch (LibDB.ReadBinCmplxException ex) {
+@@ -862,7 +980,7 @@ If redox And RedoxAsk Then  */
+             try {
+                 try{
+                     complex = LibDB.getTxtComplex(br);
+-                    dbF.updateProgressBar((int)(100*(double)cmplxNbr*SIZE_FACTOR_TXT
++                    progress((int)(100*(double)cmplxNbr*SIZE_FACTOR_TXT
+                             /(double)complxFileNameSize));
+                 }
+                 catch (LibDB.EndOfFileException ex) {complex = null;}                    
+@@ -894,7 +1012,7 @@ If redox And RedoxAsk Then  */
+       // ----- no complex found: end-of-file, or error. Get next file
+       db++;
+       openNextFile = true;
+-    } //while sd.db < pd.dataBasesList.size()
++    } //while sd.db < dataBasesList.size()
+ 
+     if(noFilesFound) { // this should not happen...
+         MsgExceptn.exception("Error: none of the databases could be found.");
+@@ -1008,7 +1126,7 @@ If redox And RedoxAsk Then  */
+    * problem and the user selected to cancel the search
+    */
+   private boolean redoxChecks() {
+-    if(pc.dbg) {System.out.println("--- \"redoxChecks\".  redox = "+redox);}
++    if(dbg) {System.out.println("--- \"redoxChecks\".  redox = "+redox);}
+     //----------
+     // Check that the user does not select both Fe+2 and Fe+3 as components...
+     //----------
+@@ -1017,24 +1135,24 @@ If redox And RedoxAsk Then  */
+     String[] elemComp; String selCompName, el; boolean problem = false;
+     for(int i =0; i< selectedComps.size(); i++) { //loop through all components selected by the user (e.g.: H+,CO3-,Fe+3)
+       selCompName = selectedComps.get(i).toString();
+-      for(int k0 =0; k0< pd.elemComp.size(); k0++) { //loop through all components in the database (CO3-2,SO4-2,HS-,etc)
+-        elemComp = pd.elemComp.get(k0);
++      for(int k0 =0; k0< elemCompList.size(); k0++) { //loop through all components in the database (CO3-2,SO4-2,HS-,etc)
++        elemComp = elemCompList.get(k0);
+         if(Util.nameCompare(elemComp[1],selCompName)) { //this component has been selected by the user
+             //Note: array ElemComp[0] contains: the name-of-the-element (e.g. "C"),
+             //  the formula-of-the-component ("CN-"), and
+             //  the name-of-the-component ("cyanide")
+             el = elemComp[0]; //get the element corresponding to the component: e.g. "S" for SO4-2
+             if(!isRedoxComp(el, selCompName)) {break;} // k0
+-            if(!pd.redoxAsk || redox) {
+-                if(el.equals("N") && !pd.redoxN) {break;} // k0
+-                else if(el.equals("P") && !pd.redoxP) {break;} // k0
+-                else if(el.equals("S") && !pd.redoxS) {break;} // k0
++            if(!redoxAsk || redox) {
++                if(el.equals("N") && !redoxN) {break;} // k0
++                else if(el.equals("P") && !redoxP) {break;} // k0
++                else if(el.equals("S") && !redoxS) {break;} // k0
+             }
+             //the component selected by the user "is redox": it only contains one element in addition to H/O
+             //  such as H+, SO4-2 or Fe+3.
+             //Look and see if there are other components for the same element
+-            for(int k1 =0; k1< pd.elemComp.size(); k1++) { //loop through all components in the database (CO3-2,SO4-2,HS-,etc)
+-              elemComp = pd.elemComp.get(k1);
++            for(int k1 =0; k1< elemCompList.size(); k1++) { //loop through all components in the database (CO3-2,SO4-2,HS-,etc)
++              elemComp = elemCompList.get(k1);
+               if(elemComp[0].equals(el)) { //got the right element
+                   if(!Util.nameCompare(elemComp[1],selCompName)) { //look at all other components with the same element
+                       if(isRedoxComp(el, elemComp[1]) && !elemComp[1].equals("ClO4-")) {
+@@ -1055,11 +1173,7 @@ If redox And RedoxAsk Then  */
+                             msg = msg + nl + "The calculations will then determine their respective concentrations."+nl+nl+
+                                     "Are you sure that you want to continue ?";
+                             System.out.println("- - - - - -"+nl+msg+nl+"- - - - - -");
+-                            Object[] opt = {"Continue", "Cancel"};
+-                            int answer = javax.swing.JOptionPane.showOptionDialog(
+-                                    dbF, msg, pc.progName, javax.swing.JOptionPane.YES_NO_OPTION,
+-                                    javax.swing.JOptionPane.WARNING_MESSAGE, null, opt, opt[1]);
+-                            if(answer != javax.swing.JOptionPane.YES_OPTION) {
++                            if(!askContinue(msg, "Continue")) {
+                               System.out.println("Answer: Cancel");
+                               return false;
+                             }
+@@ -1074,14 +1188,28 @@ If redox And RedoxAsk Then  */
+       } //for k0
+     } //for i
+     //---------- check ends
+-    if(pc.dbg && !problem) {System.out.println("Checks ok.");}
++    if(dbg && !problem) {System.out.println("Checks ok.");}
+     return true;
+   } //redoxChecks
+   //</editor-fold>
+ 
+   //</editor-fold>
+ 
+-class SearchException extends Exception {
++  //<editor-fold defaultstate="collapsed" desc="display helpers">
++  private void progressLabel(String text, int nLoop) {
++    if(display != null) {display.progressLabel(text, nLoop);}
++  }
++  private void progress(int percent) {
++    if(display != null) {display.progress(percent);}
++  }
++  /** without a display the warning is only printed, and the search goes on */
++  private boolean askContinue(String msg, String okText) {
++    if(display == null) {return true;}
++    return display.askContinue(msg, okText);
++  }
++  //</editor-fold>
++
++public static class SearchException extends Exception {
+     public SearchException() {super();}
+     public SearchException(String txt) {super(txt);}
+ } // SearchException
+diff --git a/DataBase/src/database/ExitDialog.java b/DataBase/src/database/ExitDialog.java
+index 808220c..d58dd93 100644
+--- a/DataBase/src/database/ExitDialog.java
++++ b/DataBase/src/database/ExitDialog.java
+@@ -292,7 +292,7 @@ public class ExitDialog extends javax.swing.JDialog {
+           return false;
+       }
+       // Is there enthalpy data?
+-      if(!DBSearch.checkTemperature(srch, this, false)) {return false;}
++      if(!FrameDBmain.checkTemperature(srch, this, false)) {return false;}
+ 
+       String defaultName;
+       if(dbF.outputDataFile != null) {defaultName = dbF.outputDataFile;} else {defaultName = "";}
+@@ -327,7 +327,6 @@ public class ExitDialog extends javax.swing.JDialog {
+       if(srch.nx < 0 || srch.nx > 1000000) {
+             MsgExceptn.exception("Error: Number of soluble complexes is: "+srch.nx+nl+
+             "Must be >=0 and < 1 000 000.");}
+-      int nrSol = srch.nf;
+       if(srch.nf < 0 || srch.nf > 100000) {
+             MsgExceptn.exception("Error: Number of solid reaction products is: "+srch.nf+nl+
+             "Must be >=0 and < 100 000.");}
+@@ -336,9 +335,6 @@ public class ExitDialog extends javax.swing.JDialog {
+             "Must be >=0 and <= "+srch.na+" (the nbr of components).");}
+ 
+       if(pc.dbg) {System.out.println("---- Saving file \""+fn+"\".");}
+-      String m = ",   /DATABASE (HYDRA)";
+-      if(!Double.isNaN(srch.temperature_C)) {m = m + ", t="+Util.formatDbl3(srch.temperature_C);}
+-      if(!Double.isNaN(srch.pressure_bar)) {m = m + ", p="+Util.formatDbl3(srch.pressure_bar);}
+       //if requested: add water
+       if(pd.includeH2O) {
+           dbF.modelSelectedComps.add((srch.na - srch.solidC), "H2O");
+@@ -346,61 +342,17 @@ public class ExitDialog extends javax.swing.JDialog {
+       }
+ 
+       try{
+-      w.write(" "+String.valueOf(srch.na)+", "+
+-          String.valueOf(srch.nx)+", "+String.valueOf(nrSol)+", "+
+-          String.valueOf(srch.solidC) + m.trim()+nl);
+-      for(int i=0; i < srch.na; i++) {
+-        w.write(String.format("%s",dbF.modelSelectedComps.get(i))+nl);
+-      } //for i
+-
+-      w.flush();
+-      int j, jc, nTot;
+-      Complex cmplx;
+-      StringBuilder logB = new StringBuilder();
+-      for(int ix=0; ix < srch.nx+srch.nf; ix++) {
+-        cmplx = srch.dat.get(ix);
+-        if(cmplx.name.length()<=19) {
+-            w.write(String.format(engl, "%-19s,  ",cmplx.name));
+-        } else {w.write(String.format(engl, "%s,  ",cmplx.name));}
+-        if(logB.length()>0) {logB.delete(0, logB.length());}
+-        double lgK = cmplx.logKatTandP(srch.temperature_C, srch.pressure_bar);
+-        if(Double.isNaN(lgK)) {
++          srch.writeDataFile(w, java.util.Collections.list(dbF.modelSelectedComps.elements()));
++          w.close(); fos.close();
++      }
++      catch (DBSearch.SearchException ex) {
+           String msg = "Error in \"saveDataFile\","+nl+
+-                    "   species \""+cmplx.name+"\"  has logK = Not-a-Number."+nl+
++                    ex.getMessage()+nl+
+                     "   while writing data file:"+nl+
+                     "   \""+fn+"\"";
+           MsgExceptn.exception(msg);
+           javax.swing.JOptionPane.showMessageDialog(this, msg, pc.progName,javax.swing.JOptionPane.ERROR_MESSAGE);
+           return false;
+-        }
+-        logB.append(Util.formatDbl3(lgK));
+-        //make logB occupy at least 9 chars: padding with space
+-        j = 9 - logB.length();
+-        if(j>0) {for(int k=0;k<j;k++) {logB.append(' ');}}
+-        else {logB.append(' ');} //add at least one space
+-        w.write(logB.toString());
+-        boolean fnd;
+-        for(jc = 0; jc < srch.na; jc++) {
+-            fnd = false;
+-            nTot = Math.min(cmplx.reactionComp.size(), cmplx.reactionCoef.size());
+-            for(int jdat=0; jdat < nTot; jdat++) {
+-                if(cmplx.reactionComp.get(jdat).equals(dbF.modelSelectedComps.get(jc))) {
+-                    w.write(Util.formatDbl4(cmplx.reactionCoef.get(jdat)));
+-                    if(jc < srch.na-1) {w.write(" ");}
+-                    fnd = true; break;
+-                }
+-            } //for jdat
+-            if(!fnd) {
+-                w.write(" 0");
+-                if(jc < srch.na-1) {w.write(" ");}
+-            }
+-        }//for jc
+-        if(cmplx.comment != null && cmplx.comment.length() >0) {
+-            w.write(" /"+cmplx.comment);
+-        }
+-        w.write(nl);
+-      }//for ix
+-      w.flush(); w.close(); fos.close();
+       }
+       catch (Exception ex) {
+           String msg = "Error in \"saveDataFile\","+nl+
+diff --git a/DataBase/src/database/FrameDBmain.java b/DataBase/src/database/FrameDBmain.java
+index b66f539..5740cbc 100644
+--- a/DataBase/src/database/FrameDBmain.java
++++ b/DataBase/src/database/FrameDBmain.java
+@@ -7,6 +7,7 @@ import lib.huvud.ProgramConf;
+ import lib.huvud.RedirectedFrame;
+ import lib.huvud.SortedProperties;
+ import lib.huvud.Splash;
++import lib.kemi.H2O.IAPWSF95;
+ 
+ /** Main window frame of the Database program.
+  * <br>
+@@ -32,6 +33,8 @@ public class FrameDBmain extends javax.swing.JFrame {
+    * another instance, "dbf" is a reference to the only instance of
+    * this class */
+   private static FrameDBmain dbf = null;
++  /** size of the user's computer screen */
++  private static final java.awt.Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
+   private final ProgramDataDB pd = new ProgramDataDB();
+   private final ProgramConf pc;
+   private HelpAboutDB helpAboutFrame = null;
+@@ -174,8 +177,8 @@ public class FrameDBmain extends javax.swing.JFrame {
+ 
+     solidSelectedComps = 0;
+     //---- initial location: centered on screen
+-    locationFrame.x = Math.max(0, (LibDB.screenSize.width  - this.getWidth() ) / 2);
+-    locationFrame.y = Math.max(0, (LibDB.screenSize.height - this.getHeight() ) / 2);
++    locationFrame.x = Math.max(0, (screenSize.width  - this.getWidth() ) / 2);
++    locationFrame.y = Math.max(0, (screenSize.height - this.getHeight() ) / 2);
+     setLocation(locationFrame);
+ 
+   } // constructor
+@@ -378,9 +381,9 @@ public class FrameDBmain extends javax.swing.JFrame {
+     //     Note, however, that the parent (this) frame is not visible yet.
+     readIni();
+     //---- Position the window on the screen
+-    locationFrame.x = Math.min(LibDB.screenSize.width - this.getWidth() - 4,
++    locationFrame.x = Math.min(screenSize.width - this.getWidth() - 4,
+                             Math.max(4, locationFrame.x));
+-    locationFrame.y = Math.min(LibDB.screenSize.height - this.getHeight()- 25,
++    locationFrame.y = Math.min(screenSize.height - this.getHeight()- 25,
+                             Math.max(4, locationFrame.y));
+     setLocation(locationFrame);
+     //----
+@@ -2597,26 +2600,11 @@ private static boolean askH2O(java.awt.Frame parent, final String title, final b
+         jScrollPaneComplexes.setVisible(false);
+         jLabel_cr_solids.setText(" ");
+         setTextLabelRight(" ");
+-        int position;
+-        if(modelAvailableComps.get(index).equals("H+")) {
+-            position = 0;
+-        } else if(modelAvailableComps.get(index).equals("e-")) {
+-            position = 0;
+-            if(modelSelectedComps.size() >0 && modelSelectedComps.get(0).equals("H+")) {position = 1;}
+-        } else {
+-            if(Util.isSolid(modelAvailableComps.get(index).toString())) {
+-                solidSelectedComps++;
+-                position = -1;
+-            } else { //not a solid
+-                if(solidSelectedComps >0) {
+-                    position = modelSelectedComps.size() - solidSelectedComps;
+-                } else { //no selected solid components yet
+-                    position = -1;
+-                }
+-            } //solid?
+-        } //not H+ or e-
+-        if(position == -1) {position = modelSelectedComps.size();}
+-        modelSelectedComps.add(position, modelAvailableComps.get(index));
++        String comp = modelAvailableComps.get(index);
++        int position = DBSearch.componentPosition(
++                java.util.Collections.list(modelSelectedComps.elements()), solidSelectedComps, comp);
++        if(!comp.equals("H+") && !comp.equals("e-") && Util.isSolid(comp)) {solidSelectedComps++;}
++        modelSelectedComps.add(position, comp);
+         componentsNames.add(position, availableComponentsNames.get(index));
+         doneSomeWork = true;
+     } //if not alreadyThere
+@@ -3215,8 +3203,8 @@ private static boolean askH2O(java.awt.Frame parent, final String title, final b
+     System.out.flush();
+     System.out.println(LINE+nl+"Checking ini-values.");
+     if(locationFrame.x < -1 || locationFrame.y < -1) {
+-      locationFrame.x = Math.max(0, (LibDB.screenSize.width  - this.getWidth() ) / 2);
+-      locationFrame.y = Math.max(0, (LibDB.screenSize.height - this.getHeight() ) / 2);
++      locationFrame.x = Math.max(0, (screenSize.width  - this.getWidth() ) / 2);
++      locationFrame.y = Math.max(0, (screenSize.height - this.getHeight() ) / 2);
+     }
+     // check Default Path
+     java.io.File f = new java.io.File(pc.pathDef.toString());
+@@ -3344,8 +3332,8 @@ private static boolean askH2O(java.awt.Frame parent, final String title, final b
+       }
+       advancedMenu = false;
+       pd.addDataLocation.x = -1000;   pd.addDataLocation.y = -1000;
+-      locationFrame.x = Math.max(0, (LibDB.screenSize.width  - this.getWidth() ) / 2);
+-      locationFrame.y = Math.max(0, (LibDB.screenSize.height - this.getHeight() ) / 2);
++      locationFrame.x = Math.max(0, (screenSize.width  - this.getWidth() ) / 2);
++      locationFrame.y = Math.max(0, (screenSize.height - this.getHeight() ) / 2);
+       msgFrameSize.width = 500; msgFrameSize.height = 400;
+       locationMsgFrame.x = 80; locationMsgFrame.y = 28;
+       // set the default path to the "current directory" (from where the program is started)
+@@ -3553,10 +3541,17 @@ private static boolean askH2O(java.awt.Frame parent, final String title, final b
+                 searchError = false;
+                 if(pc.dbg) {System.out.println("---- new search");}
+                 try{
+-                    srch = new DBSearch(pc,pd);
++                    srch = newSearch();
+                     setCursorDef();
++                    java.util.List<String> selected = java.util.Collections.list(modelSelectedComps.elements());
++                    int nSolids = 0;
++                    for(String c : selected) {if(Util.isSolid(c)) {nSolids++;}}
++                    if(solidSelectedComps != nSolids) {
++                        MsgExceptn.exception("Error in \"searchComplexes\":"+nl+
++                            "the number of solid components does not match!");
++                    }
+                     // the results of the search are stored in "srch.dat"
+-                    srch.searchComplexes(dbf);
++                    srch.searchComplexes(selected, searchDisplay);
+                     javax.swing.SwingUtilities.invokeLater(new Runnable() {@Override public void run() {
+                         jMenuExit.setText("Exit");
+                         jMenuExit.setEnabled(true);
+@@ -3584,7 +3579,7 @@ private static boolean askH2O(java.awt.Frame parent, final String title, final b
+                     // ---
+                     // ---  Temperature corrections?
+                     // ---
+-                    temperatureCorrectionsPossible = DBSearch.checkTemperature(srch, dbf, true);
++                    temperatureCorrectionsPossible = checkTemperature(srch, dbf, true);
+                 } // searchError?
+                 if(searchError || !temperatureCorrectionsPossible) {
+                     final boolean se = searchError;
+@@ -3688,6 +3683,115 @@ private static boolean askH2O(java.awt.Frame parent, final String title, final b
+   } //searchReactions(exit)
+   //</editor-fold>
+ 
++  //<editor-fold defaultstate="collapsed" desc="newSearch">
++  /** @return a database search with the databases and options of this window
++   * @throws DBSearch.SearchException */
++  private DBSearch newSearch() throws DBSearch.SearchException {
++    DBSearch s = new DBSearch(pd.dataBasesList, pd.elemComp, pd.temperature_C, pd.pressure_bar);
++    s.dbg = pc.dbg;
++    s.progName = pc.progName;
++    s.redoxAsk = pd.redoxAsk;
++    s.redoxN = pd.redoxN;
++    s.redoxS = pd.redoxS;
++    s.redoxP = pd.redoxP;
++    s.allSolids = pd.allSolids;
++    return s;
++  }
++
++  /** what the database search shows in this window */
++  private final DBSearch.Display searchDisplay = new DBSearch.Display() {
++    @Override public void progressLabel(String text, int nLoop) {updateProgressBarLabel(text, nLoop);}
++    @Override public void progress(int percent) {updateProgressBar(percent);}
++    @Override public void solidsExcluded(final String text) {
++        javax.swing.SwingUtilities.invokeLater(new Runnable() {@Override public void run() {
++          jLabel_cr_solids.setText(text);
++        }});
++    }
++    @Override public boolean askContinue(String msg, String okText) {
++        Object[] opt = {okText, "Cancel"};
++        int answer = javax.swing.JOptionPane.showOptionDialog(FrameDBmain.this,
++                msg, pc.progName, javax.swing.JOptionPane.YES_NO_OPTION,
++                javax.swing.JOptionPane.WARNING_MESSAGE, null, opt, opt[1]);
++        return answer == javax.swing.JOptionPane.YES_OPTION;
++    }
++  };
++  //</editor-fold>
++
++  //<editor-fold defaultstate="collapsed" desc="checkTemperature">
++  /** Checks that for a given search (srch), where the temperature and
++   * pressure are specified, each reaction has data that allows the calculation
++   * of logK at the given temperature and pressure. If any of the reactions does
++   * not have data, a message is displayed to the user, "false" is returned (not OK).
++   * If all the reactions have adequate temperature-pressure data, "true" is returned (OK).
++   * 
++   * @param srch a search engine object, where the temperature and pressure are specified
++   * @param parent a window to anchor messages
++   * @param warning if true a "note" message will be displayed telling the user
++   * that temperature extrapolations will be made
++   * @return true if there are no problems with the temperature-pressure extrpolations,
++   * false if some of the reactions do not have data at the required temperature
++   */
++  static boolean checkTemperature(DBSearch srch, java.awt.Container parent, boolean warning) {
++    boolean temperatureCorrectionsPossible = true;
++    boolean noCheck = (srch.temperature_C > 24.9 && srch.temperature_C < 25.1) || srch.nx+srch.nf < 1;
++    DBSearch.TemperatureCheck chk = srch.checkTemperature();
++    if(noCheck) {return temperatureCorrectionsPossible;}
++    String txt;
++    double maxT = chk.maxT, maxP = chk.maxP;
++    if(!chk.ok) {
++        java.util.Iterator<String> iter = chk.species.iterator();
++        txt = "";
++        while(iter.hasNext()) {txt = txt+iter.next()+"\n";}
++        String msg = "<html><font size=\"+1\"><b>Error:</b></font><br>"+
++                    "Temperature and pressure extrapolations are<br>"+
++                    "requested to "+
++                    String.format("%.0f",srch.temperature_C)+"°C and pressure = ";
++        if(srch.pressure_bar > IAPWSF95.CRITICAL_pBar) {msg = msg + Util.formatNumAsInt(srch.pressure_bar);}
++        else {msg = msg + String.format(java.util.Locale.ENGLISH,"%.2f",srch.pressure_bar);}
++        msg = msg + " bar,<br>but the necessary temperature-pressure<br>"+
++                    "data are missing for the following species:</html>";
++        javax.swing.JLabel aLabel = new javax.swing.JLabel(msg);
++        // javax.swing.JList aList = new javax.swing.JList(aModel); // java 1.6
++        javax.swing.JTextArea aTextArea = new javax.swing.JTextArea(6,20);
++        javax.swing.JScrollPane scrollPane = new javax.swing.JScrollPane(aTextArea);
++        scrollPane.setVerticalScrollBarPolicy(javax.swing.JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
++        aTextArea.append(txt);
++        aTextArea.setEditable(true);
++        aTextArea.addKeyListener(new java.awt.event.KeyAdapter() {
++            @Override
++            public void keyPressed(java.awt.event.KeyEvent evt) {evt.consume();}
++            @Override
++            public void keyTyped(java.awt.event.KeyEvent evt) {evt.consume();}
++        });
++        aTextArea.setFocusable(true);
++        String p = "\"pSat\" (vapor-liquid equilibrium)";
++        if(maxP > IAPWSF95.CRITICAL_pBar) {p = Util.formatNumAsInt(maxP)+" bar";}
++        javax.swing.JLabel endLabel = new javax.swing.JLabel(
++                "<html>For these reactions the maximum extrapolation<br>"+
++                      "temperature is "+Util.formatNumAsInt(maxT)+"°C, and maximum<br>"+
++                      "pressure is "+p+".<br>&nbsp;<br>"+
++                "Please change the temperature in the menu \"Options\".</html>");
++        Object[] o = {aLabel, scrollPane, endLabel};
++        javax.swing.JOptionPane.showMessageDialog(parent, o, "Temperature extrapolations",
++                                        javax.swing.JOptionPane.ERROR_MESSAGE);
++        temperatureCorrectionsPossible = false;
++    } else { // all reactions have T-P data
++        temperatureCorrectionsPossible = true;
++        if(warning) {
++            String msg = "Note:"+nl+"Equilibrium constants will be"+nl+
++                    "extrapolated from 25 to "+Util.formatNumAsInt(srch.temperature_C)+"°C"+nl+"(pressure ";
++            if(srch.pressure_bar > IAPWSF95.CRITICAL_pBar) {msg = msg + Util.formatNumAsInt(srch.pressure_bar);}
++            else {msg = msg + String.format(java.util.Locale.ENGLISH,"%.2f",srch.pressure_bar);}
++            msg = msg + " bar)"+nl+"when you save the data file.";
++            javax.swing.JOptionPane.showMessageDialog(parent,msg,
++                    "Selected Temperature = "+Util.formatNumAsInt(srch.temperature_C),
++                    javax.swing.JOptionPane.WARNING_MESSAGE);
++        } // if warning
++    } // cnt >0?
++    return temperatureCorrectionsPossible;
++  }
++  //</editor-fold>
++  
+   //<editor-fold defaultstate="collapsed" desc="setCursorWait and setCursorDef">
+   private void setCursorWait() {
+     if(this != null) {
+diff --git a/LibDataBase/src/lib/database/FrameAddData.java b/LibDataBase/src/lib/database/FrameAddData.java
+index 7fac5cd..7ddf069 100644
+--- a/LibDataBase/src/lib/database/FrameAddData.java
++++ b/LibDataBase/src/lib/database/FrameAddData.java
+@@ -24,6 +24,8 @@ import lib.huvud.ProgramConf;
+  * 
+  * @author Ignasi Puigdomenech */
+ public class FrameAddData extends javax.swing.JFrame {
++  /** size of the user's computer screen */
++  private static final java.awt.Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
+   // Note: for java 1.6 jComBox must be without type
+   //       for java 1.7 jComBox must be <String>
+   private ProgramConf pc;
+@@ -176,14 +178,14 @@ public class FrameAddData extends javax.swing.JFrame {
+     frameEnable(false);
+ 
+     //--- Set the location of the window in the screen
+-    int left = Math.max(0,(LibDB.screenSize.width-this.getWidth())/2);
+-    int top = Math.max(0,(LibDB.screenSize.height-this.getHeight())/2);
++    int left = Math.max(0,(screenSize.width-this.getWidth())/2);
++    int top = Math.max(0,(screenSize.height-this.getHeight())/2);
+     if(pd.addDataLocation.x < 0 || pd.addDataLocation.y < 0) {
+         pd.addDataLocation.x = left;
+         pd.addDataLocation.y = top;
+     }
+-    pd.addDataLocation.x = Math.max(60,Math.min(pd.addDataLocation.x,(LibDB.screenSize.width-this.getWidth())));
+-    pd.addDataLocation.y = Math.max(10,Math.min(pd.addDataLocation.y,(LibDB.screenSize.height-this.getHeight())));
++    pd.addDataLocation.x = Math.max(60,Math.min(pd.addDataLocation.x,(screenSize.width-this.getWidth())));
++    pd.addDataLocation.y = Math.max(10,Math.min(pd.addDataLocation.y,(screenSize.height-this.getHeight())));
+     this.setLocation(pd.addDataLocation);
+     //---- Fill in combo boxes
+     boxes.add(jComboBox0); boxes.add(jComboBox1);
+@@ -1462,8 +1464,8 @@ public class FrameAddData extends javax.swing.JFrame {
+       int nw = Math.max(w, windowSize.width);
+       int nh = Math.max(h, windowSize.height);
+       int nx=x, ny=y;
+-      if(x+nw > LibDB.screenSize.width) {nx = LibDB.screenSize.width - nw;}
+-      if(y+nh > LibDB.screenSize.height) {ny = LibDB.screenSize.height -nh;}
++      if(x+nw > screenSize.width) {nx = screenSize.width - nw;}
++      if(y+nh > screenSize.height) {ny = screenSize.height -nh;}
+       if(x!=nx || y!=ny) {this.setLocation(nx, ny);}
+       if(w!=nw || h!=nh) {this.setSize(nw, nh);}
+     }//GEN-LAST:event_formComponentResized
+diff --git a/LibDataBase/src/lib/database/LibDB.java b/LibDataBase/src/lib/database/LibDB.java
+index 213b721..464b119 100644
+--- a/LibDataBase/src/lib/database/LibDB.java
++++ b/LibDataBase/src/lib/database/LibDB.java
+@@ -24,7 +24,6 @@ import lib.huvud.Div;
+  * 
+  * @author Ignasi Puigdomenech */
+ public class LibDB {
+-  public static final java.awt.Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();;
+   public static final int ELEMENTS = 104;
+   /** electron, Hydrogen, Helium, Lithium... */
+   public static String[] elementName = new String[113];
+@@ -250,6 +249,55 @@ static { // static initializer
+   } //getElements()
+   //</editor-fold>
+ 
++  //<editor-fold defaultstate="collapsed" desc="readElements">
++ /** Reads (from the element-component files) the components (reactants) and
++  * the elements, as {@link #getElements getElements} does, but without
++  * message boxes: problems are reported as exceptions. Element files are not
++  * created if they are missing.
++  * <p>elemCompStringArray[0..2] contains the name-of-the-element (e.g. "C"),
++  * the formula of the component ("CN-"), and the name of the component ("cyanide").
++  * @param dbg print debugging info
++  * @param dataBasesList list of database names to read; databases that do not
++  * exist (and have no element file) are skipped
++  * @param elemCompStringArray  data is returned here (chemical element,
++  * component formula, component name)
++  * @throws ReadElemException if an element file is missing or can not be read */
++  public static void readElements(
++          boolean dbg,
++          java.util.ArrayList<String> dataBasesList,
++          java.util.ArrayList<String[]> elemCompStringArray) throws ReadElemException {
++    if(dbg) {System.out.println("-- readElements(..)");}
++    elemCompStringArray.clear();
++    elemCompStringArray.add(new String[]{"H","H+","hydrogen ion"});
++    for(String dbName : dataBasesList) {
++      java.io.File dbFile = new java.io.File(dbName);
++      boolean binaryDB = dbName.toLowerCase().endsWith(".db");
++      String base = Div.getFileNameWithoutExtension(dbName);
++      java.io.File elemFile;
++      if(binaryDB) {
++        elemFile = new java.io.File(base+".elb");
++      } else { // as AddDataElem.getElemFileName: "elt", else "elm"
++        elemFile = new java.io.File(base+".elt");
++        if(!elemFile.exists() && new java.io.File(base+".elm").exists()) {
++            elemFile = new java.io.File(base+".elm");
++        }
++      }
++      if(!dbFile.exists() && !elemFile.canRead()) {
++        if(dbg) {System.out.println("-- Warning: files \""+dbFile.getName()+"\" and \""+elemFile.getName()+"\" do not exist.");}
++        continue;
++      }
++      if(!elemFile.exists()) {
++        throw new ReadElemException("Can not find the \"element\"-file"+nl+
++                    "for database: \""+dbFile.getName()+"\"."+nl+nl+
++                    "Expected to find file \""+elemFile.getName()+"\".");
++      }
++      if(dbg) {System.out.println("  File \""+elemFile+"\"");}
++      if(binaryDB) {readElemFileBinary(dbg, elemFile, elemCompStringArray);}
++      else {readElemFileText(elemFile, elemCompStringArray);}
++    }
++  } //readElements()
++  //</editor-fold>
++
+   //<editor-fold defaultstate="collapsed" desc="readElemFileText">
+  /** Reads (from a single element database file) the components and the elements and
+   * stores them either in elemCompStringArray or in elemCompString.
+-- 
+2.50.0
+

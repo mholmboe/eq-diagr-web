@@ -1,0 +1,273 @@
+DataMaintenance (java) - Nov 26, 2026, 11:01:17 AM
+Statistics for LogK databases:
+
+Database(s) for reactions:
+  /Applications/Eq-Diagr/Reactions.db   Oct 22, 2021, 5:49 PM
+
+Element-reactant file(s):
+  /Applications/Eq-Diagr/Reactions.elb   Oct 22, 2021, 5:49 PM
+
+Total nbr reactions = 4446
+Total nbr reactants found in reaction databases = 169
+      (nbr reactants in element-reactant files = 169)
+
+Reactants found in reaction database(s):
+  Name     &    Nbr of reactions they participate in
+  (CH3)2Pb 2+            7
+  (CH3)2Sn 2+            34
+  AcSal-                 6
+  Ag+                    93
+  Al 3+                  82
+  Am 3+                  55
+  Am 4+                  4
+  AmO2+                  9
+  AsO4 3-                38
+  Au 3+                  11
+  Au+                    16
+  B(OH)3                 34
+  Ba 2+                  61
+  Be 2+                  60
+  Bi 3+                  55
+  Br-                    93
+  BrO-                   2
+  BrO3-                  19
+  CH3COO-                149
+  CH3Hg+                 28
+  CN-                    89
+  CO3 2-                 240
+  Ca 2+                  102
+  Cd 2+                  107
+  Ce 3+                  53
+  Ce 4+                  12
+  Cl-                    227
+  ClO3-                  17
+  ClO4-                  1
+  Co 2+                  75
+  Co 3+                  17
+  Cr 2+                  17
+  Cr 3+                  49
+  CrO4 2-                25
+  Cs+                    14
+  Cu 2+                  118
+  Cu+                    49
+  Dy 3+                  48
+  EDTA 4-                181
+  Er 3+                  47
+  Eu 3+                  65
+  F-                     245
+  Fe 2+                  68
+  Fe 3+                  121
+  Ga 3+                  37
+  Gd 3+                  55
+  Ge 2+                  8
+  Ge(OH)4                16
+  H+                     1945
+  H2O                    1379
+  H2O2                   1
+  H2PO2-                 11
+  H2Se                   27
+  H2TeO3                 8
+  H3AsO3                 25
+  H6TeO6                 6
+  HCOO-                  76
+  HP2O6 3-               7
+  HPO3 2-                15
+  HPo-                   8
+  HS-                    119
+  HTe-                   10
+  Hf 4+                  22
+  Hg 2+                  92
+  Hg2 2+                 37
+  Ho 3+                  44
+  I-                     89
+  IO3-                   64
+  In 3+                  65
+  Ir 3+                  10
+  K+                     35
+  La 3+                  60
+  Li+                    26
+  Lu 3+                  47
+  Mg 2+                  68
+  Mn 2+                  59
+  Mn 3+                  24
+  Mo 3+                  10
+  Mo2O4 2+               4
+  MoO4 2-                62
+  N3-                    71
+  NH3                    96
+  NO2-                   40
+  NO3-                   75
+  NTA 3-                 157
+  Na+                    56
+  Nb(OH)5                13
+  Nd 3+                  55
+  Ni 2+                  104
+  Np 3+                  11
+  Np 4+                  26
+  NpO2 2+                28
+  NpO2+                  40
+  OCN-                   7
+  OsO4                   6
+  P2O6 4-                5
+  P2O7 4-                95
+  P3O10 5-               63
+  P3O9 3-                18
+  P4O12 4-               24
+  PO4 3-                 258
+  Pb 2+                  109
+  Pb 4+                  5
+  Pd 2+                  51
+  Po 2+                  15
+  PoO 2+                 31
+  Pr 3+                  45
+  Pt 2+                  31
+  Pu 3+                  29
+  Pu 4+                  25
+  PuO2 2+                23
+  PuO2+                  9
+  Ra 2+                  10
+  Rb+                    10
+  Re(OH)4                6
+  ReO4-                  3
+  Rh 2+                  10
+  Rh 3+                  25
+  Ru 2+                  11
+  Ru 3+                  15
+  Ru(OH)2 2+             14
+  RuO4                   5
+  RuO4 2-                4
+  S2O3 2-                9
+  SCN-                   114
+  SO3 2-                 11
+  SO4 2-                 173
+  Sb(OH)3                25
+  Sb(OH)6-               7
+  Sc 3+                  37
+  SeCN-                  17
+  SeO3 2-                29
+  SeO4 2-                39
+  Si(OH)4                45
+  Sm 3+                  48
+  Sn 2+                  52
+  Sn 4+                  10
+  Sr 2+                  53
+  Ta(OH)5                5
+  Tb 3+                  52
+  Tc 3+                  3
+  TcO(OH)2               15
+  TcO4 2-                3
+  TcO4 3-                4
+  TcO4-                  8
+  Th 4+                  80
+  Ti 2+                  4
+  Ti 3+                  14
+  TiO 2+                 12
+  Tl 3+                  34
+  Tl+                    46
+  Tm 3+                  46
+  U 3+                   5
+  U 4+                   58
+  UO2 2+                 140
+  UO2+                   12
+  V 2+                   9
+  V 3+                   17
+  VO 2+                  60
+  VO2+                   51
+  WO4 2-                 26
+  Y 3+                   46
+  Yb 3+                  53
+  Zn 2+                  102
+  Zr 4+                  53
+  cit 3-                 158
+  e-                     444
+  gly-                   104
+  ox 2-                  141
+
+Warning: reactions found more than once
+    (with a different product):
+ b-Be(OH)2(s)   and:  a-Be(OH)2(s)
+ b-LiIO3(s)   and:  a-LiIO3(s)
+ b-NiS(s)   and:  a-NiS(s)
+ b-ZnS(s)   and:  a-ZnS(s)
+ p-MnS(s)   and:  g-MnS(s)
+ r-HgS(s)   and:  b-HgS(s)
+ trans-Cr(NH3)4(OH)2+   and:  cis-Cr(NH3)4(OH)2+
+ trans-Cr(NH3)4OH+2   and:  cis-Cr(NH3)4OH+2
+
+Note: solids found more than once
+    (with different phase designator)
+ Al(OH)3(cr)   and:  Al(OH)3(am)
+ Am(OH)3(s)   and:  Am(OH)3(am)
+ CaCO3(cr)   and:  CaCO3(am)
+ Ce(OH)3(cr)   and:  Ce(OH)3(am)
+ Co(OH)2(cr)   and:  Co(OH)2(am)
+ CoS(cr)   and:  CoS(am)
+ Cr(OH)3(cr)   and:  Cr(OH)3(am)
+ Dy(OH)3(cr)   and:  Dy(OH)3(am)
+ Er(OH)3(cr)   and:  Er(OH)3(am)
+ Eu(OH)3(cr)   and:  Eu(OH)3(am)
+ Fe(OH)3(s)   and:  Fe(OH)3(am)
+ FeAsO4·2H2O(cr)   and:  FeAsO4·2H2O(am)
+ FePO4·2H2O(cr)   and:  FePO4·2H2O(am)
+ FeS(cr)   and:  FeS(am)
+ Gd(OH)3(cr)   and:  Gd(OH)3(am)
+ GeO2(s)   and:  GeO2(cr)
+ HfO2(cr)   and:  HfO2(am)
+ Ho(OH)3(cr)   and:  Ho(OH)3(am)
+ La(OH)3(cr)   and:  La(OH)3(am)
+ Lu(OH)3(cr)   and:  Lu(OH)3(am)
+ Mg(OH)2(cr)   and:  Mg(OH)2(am)
+ Nd(OH)3(cr)   and:  Nd(OH)3(am)
+ Ni(OH)2(cr)   and:  Ni(OH)2(am)
+ NpO2OH(s)   and:  NpO2OH(am)
+ PbO(s)   and:  PbO(cr)
+ Pr(OH)3(cr)   and:  Pr(OH)3(am)
+ RuO4(s)   and:  RuO4(l)
+ S(l)   and:  S(cr)
+ Sb2O3(s)   and:  Sb2O3(cr)
+ SiO2(cr)   and:  SiO2(am)
+ Sm(OH)3(cr)   and:  Sm(OH)3(am)
+ SnO2(cr)   and:  SnO2(am)
+ Tb(OH)3(cr)   and:  Tb(OH)3(am)
+ ThO2(cr)   and:  ThO2(am)
+ ThO2(s)   and:  ThO2(am)
+ ThO2(s)   and:  ThO2(cr)
+ Tm(OH)3(cr)   and:  Tm(OH)3(am)
+ UO2(cr)   and:  UO2(am)
+ Y(OH)3(cr)   and:  Y(OH)3(am)
+ Yb(OH)3(cr)   and:  Yb(OH)3(am)
+ Zn(OH)2(cr)   and:  Zn(OH)2(am)
+
+Error? reaction products where the name
+    does not contain one or more reactant(s):
+ (CN)2  does not contain  OCN-
+ (CN)2(g)  does not contain  OCN-
+ CN-  does not contain  OCN-
+ explosive!(s)  does not contain  Au 3+
+ explosive!(s)  does not contain  NH3
+ H2Se  does not contain  CN-
+
+Error: citations with no references:
+ (logK assumed, T-dependence from:)
+ [Cp=MnSO4]
+ [delta H&Cp = La(SO4)2-]
+ [delta H&Cp = LaSO4+]
+ [delta-H & Cp: decrease stability at higher T]
+ [estimate = Cl2O]
+ [estimate dominates at Cl- > 1M]
+ [estimate from (CH3)2Hg(g)]
+ [estimate logK=1.02 as H2S(aq)=H2S(g)]
+ [estimate: 'stronger than' Fe(CN)6-3]
+ [estimate: dominates in 1M HF]
+ [estimate: dominates in 8M Hcl]
+ [estimated = CH4]
+ [estimated MoOCl5-2]
+ [estimated=Cl2]
+ [from HfO2 stability]
+ [k_H estimate = PH3]
+ [no temperature variation for Au(OH)3 reactions]
+ [solubility = 5E-6 at HCl=1M and P(H2S)=1atm, PoCl4-2 dominates]
+
+Warning: references not used in the database(s):
+ MintEQ
+ Wateq4F

@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Database maintenance</title>
+<script src="theme.js"></script>
+<link rel="stylesheet" href="theme.css">
+<script src="app-view.js"></script>
+<style>
+  main { max-width: 1180px; }
+  .note { font-size: var(--text-sm); color: var(--muted); }
+  details.tool { border: 1px solid var(--line); border-radius: 8px; padding: var(--space-4) var(--space-5); margin: var(--space-5) 0 0; }
+  details.tool > summary { font-size: var(--text-lg); }
+  details.tool[open] > summary { margin-bottom: var(--space-3); }
+  table.list { width: 100%; border-collapse: collapse; font-size: var(--text-md); margin-top: var(--space-3); }
+  table.list td, table.list th { padding: var(--space-2) var(--space-3); border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+  table.list th { color: var(--muted); font-size: var(--text-sm); font-weight: 600; }
+  table.list td.n { font-family: var(--font-mono); white-space: nowrap; }
+  table.list td.r { font-family: var(--font-mono); font-size: var(--text-sm); }
+  table.list button { padding: var(--space-2) var(--space-4); font-size: var(--text-sm); font-weight: 400; }
+  table.list tr.bad td.n { color: var(--fail); }
+  .scroll { max-height: 340px; overflow: auto; }
+  .two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 var(--space-6); }
+  @media (max-width: 700px) { .two { grid-template-columns: minmax(0, 1fr); } }
+  .reac { display: grid; grid-template-columns: 64px minmax(0, 1fr) 64px minmax(0, 1fr); gap: var(--space-3) var(--space-4); align-items: center; }
+  @media (max-width: 520px) { .reac { grid-template-columns: 56px minmax(0, 1fr); } }
+  input.num { width: 100%; }
+  .three { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0 var(--space-5); }
+  .warn { color: var(--fail); font-size: var(--text-md); margin: var(--space-3) 0 0; white-space: pre-wrap; }
+  #dbList li { font: var(--text-md) var(--font-mono); margin: var(--space-2) 0; display: flex; gap: var(--space-3); align-items: center; }
+  #dbList li button { padding: var(--space-2) var(--space-4); min-width: 28px; min-height: 26px; font-size: var(--text-sm); font-weight: 400; }
+  #dbList { padding-left: 0; list-style: none; margin: var(--space-3) 0 0; }
+  pre.report { max-height: 420px; }
+  textarea.ref { min-height: 120px; white-space: pre-wrap; }
+  html.embedded #status { display: none; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Database maintenance</h1>
+  <p class="lede">The tools of the eq-diagr programs DataMaintenance and AddShowReferences, running in the browser: statistics and checks of the databases, the data for a single component, conversion between binary and text databases, merging all databases into one, adding or editing reactions and components in a text database, and adding or editing literature references. The files stay in this browser.</p>
+  <nav><a href="database.html">Database</a><a href="maintenance.html" aria-current="page">Maintenance</a><a href="spana.html">Diagram</a><a href="sed.html">SED</a><a href="predom.html">Predom</a><a href="help.html">Help</a><a href="ec-tests.html">EC tests</a></nav>
+  <div class="grid">
+    <section>
+      <label>Databases</label>
+      <div class="row" style="margin-top:0">
+        <select id="builtin" style="width:auto; flex:1 1 15em; min-width:0" title="The databases that come with the program"></select>
+        <button id="pickFiles">Add your own files…</button>
+        <input id="files" type="file" multiple accept=".db,.elb,.txt,.skv,.csv,.elt,.elm" hidden>
+      </div>
+      <p id="dbstatus" class="note">No database loaded.</p>
+      <ol id="dbList"></ol>
+      <p class="note">The databases are used in this order (later ones replace reactions of earlier ones). These are the same files as on the Database page: a change here is seen there, and the set is remembered in this browser if it is there. Load a <code>.db</code> file with its <code>.elb</code> file, or a text <code>.txt</code> or <code>.skv</code> database with its <code>.elt</code> or <code>.elm</code> file, and <code>References.txt</code> for the references.</p>
+      <div class="row tight"><label class="check"><input id="remember" type="checkbox" checked> remember the files in this browser</label></div>
+      <div class="row tight">
+        <button id="sessSave" type="button" title="Download all the database files of the list as one session file, to open them again here or on another computer">Save session…</button>
+        <button id="sessOpen" type="button" title="Open a session file: its database files take the place of those in the list">Open session…</button>
+        <input id="sessFile" type="file" accept=".eqsession,.json" hidden>
+      </div>
+      <p id="status"></p>
+      <details id="logDetails"><summary>Program messages</summary><pre id="log"></pre></details>
+    </section>
+    <section>
+      <details class="tool" id="tStats">
+        <summary>Statistics and checks</summary>
+        <p class="note">Reads all databases and lists the reactants and their use, and the errors and warnings: reactants missing from the element files, reactions that are not charge balanced, duplicate reactions, and citations without a reference (if a references file is loaded). This is the file that DataMaintenance writes.</p>
+        <div class="row"><button id="statsRun" class="primary">Make the statistics</button><button id="statsSave" disabled>Download Statistics.txt</button></div>
+        <pre class="report" id="statsOut" hidden></pre>
+      </details>
+
+      <details class="tool" id="tSingle">
+        <summary>Show data for a single component</summary>
+        <div class="row"><select id="singleComp" style="width:auto; min-width:160px"></select><button id="singleRun" class="primary">Search</button><button id="singleSave" disabled>Download single_comp.txt</button></div>
+        <p class="note" id="singleNote"></p>
+        <pre class="report" id="singleOut" hidden></pre>
+      </details>
+
+      <details class="tool" id="tText">
+        <summary>Convert a binary database to text</summary>
+        <p class="note">Writes the text database (<code>.txt</code>) and its element file (<code>.elt</code>), which can be edited here or in a text editor. The text format keeps fewer digits of the enthalpy data, so log <i>K</i> away from 25 °C can differ in the third decimal.</p>
+        <div class="row"><select id="toTextDb" style="width:auto"></select><button id="toTextRun">Convert to text</button><label class="check"><input id="toTextUse" type="checkbox"> add the text files to the databases</label></div>
+      </details>
+
+      <details class="tool" id="tBin">
+        <summary>Merge all databases into a single binary database</summary>
+        <p class="note">All the databases above, in their order, are read and written as one binary database (<code>.db</code> with <code>.elb</code>). A reaction found again replaces the earlier one, and a name starting with "@" removes the earlier reactions with that name.</p>
+        <div class="row"><input id="binName" class="txt code" type="text" value="Reactions.db" style="width:200px"><button id="binRun" class="primary">Merge</button></div>
+        <div class="row" id="binDone" hidden><button id="binDownload">Download .db and .elb</button><button id="binUse">Use it instead of the databases above</button></div>
+      </details>
+
+      <details class="tool" id="tAdd">
+        <summary>Add data or edit a text database</summary>
+        <div class="row"><select id="addFile" style="width:auto; min-width:200px"></select><button id="addOpen">Open</button></div>
+        <p class="note">Reactions and components are added to a text database (a <code>.txt</code> file and its element file, <code>.elt</code>). The reactants offered are those of all the databases above and of this file. Choose "New text database…" to start a file of your own, for example with your own data, and use it together with the other databases.</p>
+        <div id="addPanel" hidden>
+          <p class="warn" id="addWarn"></p>
+          <div class="row tight"><button id="addDownload">Download .txt and .elt</button></div>
+          <label>Reactions in <span id="addName"></span></label>
+          <div class="scroll"><table class="list" id="addReactions"></table></div>
+          <fieldset>
+            <legend id="reacLegend">New reaction</legend>
+            <label for="rName">Reaction product (complex or solid)</label>
+            <input id="rName" class="txt formula" type="text" placeholder="for example CaCl+ or @CaSO4 to exclude a species">
+            <label>Reactants and stoichiometric coefficients</label>
+            <div class="reac" id="rReac"></div>
+            <div class="three">
+              <div><label for="rLogK">log <i>K</i>° (25 °C)</label><input id="rLogK" class="num" type="text"></div>
+              <div><label for="rDH">Δ<i>H</i>° (kJ/mol)</label><input id="rDH" class="num" type="text"></div>
+              <div><label for="rDCp">Δ<i>C<sub>p</sub></i>° (J/(K mol))</label><input id="rDCp" class="num" type="text"></div>
+            </div>
+            <p class="note" id="rNote"></p>
+            <div class="two">
+              <div><label for="rRef">Reference(s)</label><input id="rRef" class="txt" type="text"></div>
+              <div><label for="rComment">Comment</label><input id="rComment" class="txt" type="text"></div>
+            </div>
+            <p class="note" id="rText"></p>
+            <div class="row tight"><button id="rSave" class="primary">Save reaction</button><button id="rNew">New reaction</button></div>
+          </fieldset>
+          <label>Components (reactants) in <span id="addEleName"></span></label>
+          <div class="scroll"><table class="list" id="addComponents"></table></div>
+          <fieldset>
+            <legend id="compLegend">New component</legend>
+            <div class="two">
+              <div><label for="cName">Name</label><input id="cName" class="txt formula" type="text" placeholder="for example SCN-"></div>
+              <div><label for="cDescr">Description</label><input id="cDescr" class="txt" type="text" placeholder="for example thiocyanate"></div>
+            </div>
+            <label for="cElems">Linked to the elements <span class="note">(select one or more)</span></label>
+            <select id="cElems" multiple size="5"></select>
+            <div class="row tight"><button id="cSave" class="primary">Save component</button><button id="cNew">New component</button></div>
+          </fieldset>
+        </div>
+      </details>
+
+      <details class="tool" id="tRefs">
+        <summary>Show, add or edit references</summary>
+        <div class="row"><select id="refFile" style="width:auto; min-width:200px"></select><button id="refOpen">Open</button></div>
+        <div id="refPanel" hidden>
+          <div class="row"><select id="refKeys" style="width:auto; min-width:220px; flex:1"></select><button id="refNew">Add new reference</button><button id="refDownload">Download</button></div>
+          <label for="refKey">Reference key (citation)</label>
+          <input id="refKey" class="txt code" type="text">
+          <label for="refText">Reference</label>
+          <textarea id="refText" class="ref"></textarea>
+          <div class="row tight"><button id="refSave" class="primary">Save</button><button id="refDelete">Delete</button></div>
+          <p class="note">The references file is a Java properties file: one "key=reference" entry per line. It is written with the keys in alphabetical order, as AddShowReferences intends (on Java 9 and later the desktop program writes them in no particular order).</p>
+        </div>
+      </details>
+    </section>
+  </div>
+</main>
+<script src="engine-client.js"></script>
+<script src="store.js"></script>
+<script src="builtin-db.js"></script>
+<script src="properties.js"></script>
+<script src="dialogs.js"></script>
+<script src="maintenance.js"></script>
+</body>
+</html>

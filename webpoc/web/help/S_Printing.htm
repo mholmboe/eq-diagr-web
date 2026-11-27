@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>SPANA: exporting and printing diagrams</title>
+<link rel="stylesheet" href="1_.css">
+<link rel="stylesheet" href="1_web.css">
+</head>
+<body>
+<div class="crumb"><a href="0_Index.htm"><img src="images/thco35_s.gif" width="32" height="32" alt="Chem.Eq.Diagr"></a>
+<span><a href="S_0_Main.htm">SPANA</a></span></div>
+
+<h3>Exporting and printing diagrams, and figures for reports</h3>
+
+<p>The buttons above the diagram, and the same items in the <span class="ui">File</span> menu, download the diagram
+or its data to your computer:</p>
+
+<table class="opts">
+<tr><td><span class="ui">SVG</span></td><td>a vector image, as drawn on the screen. It keeps its quality at any size,
+and can be inserted in documents (Word, LibreOffice and others) and edited in drawing programs such as
+Inkscape.</td></tr>
+<tr><td><span class="ui">PNG</span></td><td>a bitmap image for slides and web pages, 1600 pixels on the longest
+side unless you choose another size (800 to 4800 pixels) under <span class="ui">PNG image</span> in the
+<a href="S_Diagram_Window.htm#Style">diagram style</a>.</td></tr>
+<tr><td><span class="ui">PDF</span></td><td>the diagram as on the screen, with the fonts and colours of the
+<a href="S_Diagram_Window.htm#Style">diagram style</a>. The labels use the standard PDF fonts (Helvetica, Times or
+Courier). These fonts are not embedded in the file: every PDF viewer has them (or a font with the same widths), so
+the file is small and shows the same layout everywhere, but a viewer may draw them with a similar font of its own.</td></tr>
+<tr><td><span class="ui">EPS</span> <span class="adv">(advanced)</span></td><td>encapsulated PostScript, made by
+PlotPS, the converter of the desktop programs: always with the plotter lettering of the plot file, whatever the diagram
+style, in colour or in black and white. See <a href="SP_PostScript.htm">PostScript</a>.</td></tr>
+<tr><td><span class="ui">.plt</span> <span class="adv">(advanced)</span></td><td>the plot file, which can be edited
+with a text editor (see <a href="SP_Plot-File_Format.htm#Make_Changes">making it pretty</a>) and displayed again
+here (<span class="ui">File &gt; Open data or plot file&hellip;</span>) or with the desktop Spana.</td></tr>
+<tr><td><span class="ui">.csv</span></td><td>SED diagrams: the values of the curves as a table, for a spreadsheet or
+another plotting program. See <a href="SP_Table_Output.htm">table output</a>; the file name extension and the
+separator can be changed in the Options (advanced mode).</td></tr>
+<tr><td><span class="ui">.dat</span></td><td>the data file, with the current settings. It can be opened again here,
+or in the desktop programs.</td></tr>
+</table>
+
+<p>The <a href="S_Diagram_Window.htm#Style">diagram style</a> (<span class="ui">Style…</span> above the diagram)
+sets the font, text size, colours and line width of the SVG, PNG and PDF files, as on the screen. EPS files are made
+by PlotPS with the lines of the plot file, in colour, or in black and white when the style is black and white.</p>
+
+<h4 id="Page">The page of PDF and PostScript files</h4>
+<p>Under <span class="ui">PDF and PostScript page</span> in the <a href="S_Diagram_Window.htm#Style">diagram
+style</a> you choose, as in the conversion window of the desktop Spana:</p>
+<table class="opts">
+<tr><td><b>Page</b></td><td>the diagram alone (the page is as large as the diagram), or an A4 or Letter page.</td></tr>
+<tr><td><b>Orientation</b>, <b>Left</b>, <b>Bottom</b></td><td>for an A4 or Letter page: portrait or landscape, and
+the distance in cm from the left and bottom edges of the page to the diagram.</td></tr>
+<tr><td><b>Size</b></td><td>50 to 200 % of the size of the diagram.</td></tr>
+<tr><td><b>header line</b></td><td>the name of the diagram and the date, at the top of the page.</td></tr>
+<tr><td><b>PostScript file</b> <span class="adv">(advanced)</span></td><td>EPS, the diagram alone for insertion
+in a document, or PS, a page for a printer. The button above the diagram is named after the choice.</td></tr>
+</table>
+
+<h4 id="Copy">Copying the diagram</h4>
+<p><span class="ui">Copy</span> above the diagram (or <span class="ui">File &gt; Copy the diagram as an image</span>)
+puts the diagram on the clipboard as a PNG image, as drawn on the screen and with the size chosen for PNG files.
+Paste it in a document, a slide or a message. A browser that cannot copy images says so; use the PNG file
+instead.</p>
+
+<h4>Printing</h4>
+<p><span class="ui">File &gt; Print the diagram&hellip;</span> (<kbd>Ctrl</kbd>+<kbd>P</kbd>, or
+<kbd>&#8984;</kbd>+<kbd>P</kbd> on a Mac, while a diagram tab is shown) opens the print dialog of the browser with
+the diagram alone, drawn with the <a href="S_Diagram_Window.htm#Style">diagram style</a> and scaled to the width of
+the page. Choose landscape in the dialog for a larger diagram. You can also export the diagram as
+<span class="ui">PDF</span> and print that file.</p>
+
+<h4>Making it pretty</h4>
+<ul class="plain">
+<li>Choose the font, text size, colours, line width, tick marks, grid and frame with
+<span class="ui">Style…</span>, and the step between the numbers of the axes in the Options (advanced mode); see
+<a href="S_Diagram_Window.htm#Style">the diagram style</a>.</li>
+<li>Change the <b>text height</b>, the <b>title</b>, the concentration <b>units</b> and <b>notation</b> in the
+Options (advanced mode), and make the diagram again.</li>
+<li>Edit an exported SVG in a drawing program, for example to move labels, change colours or fonts.</li>
+<li>Edit the plot file (<span class="ui">.plt</span>, advanced mode) with a text editor, see the
+<a href="SP_Plot-File_Format.htm">plot file format</a>.</li>
+</ul>
+<p>&nbsp;</p>
+</body>
+</html>

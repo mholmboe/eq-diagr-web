@@ -1,0 +1,1 @@
+MESSAGE: Finished converting the text database. The following binary files were created:      "/private/var/folders/jy/n3825p752cx7f68jpsnl420m0000gn/T/tmp.f7z9pgPbN5/M2.elb"      "/private/var/folders/jy/n3825p752cx7f68jpsnl420m0000gn/T/tmp.f7z9pgPbN5/M2.db"

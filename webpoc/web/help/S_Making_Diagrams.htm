@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>SPANA: making a diagram</title>
+<link rel="stylesheet" href="1_.css">
+<link rel="stylesheet" href="1_web.css">
+</head>
+<body>
+<div class="crumb"><a href="0_Index.htm"><img src="images/thco35_s.gif" width="32" height="32" alt="Chem.Eq.Diagr"></a>
+<span><a href="S_0_Main.htm">SPANA</a></span></div>
+
+<h3>Making a diagram (SED or PREDOM)</h3>
+
+<p>A diagram tab has the settings on the left and the diagram on the right (below the settings on a narrow
+screen). The settings are in four sections, which open and close with a click on their heading:
+<a href="#System">Chemical system</a>, <a href="#Diagram">Diagram</a>, <a href="#Concs">Concentrations</a> and
+<a href="#Parameters">Options</a>. When they are set, click <span class="ui">Plot the diagram</span>
+(<kbd>Ctrl</kbd>+<kbd>Enter</kbd>, or <kbd>&#8984;</kbd>+<kbd>Enter</kbd> on a Mac).</p>
+
+<h4 id="System">Chemical system</h4>
+<p>The components and reactions of the data file, with the temperature and pressure it was made for. Here you can
+switch reactions off, change log&nbsp;<i>K</i> values, delete components and exchange them for reaction products.
+See <a href="S_Modify_Chem_System.htm">changing the chemical system</a>.</p>
+
+<h4 id="Diagram">Diagram</h4>
+<p><b>Type.</b> Only the types that the chemical system allows are offered:</p>
+<table class="opts">
+<tr><td>Predominance area diagram</td><td>PREDOM</td><td>the species that predominate for a main component, with a varied
+component on each axis. See <a href="SP_Diagr_Predom.htm">predominance diagrams</a>.</td></tr>
+<tr><td>Fractions</td><td>SED</td><td>the fraction of a component in each of its species. See
+<a href="SP_Diagr_Fract.htm">fraction diagrams</a>.</td></tr>
+<tr><td>Logarithmic concentrations</td><td>SED</td><td>log of the concentrations of all species. See
+<a href="SP_Diagr_Log.htm">logarithmic diagrams</a>.</td></tr>
+<tr><td>Logarithmic solubilities</td><td>SED</td><td>the total dissolved concentration of each component; offered when
+the system has a solid or a gas. See <a href="SP_Diagr_Solubl.htm">solubility diagrams</a>.</td></tr>
+<tr><td>Relative activities</td><td>SED</td><td>activities relative to that of a reference species.</td></tr>
+<tr><td>Calculated pH</td><td>SED</td><td>the pH of the solution; offered when the system has H<sup>+</sup>.</td></tr>
+<tr><td>Calculated pe (or Eh)</td><td>SED</td><td>the redox potential; offered when the system has e<sup>&minus;</sup>.</td></tr>
+<tr><td>Logarithmic activities <span class="adv">(advanced)</span></td><td>SED</td><td>log of the activities of all species.</td></tr>
+<tr><td>H<sup>+</sup> affinity spectrum <span class="adv">(advanced)</span></td><td>SED</td><td>see
+<a href="Tut_H_aff_spectr.htm">proton affinity diagrams</a>.</td></tr>
+</table>
+
+<p><b>Components in the axes.</b> Choose the <span class="ui">X-axis component</span>. A predominance diagram also
+needs a <span class="ui">Y-axis component</span> and a <span class="ui">Main component</span>, the one whose species
+are shown. A fraction diagram needs the component whose fractions are shown
+(<span class="ui">Fractions of component</span>), and a relative activity diagram a
+<span class="ui">Reference component</span>. A component placed in an axis gets a varied concentration, and a
+component taken out of the axes gets a fixed one.</p>
+
+<p>The <b>Y-axis</b> has a row of its own at the end of the table of concentrations, marked as the row of the
+component in the X-axis is. It says what the axis shows (for example log concentration) and, for logarithmic,
+solubility, activity, pH and pe diagrams, has the range of the axis in the two fields. In a predominance diagram
+the Y-axis is a component, and its row is marked in the same way.</p>
+
+<p><b>Show Eh instead of pe</b> (for systems with e<sup>&minus;</sup>) gives the redox potential in volts, in the
+concentrations, the axes and the Y range of a calculated Eh diagram. The temperature of the data file (or the one given in
+the Options) is used to convert pe to Eh. See <a href="1_Eh_pe.htm">Eh and pe</a>.</p>
+
+<p><b>Title</b> <span class="adv">(advanced)</span>: a text written at the top of the diagram. See
+<a href="SP_Plot-File_Format.htm">how to enter texts</a>.</p>
+
+<h4 id="Concs">Concentrations</h4>
+<p>One row for each component, with the type of concentration and its value, or its range when it is varied:</p>
+<table class="opts">
+<tr><td><b>total conc.</b></td><td>the total concentration in mol/kg (molal); for H<sup>+</sup>, the amount of acid
+added (negative for a base)</td></tr>
+<tr><td><b>total conc. varied</b></td><td>from &hellip; to &hellip; mol/kg</td></tr>
+<tr><td><b>log total varied</b></td><td>from &hellip; to &hellip;, as log of the total concentration</td></tr>
+<tr><td><b>pH</b>, <b>pe</b>, <b>Eh (V)</b></td><td>for H<sup>+</sup> and e<sup>&minus;</sup>: a fixed pH, pe or Eh</td></tr>
+<tr><td><b>log P</b></td><td>for a gas component, for example CO<sub>2</sub>(g): log of the partial pressure in bar</td></tr>
+<tr><td><b>log activity</b></td><td>for other components: a fixed log activity</td></tr>
+<tr><td>&hellip; <b>varied</b></td><td>the same, varied from &hellip; to &hellip;</td></tr>
+</table>
+<p>When the type changes between a fixed and a varied form of the same quantity (pH and pH varied, total conc.
+and total conc. varied, and so on), the value is kept: a range becomes its middle, and a value becomes the centre of
+a range. A type with other units starts from a default value.</p>
+<p>The components in the axes must be varied, and the others fixed; a line below the table says what is missing.
+The data file keeps pH, pe, Eh and log&nbsp;<i>P</i> as log activities, as in the desktop programs, so files can be
+exchanged with them.</p>
+
+<h4 id="Parameters">Options</h4>
+<p>In normal mode:</p>
+<table class="opts">
+<tr><td><b>Ionic strength</b></td><td>empty or 0: no activity coefficients (ideal solution). A positive value: the
+activity coefficients for that fixed ionic strength. &minus;1: the ionic strength is calculated at each point,
+assuming electroneutrality (Na<sup>+</sup> or Cl<sup>&minus;</sup> is added to balance the charge). See
+<a href="SP_Ionic_Strength.htm">ionic strength</a>.</td></tr>
+</table>
+<p>In <a href="S_Menu_Prefs.htm">advanced mode</a> also:</p>
+<table class="opts">
+<tr><td><b>allow reversed axes</b></td><td>normally the lower value of a range is shown first. Tick this to keep a
+range in the order you give it, see <a href="SP_Data_File_Concs.htm">concentrations</a>.</td></tr>
+<tr><td><b>Steps</b></td><td>the number of calculation steps in each axis (default 50). More steps give smoother
+curves and sharper borders in predominance diagrams, and take longer.</td></tr>
+<tr><td><b>Temperature</b></td><td>for activity coefficients and Eh; the default is the temperature of the data file.
+The log&nbsp;<i>K</i> values are not changed. See <a href="DB_Temperature.htm">temperature</a>.</td></tr>
+<tr><td><b>Activity coefficients</b></td><td>the model: Davies, SIT or simplified HKF (the default). See
+<a href="SP_Act_Coeff_Models.htm">activity coefficient models</a>.</td></tr>
+<tr><td><b>Diagram name</b> (in the Diagram section)</td><td>the name of the files you export (SVG, PNG, PDF, the
+table); empty for the name of the data file.</td></tr>
+<tr><td><b>Tolerance in HaltaFall</b>, <b>tolerance for activity coefficients</b></td><td>see
+<a href="SP_Tolerance.htm">tolerance</a>.</td></tr>
+<tr><td><b>Concentration units</b>, <b>notation</b>, <b>text height</b></td><td>how concentrations and texts are written
+in the diagram.</td></tr>
+<tr><td><b>Tick step, X-axis</b> and <b>Y-axis</b></td><td>the step between the numbers of an axis, in its
+units; empty for the program's choice. Changes the drawing only, see
+<a href="S_Diagram_Window.htm#Ticks">the diagram</a>.</td></tr>
+<tr><td><b>Fraction threshold</b></td><td>SED: the smallest fraction for which a curve is drawn (default 0.03).
+Lower it to show minor species.</td></tr>
+<tr><td><b>aqueous species only</b>, <b>neutral pH line</b></td><td>PREDOM: leave out the solids (to show the
+aqueous speciation below them), and draw the line of neutral pH.</td></tr>
+<tr><td><b>Table of results</b></td><td>SED writes the values of the curves as a table; here you choose its name
+extension, column separator and comment characters. See <a href="SP_Table_Output.htm">table output</a>.</td></tr>
+<tr><td><b>write the table of results</b></td><td>untick it to make a SED diagram without the table. The species
+at the pointer are then not listed under the diagram, since they are read from the table.</td></tr>
+<tr><td><b>Save as defaults</b>, <b>Program defaults</b></td><td>the first keeps these options in this browser for
+the diagram tabs you open later, as the button of the desktop Spana; the second goes back to the options of the
+programs. The temperature, the title and the tick steps belong to a diagram and are not saved.</td></tr>
+<tr><td><b>Debugging</b></td><td>more output from SED, PREDOM and HaltaFall under <span class="ui">Program
+messages</span>.</td></tr>
+</table>
+
+<h4>Making the diagram</h4>
+<p><span class="ui">Plot the diagram</span> writes the settings into the data file, saves it in this browser (as the
+desktop Spana saves the data file before it runs SED or PREDOM), and runs SED or PREDOM. The status line reports the
+number of equilibrium calculations; <span class="ui">Stop</span> interrupts a long calculation. If some points
+fail, or nothing is drawn, see <span class="ui">Program messages</span> below the diagram, and
+<a href="SP_Failures.htm">the programs fail?</a></p>
+
+<h4 id="Live">Live mode</h4>
+<p>Tick <span class="ui">Live</span>, beside <span class="ui">Plot the diagram</span>, to have the diagram follow
+the settings: each change of the diagram type, an axis, a concentration or an option makes the diagram again, without
+a click on the button. The browser remembers the choice.</p>
+
+<p>In live mode a slider is shown under each fixed value in the table of concentrations, so that you can see how the
+diagram changes with, for example, the total concentration of a metal or the partial pressure of
+CO<sub>2</sub>:</p>
+<ul class="plain">
+<li>pH, pe, Eh, log&nbsp;<i>P</i> and log activity move between the limits of the quantity (pH 0 to 14, Eh &minus;2
+to 2&nbsp;V);</li>
+<li>a total concentration moves on a logarithmic scale, from 10<sup>&minus;9</sup> to 10&nbsp;mol/kg;</li>
+<li>a total concentration that is zero or negative, as it may be for H<sup>+</sup> and e<sup>&minus;</sup>, moves
+linearly around zero.</li>
+</ul>
+<p>The slider writes its value in the table, and a value typed in the table moves the slider. The values of a varied
+component (the range of an axis) have no sliders; type them as usual.</p>
+
+<p>In live mode the drawing keeps its place when the texts above it change. An ionic strength adds a line above
+the diagram, which would move the whole diagram down; live mode keeps room for that line from the start, so there
+is a little more space above the diagram than otherwise. The ionic strength is written on the new line, above the
+concentrations, and the temperature stays where it is. (The desktop programs, and the EPS, PS and plot files, have
+the two the other way round.)</p>
+
+<p id="LiveOpt">Two options have sliders in live mode, under <span class="ui">Options</span>: the
+<b>ionic strength</b>, from 0 to 1&nbsp;mol/kg, and in advanced mode the <b>temperature</b> of the calculation, from
+0 to 100&nbsp;&deg;C. The temperature changes the activity coefficients and the Eh scale only. The
+log&nbsp;<i>K</i> values of a data file are those of the temperature it was made for in the Chemical system tab;
+for another temperature, search again with that temperature, see <a href="DB_Temperature.htm">temperature</a>.</p>
+
+<p id="LiveK">The equilibrium constants have sliders too: open the <span class="ui">Chemical system</span> section,
+and each log&nbsp;<i>K</i> has a slider that moves three units to each side of the value the file was opened with,
+in steps of 0.05. A changed log&nbsp;<i>K</i> is shown in bold, and the button &#8634; beside it takes it back to the
+value of the file. This shows, for example, how much a p<i>K</i><sub>a</sub> or a solubility product must change
+before a diagram looks different. A changed log&nbsp;<i>K</i> is not part of the file that is saved for you when
+the diagram is made: see <a href="S_Modify_Chem_System.htm#LogK">changing log&nbsp;<i>K</i></a>. To compare the
+diagrams before and after, keep the first one (see <a href="S_Diagram_Window.htm#Keep">comparing
+diagrams</a>).</p>
+
+<p>Most diagrams are calculated in less than a tenth of a second, and then the diagram follows the slider while it
+is dragged. A slow calculation (many components, a calculated ionic strength, a high number of steps) is not started
+for every step of the slider: one calculation runs at a time, and the latest settings are used for the next one.
+While a setting is in error, nothing is calculated and the diagram is dimmed, as without live mode.</p>
+
+<p>The data file is not saved for each of these diagrams. It is saved in this browser when the settings have been
+left unchanged for two seconds.</p>
+
+<p>On a narrow screen (a phone) the diagram stays in the upper part of the tab in live mode, and the settings are
+scrolled under it.</p>
+
+<p>The diagram and its export buttons are described in <a href="S_Diagram_Window.htm">the diagram</a> and
+<a href="S_Printing.htm">exporting and printing</a>.</p>
+<p>&nbsp;</p>
+</body>
+</html>

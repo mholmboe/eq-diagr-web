@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Make your first diagram</title>
+<link rel="stylesheet" href="1_.css">
+<link rel="stylesheet" href="1_web.css">
+</head>
+<body>
+<div class="crumb"><a href="0_Index.htm"><img src="images/thco35_s.gif" width="32" height="32" alt="Chem.Eq.Diagr"></a>
+<span><a href="0_Index.htm">Chemical Equilibrium Diagrams</a> / <a href="Tut_0_Tutorials.htm">Tutorials</a></span></div>
+
+<h3>Make your first diagram</h3>
+
+<p>This diagram shows the hydrolysis of iron(II) as a function of pH. It takes four clicks in the
+<span class="ui">Chemical system</span> tab and one in the diagram tab.</p>
+
+<ol class="steps">
+<li>In the <span class="ui">Chemical system</span> tab, click <span class="ui">Fe</span> in the periodic table.
+The components of iron are listed under <span class="ui">Available for Fe</span>. Click
+<span class="ui">Fe 2+</span>. The selected components are now H<sup>+</sup> (selected from the start) and
+Fe<sup>2+</sup>.</li>
+<li>Click <span class="ui">Search reactions</span>. The reactions found in the database are listed with their
+log&nbsp;<i>K</i> values and references.</li>
+<li>Click <span class="ui">Create a diagram</span>. The data file is saved in this browser
+(as <code>H+_Fe2+.dat</code>), and a new tab opens with the diagram settings. Spana has already chosen a
+logarithmic diagram with pH on the X-axis and a total concentration of 10&nbsp;&micro;M for iron(II).</li>
+<li>Click <span class="ui">Plot the diagram</span> (or press <kbd>Ctrl</kbd>+<kbd>Enter</kbd>,
+<kbd>&#8984;</kbd>+<kbd>Enter</kbd> on a Mac). SED calculates the equilibrium composition at 51 pH values
+and draws the diagram.</li>
+</ol>
+
+<img class="diagr" src="images/1st_Diagram.gif" alt="Logarithmic diagram of Fe(II) hydrolysis" width="370" height="248">
+
+<p>The logarithmic diagram shows the distribution of the hydrolysis products of Fe(II) as a function of pH.
+Fe(OH)<sub>2</sub> precipitates above pH&nbsp;&asymp;&nbsp;9. The picture above was made with the desktop
+programs and the eq-diagr database; with the KTH course database, the default, the solid is called
+Fe(OH)<sub>2</sub>(c) and the curves are nearly the same.</p>
+
+<p>From here you can change the concentrations (in the <span class="ui">Concentrations</span> section), choose
+another diagram type, or export the diagram with the buttons above it (<span class="ui">SVG</span>,
+<span class="ui">PNG</span>, <span class="ui">PDF</span>). See <a href="S_Making_Diagrams.htm">making a diagram</a>.</p>
+
+<p>Two things to try with this diagram:</p>
+<ul class="plain">
+<li>Point at the diagram. The pH and the logarithm of the concentration at the pointer are shown under the diagram,
+together with the species at that pH, for example where the curves of Fe<sup>2+</sup> and FeOH<sup>+</sup> cross
+(see <a href="S_Diagram_Window.htm#Displ_Coord">reading values from the diagram</a>).</li>
+<li>Tick <span class="ui">Live</span> beside <span class="ui">Plot the diagram</span>, and drag the slider that
+appears under the total concentration of Fe<sup>2+</sup>. The diagram follows the slider, and the pH at which
+Fe(OH)<sub>2</sub> starts to precipitate moves with the concentration (see
+<a href="S_Making_Diagrams.htm#Live">live mode</a>).</li>
+</ul>
+
+<p class="note">The data file stays in this browser and is listed under <span class="ui">Data files</span> on the
+left. Click it there to open it again later. See <a href="S_Interacting_w_Windows.htm">files in the browser</a>.</p>
+
+<p>See also the <b><a href="Tut_0_Tutorials.htm">tutorials</a></b> and the
+<b><a href="Tut_Example_Files.htm">example files</a></b>.</p>
+<p>&nbsp;</p>
+</body>
+</html>

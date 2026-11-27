@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Predom in the browser</title>
+<script src="theme.js"></script>
+<link rel="stylesheet" href="theme.css">
+</head>
+<body>
+<main>
+  <h1>Predom (Predominance Area Diagrams) running in the browser</h1>
+  <p class="lede">The eq-diagr Predom calculation (HaltaFall on a grid of points) and plot generation, compiled from Java to JavaScript with TeaVM and run in a Web Worker. The diagram is the <code>.plt</code> file Predom writes, drawn as SVG. Input is the usual Predom <code>.dat</code> file; options are Predom's command-line options (<code>-n=</code> steps per axis, <code>-i=</code> ionic strength, <code>-t=</code> temperature, <code>-m=</code> activity model, <code>-aqu</code> aqueous species only, <code>-ph</code> neutral-pH line, <code>-tol=</code>, <code>-units=</code>, <code>-sci</code>, <code>-eng</code>, <code>-rev</code>).</p>
+  <nav><a href="database.html">Database</a><a href="maintenance.html">Maintenance</a><a href="spana.html">Diagram</a><a href="sed.html">SED</a><a href="predom.html" aria-current="page">Predom</a><a href="help.html">Help</a><a href="ec-tests.html">EC tests</a></nav>
+  <div class="grid">
+    <section>
+      <label for="example">Example</label>
+      <select id="example"></select>
+      <label for="dat">Input file (<code>.dat</code>)</label>
+      <textarea id="dat" spellcheck="false"></textarea>
+      <label for="args">Options</label>
+      <input id="args" class="code" type="text" spellcheck="false">
+      <div class="hint">At most 1000 steps per axis, as in Predom; 100 steps means 101 × 101 equilibrium calculations.</div>
+      <div class="row">
+        <button id="draw" class="primary">Draw diagram</button>
+        <button id="stop" hidden>Stop</button>
+        <label class="check"><input id="colour" type="checkbox" checked> Colour</label>
+      </div>
+    </section>
+    <section>
+      <p id="status"></p>
+      <div class="paper" id="plot"><div class="empty">Choose an example or edit the input, then press "Draw diagram".</div></div>
+      <div class="row">
+        <button id="dlSvg" disabled>Download SVG</button>
+        <button id="dlPlt" disabled>Download .plt</button>
+        <button id="dlPdf" disabled>PDF</button>
+        <button id="dlEps" disabled>EPS</button>
+      </div>
+      <details id="logDetails"><summary>Predom messages</summary><pre id="log"></pre></details>
+    </section>
+  </div>
+</main>
+<script src="predom-examples.js"></script>
+<script src="engine-client.js"></script>
+<script src="diagram.js"></script>
+<script>
+  setupDiagramPage({
+    program: "predom", examples: window.predomExamples, fixedArgs: "",
+    pointsText: r => `${r.points.toLocaleString("en")} equilibrium calculations in ${r.ms} ms`
+  });
+</script>
+</body>
+</html>

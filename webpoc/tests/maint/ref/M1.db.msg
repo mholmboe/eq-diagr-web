@@ -1,0 +1,1 @@
+MESSAGE: Finished merging 2 text databases. The following binary files were created:      "/private/var/folders/jy/n3825p752cx7f68jpsnl420m0000gn/T/tmp.hjjaI1bA8u/M1.elb"      "/private/var/folders/jy/n3825p752cx7f68jpsnl420m0000gn/T/tmp.hjjaI1bA8u/M1.db"

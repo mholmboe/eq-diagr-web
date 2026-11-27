@@ -1,0 +1,55 @@
+DataMaintenance (java) - Nov 26, 2026, 11:01:15 AM
+Statistics for LogK databases:
+
+Database(s) for reactions:
+  /private/var/folders/jy/n3825p752cx7f68jpsnl420m0000gn/T/tmp.9ChQGN7OFB/R.txt   Nov 26, 2026, 11:01 AM
+  /private/var/folders/jy/n3825p752cx7f68jpsnl420m0000gn/T/tmp.9ChQGN7OFB/Extra.txt   Nov 26, 2026, 11:01 AM
+
+Element-reactant file(s):
+  /private/var/folders/jy/n3825p752cx7f68jpsnl420m0000gn/T/tmp.9ChQGN7OFB/R.elt   Nov 26, 2026, 11:01 AM
+  /private/var/folders/jy/n3825p752cx7f68jpsnl420m0000gn/T/tmp.9ChQGN7OFB/Extra.elt   Nov 26, 2026, 11:01 AM
+
+Total nbr reactions = 116
+Total nbr reactants found in reaction databases = 22
+      (nbr reactants in element-reactant files = 23)
+
+Reactants found in reaction database(s):
+  Name     &    Nbr of reactions they participate in
+  CO3 2-                 20
+  Ca 2+                  17
+  Cl-                    14
+  ClO4-                  1
+  F-                     6
+  H+                     94
+  H2O                    56
+  H2O2                   1
+  H2PO2-                 4
+  HCOO-                  3
+  HPO3 2-                2
+  HS-                    14
+  NH3                    3
+  NO2-                   2
+  NO3-                   3
+  Na+                    11
+  Ox 2-                  2
+  PO4 3-                 9
+  S2O3 2-                5
+  SO3 2-                 6
+  SO4 2-                 9
+  e-                     59
+
+Warning: reactions found more than once
+    (with the same product):
+ CaCO3
+ CaCl+
+ CaOH+
+
+Warning: reaction products found more than once
+    (with a different reaction):
+ CaSO4
+
+Note: solids found more than once
+    (with different phase designator)
+ S(l)   and:  S(cr)
+
+No reference file found.

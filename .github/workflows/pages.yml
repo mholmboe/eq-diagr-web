@@ -1,0 +1,47 @@
+# Runs the engine tests on every push to main. The app (the static files in
+# webpoc/web) is published on GitHub Pages after the tests only when the
+# repository variable PUBLISH_PAGES is "true" (Settings > Secrets and variables
+# > Actions > Variables), and Settings > Pages > Source is "GitHub Actions".
+# Until then nothing is published.
+name: Test and publish the app
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      # the engine through the worker code in Node: no browser and no Java needed
+      - run: node webpoc/tests/test-engine.js
+
+  publish:
+    needs: test
+    if: vars.PUBLISH_PAGES == 'true'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: webpoc/web
+      - id: deployment
+        uses: actions/deploy-pages@v4

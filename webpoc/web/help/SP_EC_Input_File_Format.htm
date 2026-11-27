@@ -1,0 +1,73 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=iso-8859-1">
+<title>EC: Format of input file</title>
+<style type="text/css"> <!-- @import url(1_.css);   --> </style>
+<link disabled rel="stylesheet" type="text/css" href="1_.css">
+</head>
+
+<body bgcolor="#ffffff" text="#000000" link="#008000" vlink="#008000" alink="#008000">
+<table cellspacing="0" cellpadding="0" border="0">
+  <tr>
+    <td align="center" valign="middle" width="50">
+    <a href="SP_0_Main.htm"><img src="images/abacus.gif" border="0" width="32" height="32" alt="Calc." title="Calc."></a>&nbsp;</td>
+    <td align="left" valign="middle"><font size="-1"><a href="SP_0_Main.htm">SED &amp; PREDOM</a>&nbsp;/ <a href="SP_EC.htm">EC</a></font></td>
+  </tr>
+</table>
+
+<h3><a href="SP_EC.htm">EC</a>: Equilibrium Calculations</h3>
+
+<h3>Format of the Input Data-File</h3>
+
+<p>Input data files for <a href="SP_EC.htm">EC</a> consist of: <nobr><b>1)</b></nobr> definition of the
+<a href="SP_Data_File_Chemical_System.htm">chemical <nobr>system</a>;</nobr>
+<nobr><b>2)</b></nobr> <b>number of calculation points;</b> and
+<nobr><b>3)</b></nobr> <a href="SP_Data_File_Concs.htm">concentrations</a>
+(ranges) for the chemical components.</p>
+
+<p>The <b>number of calculation points</b> for <b>EC</b> is as follows:</p>
+<p class="indent">
+  NPKT
+</p>
+<p class="cont">
+The value of NPKT may be positive or negative.</p>
+<p>If NPKT is less than zero, &#8722;NPKT points will be calculated, and the input for each point to
+be calculated must be given, as indicated in <a href="SP_Data_File_Concs.htm">concentrations,</a>
+by using "T" or"LA" for each chemical component.
+It is convenient to have &#8722;NPKT lines in the input file, one for each calculation point,
+and in each line provide the concentration for each component.</p>
+
+<p>For example, for the system
+<nobr>H<sup>+</sup>,</nobr> <nobr>Fe<sup>3+</sup>,</nobr> <nobr>Cl<sup>&#8722;</sup></nobr>
+and <nobr>SO<sub>4</sub><sup>2&#8722;</sup></nobr>, you could write:
+<table cellspacing="0" cellpadding="0" border="0">
+<tr valign="top"><td>&nbsp;&nbsp;&nbsp;</td>
+		<td><nobr><tt>-2</tt></nobr></td></tr>
+<tr><td>&nbsp;</td>
+		<td><nobr><tt>LA,-7, T,0.3, T,0.9, T,0</tt></nobr></td></tr>
+<tr><td>&nbsp;</td>
+		<td><nobr><tt>LA,-8, T,0.3, T,0.9, T,0</tt></nobr></td></tr>
+</table>
+to calculate two points with pH values of 7 and 8 with
+<nobr>[FeCl<sub>3</sub>]<sub>Tot</sub></nobr> = 0.3 <a href="SP_Molality.htm">molal.</a>
+</p>
+
+<p>If NPKT is larger than zero, the input is made using concentration ranges for at
+least one of the components, as explained in <a href="SP_Data_File_Concs.htm">concentrations.</a>
+For example, with the chemical system above,
+you could write:
+<table cellspacing="0" cellpadding="0" border="0">
+<tr valign="top"><td>&nbsp;&nbsp;&nbsp;</td>
+		<td><nobr><tt>7</tt></nobr></td></tr>
+<tr><td>&nbsp;</td>
+		<td><nobr><tt>LAV,-5,-8, T,0.3, T,0.9, T,0</tt></nobr></td></tr>
+</table>
+with NPKT = 7, seven calculations are made with pH values of
+5.0, 5.5, ... 7.5, 8.0
+</p>
+
+<p>See also: <a href="SP_Data_File_Format.htm">Input Data-Files for SED and PREDOM</a></p>
+
+</body>
+</html>

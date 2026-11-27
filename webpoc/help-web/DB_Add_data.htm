@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>DATABASE: adding data</title>
+<link rel="stylesheet" href="1_.css">
+<link rel="stylesheet" href="1_web.css">
+</head>
+<body>
+<div class="crumb"><a href="0_Index.htm"><img src="images/thco35_s.gif" width="32" height="32" alt="Chem.Eq.Diagr"></a>
+<span><a href="DB_0_Main.htm">DATABASE</a> / <a href="DB_Databases.htm">Databases</a> /
+<a href="DB_Create_your_database.htm">Create databases</a></span></div>
+
+<h3>Adding data</h3>
+
+<p>New components and new reactions are added to a text database of your own (a <a href="DB_logK_files.htm">logK
+file</a> <code>.txt</code> with its <a href="DB_Element_files.htm">element file</a> <code>.elt</code>), which is
+then used together with the other databases. This is done in <a href="S_Menu_Prefs.htm">advanced mode</a>:</p>
+
+<ol class="steps">
+<li>Choose <span class="ui">Database &gt; Add data or edit a text database</span>. The
+<span class="ui">Database tools</span> tab opens, with the list of databases in use at the top.</li>
+<li>Under <span class="ui">Add data or edit a text database</span>, choose <span class="ui">New text
+database&hellip;</span> (or a text database already in the list) and click <span class="ui">Open</span>. A new
+database needs a name, for example <code>New-Data.txt</code>.</li>
+<li>To add a reaction, give the reaction product, the reactants with their stoichiometric coefficients, and
+log&nbsp;<i>K</i>&deg; at 25&nbsp;&deg;C (with &Delta;<i>H</i>&deg; and &Delta;<i>C<sub>p</sub></i>&deg; if you have
+them, for other temperatures), a reference and a comment, and click <span class="ui">Save reaction</span>. The
+reactants offered are the components of all the databases in use and of this file. A reaction that is not charge
+balanced is reported.</li>
+<li>To add a component (a new ligand, for example), give its name and description, choose the elements it is listed
+under in the periodic table, and click <span class="ui">Save component</span>.</li>
+<li>Click <span class="ui">Download .txt and .elt</span> to keep the two files on your computer.</li>
+</ol>
+
+<p>When the first reaction or component is saved, the new file is added last to the list of databases, so that its reactions replace reactions of the same name in
+the databases before it (see <a href="DB_Remove_change_data.htm">removing or changing data</a>). The
+<span class="ui">Chemical system</span> tab uses the same list.</p>
+
+<p class="note">Only text databases (<code>.txt</code> with <code>.elt</code>) can be edited here. A binary database
+(<code>.db</code>) can first be converted with <span class="ui">Convert a binary database to text</span> in the same
+tab.</p>
+
+<ul class="plain">
+<li><a href="ChEq_Sources_logK.htm">How to get equilibrium constants</a></li>
+<li><a href="DB_Names_Numbers.htm">How to enter names and numbers in databases</a></li>
+</ul>
+<p>&nbsp;</p>
+</body>
+</html>

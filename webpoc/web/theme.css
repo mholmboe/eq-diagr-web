@@ -1,0 +1,116 @@
+/* The theme of all pages: colours, type and spacing tokens, and the base styles.
+   Colours: --fg text, --muted secondary text, --line borders, --bg page, --panel
+   panels and fields, --accent links and primary buttons, --fail/--ok/--warn status.
+   Spacing: --space-1..6 = 2, 4, 6, 8, 12, 16 px. Text: --text-xs 11, -sm 12, -md 13,
+   -base 14, -lg 15, -xl 22 px. Fonts: --font-sans for text and fields, --font-mono
+   for formulas, file names and code (class "formula" or "code" on a field).
+   Controls: fields, lists and buttons are --ctl-h high (32 px), those in tables
+   and toolbars --ctl-h-sm (28 px); the one main action of a form has the class
+   "cta" (38 px). With a finger as the pointer all are 4 px higher. */
+:root {
+  --fg: #1d1d1f; --muted: #6e6e73; --line: #d2d2d7; --bg: #ffffff; --panel: #f5f5f7; --accent: #0a62c9; --fail: #c62828; --ok: #1a7f37; --warn: #9a6700; --on-accent: #ffffff;
+  --space-1: 2px; --space-2: 4px; --space-3: 6px; --space-4: 8px; --space-5: 12px; --space-6: 16px;
+  --text-xs: 11px; --text-sm: 12px; --text-md: 13px; --text-base: 14px; --text-lg: 15px; --text-xl: 22px;
+  --font-sans: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+  --font-mono: ui-monospace, Menlo, Consolas, monospace;
+  --ctl-h: 32px; --ctl-h-sm: 28px;
+  color-scheme: light dark;
+}
+/* The themes (theme.js sets data-theme on <html>; without it the page follows
+   the computer). Dark: */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) { --fg: #f5f5f7; --muted: #a1a1a6; --line: #3a3a3c; --bg: #1c1c1e; --panel: #2c2c2e; --accent: #4da3ff; --fail: #ff6b6b; --ok: #3fb950; --warn: #e3b341; --on-accent: #06213f; }
+}
+:root[data-theme="dark"] { --fg: #f5f5f7; --muted: #a1a1a6; --line: #3a3a3c; --bg: #1c1c1e; --panel: #2c2c2e; --accent: #4da3ff; --fail: #ff6b6b; --ok: #3fb950; --warn: #e3b341; --on-accent: #06213f; color-scheme: dark; }
+:root[data-theme="light"] { color-scheme: light; }
+/* Original: the greys, the navy titles and the square controls of the desktop
+   programs (Spana and DataBase, Java Swing); the periodic table of DataBase is
+   on a yellow panel (database.html). */
+:root[data-theme="original"] {
+  --fg: #000000; --muted: #4a4a4a; --line: #a6a6a6; --bg: #ececec; --panel: #e0e0e0; --accent: #000099; --fail: #cc0000; --ok: #006600; --warn: #990099;
+  --font-sans: Tahoma, "Segoe UI", Verdana, "DejaVu Sans", Arial, sans-serif;
+  color-scheme: light;
+}
+:root[data-theme="original"] :is(button, select, input, textarea, details, pre, dialog, .menu, .paper, .chip, .mode) { border-radius: 2px !important; }
+:root[data-theme="original"] :is(select, textarea, input:not([type=checkbox], [type=radio], [type=range], [type=file])) { background: #ffffff !important; }
+:root[data-theme="original"] button:not(.primary, [aria-pressed="true"], [role^="menuitem"], [aria-haspopup], .sidetoggle, .item, .t, .x, .rm, .picked, .none) { background: linear-gradient(#fbfbfb, #dedede); border-color: #8c8c8c; }
+:root[data-theme="original"] :is(h1, h2, h3, summary, .side-h) { color: #000099; }
+* { box-sizing: border-box; }
+/* the hidden attribute wins over the display of a class (for example .row) */
+[hidden] { display: none !important; }
+body { font: var(--text-lg)/1.45 var(--font-sans); color: var(--fg); background: var(--bg); margin: 0; padding: 24px var(--space-6); }
+main { max-width: 1180px; margin: 0 auto; }
+h1 { font-size: var(--text-xl); margin: 0 0 var(--space-2); }
+p.lede { color: var(--muted); margin: 0 0 var(--space-5); max-width: 860px; }
+nav { margin: 0 0 20px; font-size: var(--text-base); }
+nav a { color: var(--accent); margin-right: var(--space-6); }
+nav a[aria-current] { color: var(--fg); font-weight: 600; text-decoration: none; }
+.grid { display: grid; grid-template-columns: minmax(0, 380px) minmax(0, 1fr); gap: 24px; align-items: start; }
+@media (max-width: 700px) { .grid { grid-template-columns: minmax(0, 1fr); } }
+label { display: block; font-size: var(--text-md); font-weight: 600; color: var(--muted); margin: var(--space-5) 0 var(--space-2); }
+select, input[type=text], input[type=number], textarea { width: 100%; font: var(--text-base) var(--font-sans); color: var(--fg); background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: var(--space-4) var(--space-4); }
+select:not([multiple]), input[type=text], input[type=number] { height: var(--ctl-h); padding-top: 0; padding-bottom: 0; }
+textarea { font-size: var(--text-md); }
+/* formulas, file names and code keep the monospaced font */
+textarea, input.formula, input.code { font-family: var(--font-mono) !important; }
+textarea { min-height: 260px; resize: vertical; white-space: pre; }
+.row { display: flex; gap: var(--space-5); align-items: center; flex-wrap: wrap; margin-top: var(--space-6); }
+button { font: inherit; font-size: var(--text-base); font-weight: 500; border: 1px solid var(--line); background: var(--panel); color: var(--fg); border-radius: 6px; padding: 5px var(--space-5); cursor: pointer; }
+button.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); font-weight: 600; }
+/* the main action of a form (Search, Make the diagram) */
+button.cta { font-size: var(--text-lg); font-weight: 600; padding: var(--space-4) 18px; }
+@media (pointer: coarse) {
+  :root { --ctl-h: 36px; --ctl-h-sm: 32px; }
+  button { padding-top: 7px; padding-bottom: 7px; }
+  button.cta { padding-top: 10px; padding-bottom: 10px; }
+}
+button:disabled { opacity: 0.5; cursor: default; }
+/* a disabled primary button looks like any disabled button, not like a faded call to action */
+button.primary:disabled { background: var(--panel); border-color: var(--line); color: var(--muted); opacity: 1; }
+.check { display: flex; gap: var(--space-3); align-items: center; font-size: var(--text-base); color: var(--fg); margin: 0; font-weight: 400; }
+.check[hidden] { display: none; }
+.hint { font-size: var(--text-sm); color: var(--muted); margin-top: var(--space-2); }
+#status { min-height: 22px; margin: 0 0 var(--space-5); }
+#status.ok { color: var(--ok); } #status.fail { color: var(--fail); }
+.paper { background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: var(--space-4); }
+.paper svg { display: block; width: 100%; height: auto; }
+.empty { color: #6e6e73; padding: 80px var(--space-6); text-align: center; font-size: var(--text-base); }
+details { margin-top: var(--space-6); }
+summary { cursor: pointer; font-weight: 600; font-size: var(--text-base); }
+pre:empty { display: none; }
+pre { font: var(--text-sm)/1.35 var(--font-mono); overflow: auto; border: 1px solid var(--line); border-radius: 6px; padding: var(--space-5); max-height: 340px; margin: var(--space-4) 0 0; }
+code { font: var(--text-md) var(--font-mono); }
+
+/* ---- normal and advanced mode (app-view.js) */
+html:not(.adv) .adv-only { display: none !important; }
+html.embedded .standalone-only { display: none !important; }
+
+/* ---- the page as a view (tab) in the app window, app.html */
+html.embedded body { padding: 0; background: var(--bg); }
+html.embedded main { max-width: none; margin: 0; }
+html.embedded main > h1, html.embedded p.lede, html.embedded nav { display: none; }
+html.embedded .grid { gap: 0; }
+html.embedded .grid > section { padding: var(--space-5) var(--space-6) var(--space-6); min-width: 0; }
+html.embedded details.panel, html.embedded details.tool {
+  border: 0; border-bottom: 1px solid var(--line); border-radius: 0; padding: var(--space-4) 0 var(--space-5); margin: 0; }
+html.embedded details.panel > summary, html.embedded details.tool > summary { font-size: var(--text-base); }
+/* side by side from 701 px (a 1024 px window with the file list open) */
+@media (min-width: 701px) {
+  html.embedded, html.embedded body { height: 100%; overflow: hidden; }
+  html.embedded main, html.embedded .grid { height: 100%; }
+  html.embedded .grid { align-items: stretch; grid-template-columns: minmax(0, clamp(300px, 42%, 380px)) minmax(0, 1fr); }
+  html.embedded .grid > section { overflow: auto; }
+  html.embedded .grid > section:first-child { border-right: 1px solid var(--line); background: var(--panel); }
+  html.embedded .grid > section:first-child select, html.embedded .grid > section:first-child input,
+  html.embedded .grid > section:first-child textarea { background: var(--bg); }
+}
+@media (max-width: 700px) {
+  html.embedded .grid > section:first-child { border-bottom: 1px solid var(--line); }
+}
+
+/* ---- questions in the page (dialogs.js) */
+dialog.eqdlg { max-width: min(480px, calc(100vw - 32px)); border: 1px solid var(--line); border-radius: 10px; color: var(--fg); background: var(--bg); padding: var(--space-6) 18px; }
+dialog.eqdlg::backdrop { background: rgba(0, 0, 0, .3); }
+dialog.eqdlg .msg { margin: 0 0 var(--space-5); white-space: pre-wrap; font-size: var(--text-base); }
+dialog.eqdlg input[hidden] { display: none; }
+dialog.eqdlg .btns { display: flex; flex-direction: row-reverse; gap: var(--space-4); margin-top: var(--space-6); }
