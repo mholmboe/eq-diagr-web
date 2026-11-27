@@ -34,6 +34,27 @@ that precipitates only slowly, see <a href="DB_Solid_solub.htm">solids</a>.</p>
 <p id="LogK">The log&nbsp;<i>K</i> of each reaction can be edited in its field; the new value is used from the next
 diagram. A changed value is shown in bold, and the button &#8634; beside it takes it back to the value of the file.
 In <a href="S_Making_Diagrams.htm#LiveK">live mode</a> each log&nbsp;<i>K</i> also has a slider.</p>
+<p id="Steps"><b>Accumulated constants and individual steps.</b> The log&nbsp;<i>K</i> of a data file is that of
+the formation of a species from the components: for H<sub>3</sub>PO<sub>4</sub>, with the components
+H<sup>+</sup> and PO<sub>4</sub><sup>3&minus;</sup>, it is the constant of
+3&nbsp;H<sup>+</sup> + PO<sub>4</sub><sup>3&minus;</sup> = H<sub>3</sub>PO<sub>4</sub>, 21.70, which is the sum of
+the three steps. An acid is more often described by its steps, p<i>K</i><sub>a</sub> 2.15, 7.21 and 12.35.
+Above the reactions, <span class="ui">Constants shown as</span> chooses between the two:</p>
+<ul class="plain">
+<li><span class="ui">accumulated log K</span>: the values of the data file;</li>
+<li><span class="ui">individual steps (pKa)</span>: for each species that is a step of an acid, the
+p<i>K</i><sub>a</sub> of that step, marked &ldquo;pKa&rdquo;. Point at the mark to see the reaction, for example
+H<sub>2</sub>PO<sub>4</sub><sup>&minus;</sup> &#8652; HPO<sub>4</sub><sup>2&minus;</sup> + H<sup>+</sup>. The
+hydrolysis of a metal ion is shown in the same way (Fe<sup>2+</sup> + H<sub>2</sub>O &#8652; FeOH<sup>+</sup> +
+H<sup>+</sup>), and OH<sup>&minus;</sup> has p<i>K</i><sub>w</sub>. Species that are not a step of an acid, for
+example a metal carbonate complex or a solid, keep their accumulated value, marked &ldquo;log K&rdquo;.</li>
+</ul>
+<p>In the view of individual steps the field, the slider of live mode and the button &#8634; work on the step.
+Changing p<i>K</i><sub>a2</sub> of phosphoric acid, for example, leaves p<i>K</i><sub>a1</sub> and
+p<i>K</i><sub>a3</sub> as they are: the accumulated values of H<sub>2</sub>PO<sub>4</sub><sup>&minus;</sup> and
+H<sub>3</sub>PO<sub>4</sub> in the data file both move by the change. The choice is remembered in the browser; the
+data file always holds accumulated values.</p>
+
 <p>A changed log&nbsp;<i>K</i> is a trial: it is used for the diagrams of the tab, but it is <b>not</b> written to
 the file that is saved in the browser when a diagram is made. The saved file keeps its own values, the tab stays
 marked as changed, and the status line says that the file was saved without the changed log&nbsp;<i>K</i>. To keep

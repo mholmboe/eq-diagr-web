@@ -43,12 +43,17 @@
   html.live .three { align-items: start; }
   /* log K: the field, and a button back to the value of the file when it was changed */
   #specTable .kcell { display: flex; gap: var(--space-2); align-items: center; }
+  /* individual steps: which kind of constant the field of a row holds */
+  #specTable .kkind { flex: none; width: 2.6em; font-size: var(--text-xs); color: var(--muted); }
+  #specTable .kkind.pka { color: var(--accent); font-weight: 600; }
+  .kmode label { margin: 0; }
+  .kmode select { width: auto; height: var(--ctl-h-sm); font-size: var(--text-sm); padding: 0 var(--space-3); }
   #specTable tr.changed input[type=number] { border-color: var(--accent); font-weight: 600; }
   #specTable tr.slide input[type=range] { max-width: 210px; }
   #compTable td.exch select { min-width: 12em; }
   #specTable tr.off td.name { color: var(--muted); text-decoration: line-through; }
   #specTable td:first-child { width: 1.5em; }
-  #specTable input[type=number] { max-width: 150px; }
+  #specTable input[type=number] { max-width: 130px; }
   table.grid button { padding: var(--space-2) var(--space-4); font-size: var(--text-sm); font-weight: 400; }
   .scroll { max-height: 300px; overflow: auto; }
   .note { font-size: var(--text-sm); color: var(--muted); }
@@ -178,6 +183,11 @@
         <label>Components</label>
         <div class="scroll"><table class="grid" id="compTable"></table></div>
         <label>Reactions <span class="note">(log <i>K</i> can be edited; switched-off reactions are kept in the file with a "*")</span></label>
+        <div class="row tight kmode" style="margin-top:2px">
+          <label for="kMode">Constants shown as</label>
+          <select id="kMode" title="Accumulated: log K of the formation of each species from the components, as in the data file. Individual steps: the pKa of each step of an acid (H3PO4, H2PO4−, HPO4 2−), which is the difference between two accumulated values.">
+            <option value="cum">accumulated log K</option><option value="step">individual steps (pKa)</option></select>
+        </div>
         <div class="scroll"><table class="grid" id="specTable"></table></div>
         <div class="row tight adv-only">
           <button id="mergeBtn" type="button">Merge with another data file…</button>

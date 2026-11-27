@@ -158,24 +158,90 @@
     // (the model lists switched-off reactions too, with the "*"; the file is the reference)
     const off = inactiveReactions(), isOff = x => x.name.trim().startsWith("*");
     $("delOff").hidden = !adv() || !off.length;
-    $("specTable").innerHTML = `<tr><th></th><th>Reaction product</th><th>log K</th>${spNotes ? "<th>Comment</th>" : ""}</tr>` + sp.map((x, k) => isOff(x) ? "" :
-      `<tr${kChanged(x) ? ' class="changed"' : ""}><td><input type="checkbox" checked data-off="${esc(x.name)}" title="untick to leave ${esc(x.name)} out of the calculations"></td>` +
+    $("specTable").innerHTML = `<tr><th></th><th>Reaction product</th><th>${kMode === "step" ? "pKa or log K" : "log K"}</th>${spNotes ? "<th>Comment</th>" : ""}</tr>` + sp.map((x, k) => isOff(x) ? "" :
+      `<tr${kShown(k).changed ? ' class="changed"' : ""}><td><input type="checkbox" checked data-off="${esc(x.name)}" title="untick to leave ${esc(x.name)} out of the calculations"></td>` +
       `<td class="name" title="${esc(reactionText(x))}">${esc(x.name)}</td>` +
-      `<td><div class="kcell"><input type="number" step="any" data-logk="${k}" value="${x.logK}">` +
-      `<button class="mv" data-kreset="${k}" title="back to ${origLogK[x.name.trim()]}, the value when the file was opened"${kChanged(x) ? "" : " hidden"}>↺</button></div></td>` +
+      `<td><div class="kcell">${kKind(k)}<input type="number" step="any" data-logk="${k}" value="${kShown(k).value}">` +
+      `<button class="mv" data-kreset="${k}" title="back to ${kShown(k).orig}, the value when the file was opened"${kShown(k).changed ? "" : " hidden"}>↺</button></div></td>` +
       (spNotes ? `<td class="note">${esc(x.comment || "")}</td>` : "") + `</tr>` + (live() ? kSliderRow(x, k, spNotes ? 3 : 2) : "")).join("") +
       off.map(x => `<tr class="off"><td><input type="checkbox" data-on="${esc(x.name)}" title="tick to use ${esc(x.name.slice(1))} again"></td>` +
         `<td class="name">${esc(x.name.slice(1))}</td><td class="note">${isFinite(x.logK) ? x.logK : ""}</td>${spNotes ? "<td></td>" : ""}</tr>`).join("");
   }
 
-  // Live mode: a slider under each log K, three units to each side of the
-  // value the file was opened with (wider if the value is outside).
   const kChanged = x => { const o = origLogK[x.name.trim()]; return o !== undefined && o !== x.logK; };
+
+  // ---- accumulated constants and individual steps
+  // The data file has the log K of the formation of each species from the
+  // components (accumulated: H3PO4 from 3 H+ and PO4 3-). An acid is usually
+  // described by the constants of its steps instead (pKa 2.15, 7.21, 12.35),
+  // which are differences of two accumulated values. With "individual steps"
+  // the table shows, edits and slides the step of each species that belongs
+  // to such a chain: soluble species that differ only in their number of H+,
+  // down to the species without H+ (a component, or water for OH-).
+  //   H+ added (n > 0):   pKa = log K(n) - log K(n-1), the acid is the species
+  //   H+ removed (n < 0): pKa = log K(n+1) - log K(n), the acid is its neighbour
+  // Changing a step moves the accumulated log K of the species and of all
+  // those further out in its chain, so that the other steps stay as they are.
+  const K_MODE = "eqdiagr.kMode";
+  let kMode = "cum";
+  try { if (localStorage.getItem(K_MODE) === "step") kMode = "step"; } catch (e) {}
+  function chains() {
+    const iH = model.components.findIndex(c => isProton(c.name)), nSol = model.na - model.solidC;
+    if (iH < 0 || iH >= nSol) return null;
+    const key = a => a.map((v, i) => i === iH ? "" : v).join(","), groups = new Map();
+    const member = (kk, n, m) => { if (!groups.has(kk)) groups.set(kk, new Map()); const g = groups.get(kk); if (!g.has(n)) g.set(n, []); g.get(n).push(m); };
+    const zero = model.components.map(() => 0);
+    member(key(zero), 0, { base: "H2O" });
+    for (let i = 0; i < nSol; i++) if (i !== iH) { const a = zero.slice(); a[i] = 1; member(key(a), 0, { base: model.components[i].name.trim() }); }
+    model.species.forEach((x, k) => {
+      if (k >= model.nx || x.name.trim().startsWith("*") || isGas(x.name) || !isFinite(x.logK)) return;
+      member(key(x.a), x.a[iH], { k });
+    });
+    return { iH, key, groups };
+  }
+  // the step of species k: {value, orig, acid, base, shift: [[k, sign]…]}, or null when it has none
+  function stepOf(k, C) {
+    C = C || chains();
+    const x = model.species[k];
+    if (!C || !x || k >= model.nx) return null;
+    const g = C.groups.get(C.key(x.a)), n = x.a[C.iH];
+    if (!g || !n || !g.has(n) || g.get(n).length !== 1 || g.get(n)[0].k !== k) return null;
+    const pb = g.get(n > 0 ? n - 1 : n + 1);
+    if (!pb || pb.length !== 1) return null;
+    const p = pb[0], pName = p.base || model.species[p.k].name.trim(), name = x.name.trim();
+    const K = m => m.base ? 0 : model.species[m.k].logK, K0 = m => m.base ? 0 : origLogK[model.species[m.k].name.trim()];
+    const self = { k }, sign = n > 0 ? 1 : -1;
+    const shift = [];
+    for (const [m, list] of g) if (n > 0 ? m >= n : m <= n) for (const q of list) if (q.k !== undefined) shift.push(q.k);
+    const o = sign * (K0(self) - K0(p));
+    return { value: +(sign * (K(self) - K(p))).toFixed(4), orig: isFinite(o) ? +o.toFixed(4) : NaN, sign, shift,
+             text: n > 0 ? `${name} ⇌ ${pName} + H+` : p.base === "H2O" ? `H2O ⇌ ${name} + H+ (pKw)` : `${pName} + H2O ⇌ ${name} + H+` };
+  }
+  // what the field of species k shows: the step in the individual view, where the species has one
+  function kShown(k) {
+    const x = model.species[k], st = kMode === "step" ? stepOf(k) : null;
+    if (st) return { step: st, value: st.value, orig: st.orig, changed: isFinite(st.orig) && Math.abs(st.orig - st.value) > 5e-5 };
+    return { step: null, value: x.logK, orig: origLogK[x.name.trim()], changed: kChanged(x) };
+  }
+  const kKind = k => {
+    if (kMode !== "step") return "";
+    const st = stepOf(k);
+    return st ? `<span class="kkind pka" title="${esc(st.text)}">pKa</span>` : `<span class="kkind" title="This species is not a step of an acid: the accumulated log K">log K</span>`;
+  };
+  // the changes of the data file that give species k the value v in its field
+  function kAssign(k, v) {
+    const st = kMode === "step" ? stepOf(k) : null;
+    if (!st) return [[k, +v]];
+    const d = st.sign * (+v - st.value);
+    return st.shift.map(q => [q, +(model.species[q].logK + d).toFixed(6)]);
+  }
+  // Live mode: a slider under each constant, three units to each side of the
+  // value the file was opened with (wider if the value is outside).
   function kSliderRow(x, k, span) {
-    const o = origLogK[x.name.trim()], c = isFinite(o) ? o : x.logK;
-    if (!isFinite(c) || !isFinite(x.logK)) return "";
-    return `<tr class="slide"><td></td><td colspan="${span}"><input type="range" data-kslide="${k}" min="${round(Math.min(c - 3, x.logK), 2)}" max="${round(Math.max(c + 3, x.logK), 2)}" ` +
-      `step="0.05" value="${x.logK}" aria-label="log K of ${esc(x.name.trim())}"></td></tr>`;
+    const sh = kShown(k), c = isFinite(sh.orig) ? sh.orig : sh.value;
+    if (!isFinite(c) || !isFinite(sh.value)) return "";
+    return `<tr class="slide"><td></td><td colspan="${span}"><input type="range" data-kslide="${k}" min="${round(Math.min(c - 3, sh.value), 2)}" max="${round(Math.max(c + 3, sh.value), 2)}" ` +
+      `step="0.05" value="${sh.value}" aria-label="${sh.step ? "pKa" : "log K"} of ${esc(x.name.trim())}"></td></tr>`;
   }
   // a slider moves: the constant is written to the data file without drawing
   // the table again (the drag would be lost); the last position wins
@@ -189,12 +255,12 @@
     while (kPending) {
       const p = kPending; kPending = null;
       await applyForm(true);
-      const r = await engine.datSet(dat, [`species[${p.k}].logK=${p.v}`]);
-      if (r.ok) { dat = r.dat; model.species[p.k].logK = p.v; $("datText").textContent = dat; }
+      const list = kAssign(p.k, p.v);
+      const r = await engine.datSet(dat, list.map(([q, val]) => `species[${q}].logK=${val}`));
+      if (r.ok) { dat = r.dat; for (const [q, val] of list) model.species[q].logK = val; $("datText").textContent = dat; }
     }
     kBusy = false;
-    const x = model.species[k];
-    if (x) { row.classList.toggle("changed", kChanged(x)); row.querySelector("[data-kreset]").hidden = !kChanged(x); }
+    if (model.species[k]) { const sh = kShown(k); row.classList.toggle("changed", sh.changed); row.querySelector("[data-kreset]").hidden = !sh.changed; }
     checkDirty();
   }
   // the reactions that are switched off are removed from the data file: their
@@ -281,10 +347,11 @@
 
   async function setLogK(k, value) {
     await applyForm();
-    const r = await engine.datSet(dat, [`species[${k}].logK=${value}`]);
+    // (in the individual view the value is a step: see kAssign)
+    const r = await engine.datSet(dat, kAssign(k, value).map(([q, val]) => `species[${q}].logK=${val}`));
     if (!r.ok) { status("fail", "log K not changed; see the messages."); showLog(r.log || r.error); return; }
     dat = r.dat; checkDirty(); await reload();
-    status("ok", `log K of ${model.species[k].name} set to ${value}.`);
+    status("ok", `${kShown(k).step ? "pKa" : "log K"} of ${model.species[k].name.trim()} set to ${value}.`);
   }
 
   // ---------------------------------------------------------------- editing the text (advanced mode)
@@ -1263,7 +1330,14 @@
   $("specTable").addEventListener("input", e => { if (e.target.dataset.kslide !== undefined) slideLogK(e.target); });
   $("specTable").addEventListener("click", e => {
     const k = e.target.dataset.kreset;
-    if (k !== undefined && model.species[+k]) setLogK(+k, origLogK[model.species[+k].name.trim()]);
+    if (k !== undefined && model.species[+k]) setLogK(+k, kShown(+k).orig);
+  });
+  $("kMode").value = kMode;
+  $("kMode").addEventListener("change", e => {
+    e.stopPropagation();
+    kMode = e.target.value === "step" ? "step" : "cum";
+    try { localStorage.setItem(K_MODE, kMode); } catch (err) {}
+    if (model) drawSystem();
   });
   $("delOff").addEventListener("click", deleteInactive);
   $("specTable").addEventListener("change", e => {

@@ -522,3 +522,14 @@ Not done: a temperature slider that recalculates the log *K* values. It needs th
 Decision made without asking: the heading options are in the diagram style, which is shared by all diagrams of the browser, not a setting of one diagram.
 
 - **The temperature keeps its place** (added after a comment on the above): with an ionic strength, the programs write "I=" where the temperature was and move "t=" to a new line. In the drawing of the app the two change places (`headingOrder` in `diagram.js`): the temperature stays where it is without an ionic strength, and "I=" is on the new line above the concentrations. Checked on six examples (SED and Predom, one to four concentrations), where the programs always follow that rule. EPS, PS and `.plt` files keep the order of the programs.
+
+## Constants as individual steps (2026-11-27)
+
+The data file holds accumulated constants (H₃PO₄ from 3 H⁺ and PO₄³⁻: 21.702), while students know an acid by its steps (pKa 2.15, 7.21, 12.35). Above the reactions table, "Constants shown as" now chooses between "accumulated log K" and "individual steps (pKa)".
+
+- In the individual view each species that is a step of an acid shows the pKa of that step, marked "pKa" with the reaction in its tooltip. For the phosphate system of the KTH database: 2.149, 7.207, 12.346, and pKw 14 for OH⁻. Hydrolysis of a metal ion is shown the same way (Fe²⁺ + H₂O ⇌ FeOH⁺ + H⁺, 9.1 in the first example file).
+- The field, the slider of live mode and the ↺ button work on the step. A changed step moves the accumulated log K of its species and of those further out in the chain, so the other steps keep their values.
+- Species that are not a step (a metal–ligand complex, a solid, a gas, two species with the same stoichiometry) keep their accumulated log K, marked "log K".
+- The data file is unchanged in format: it always holds accumulated values. The choice is remembered in the browser.
+
+Decision made without asking: the steps are always written as acid dissociation (pKa). A view in base constants (pKb) or in stepwise formation constants of metal complexes (log K₁, log K₂ for ligands other than H⁺) was not added.

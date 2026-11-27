@@ -538,6 +538,38 @@ const STEPS = [
     assert.match(await db.textContent("#status"), /Left out, without log K in the database: H2SO4/);
     assert.ok(!(await db.$eval("#toDiagram", b => b.disabled)));
   }],
+  ["constants as individual steps: the pKa values of phosphoric acid; a step changes alone", async t => {
+    await t.page.click("#tabs .tab .t");
+    await t.menu("File", "New chemical system");
+    const db = await t.frame("database.html");
+    await db.click('#ptable button:text-is("P")');
+    await db.click('#avail button:text-is("PO4 3-")');
+    await db.click("#search");
+    await db.waitForFunction(() => /species found/.test(document.getElementById("status").textContent));
+    await db.click("#toDiagram");
+    await t.page.waitForFunction(() => /^H\+_PO43-/.test(document.querySelector("#tabs .tab.active .t").textContent));
+    const sp = await t.spana();
+    await sp.evaluate(() => { document.getElementById("sysPanel").open = true; });
+    const rows = () => sp.$$eval("#specTable tr", r => r.filter(x => x.querySelector("[data-logk]")).map(x => [x.cells[1].textContent, (x.querySelector(".kkind") || {}).textContent || "", x.querySelector("[data-logk]").value]));
+    assert.deepEqual(await rows(), [["H2PO4-", "", "19.553"], ["H3PO4", "", "21.702"], ["HPO4 2-", "", "12.346"], ["OH-", "", "-14"]]);
+    await sp.selectOption("#kMode", "step");
+    assert.deepEqual(await rows(), [["H2PO4-", "pKa", "7.207"], ["H3PO4", "pKa", "2.149"], ["HPO4 2-", "pKa", "12.346"], ["OH-", "pKa", "14"]]);
+    assert.equal(await sp.$eval('#specTable tr:has(td.name:text-is("H2PO4-")) .kkind', e => e.title), "H2PO4- ⇌ HPO4 2- + H+");
+    // pKa2 one unit higher: the accumulated log K of H2PO4- and H3PO4 move, the other steps stay
+    const f = '#specTable tr:has(td.name:text-is("H2PO4-")) [data-logk]';
+    await sp.fill(f, "8.207"); await sp.press(f, "Tab");
+    await sp.waitForFunction(() => /^H2PO4- +, +20\.553 /m.test(document.getElementById("datText").textContent));
+    const dat = await sp.textContent("#datText");
+    assert.ok(/^H3PO4 +, +22\.702 /m.test(dat) && /^HPO4 2- +, +12\.346 /m.test(dat));
+    assert.deepEqual(await rows(), [["H2PO4-", "pKa", "8.207"], ["H3PO4", "pKa", "2.149"], ["HPO4 2-", "pKa", "12.346"], ["OH-", "pKa", "14"]]);
+    assert.equal(await sp.$$eval("#specTable tr.changed", x => x.length), 1, "one step is marked as changed");
+    await t.shot("23-individual-steps");
+    await sp.click("#specTable tr.changed [data-kreset]");
+    await sp.waitForFunction(() => /^H2PO4- +, +19\.553 /m.test(document.getElementById("datText").textContent) && !document.querySelector("#specTable tr.changed"));
+    // back to the accumulated view, which later steps expect
+    await sp.selectOption("#kMode", "cum");
+    assert.deepEqual((await rows()).map(r => r[2]), ["19.553", "21.702", "12.346", "-14"]);
+  }],
   ["a dropped data file opens in a tab; the readout lists the species; the diagram can be printed", async t => {
     const dat = await t.page.evaluate(async () => (await fetch("data/examples/" + encodeURIComponent("01-Make your 1st diagram.dat"))).text());
     const dt = await t.page.evaluateHandle(text => { const d = new DataTransfer(); d.items.add(new File([text], "dropped.dat", { type: "text/plain" })); return d; }, dat);

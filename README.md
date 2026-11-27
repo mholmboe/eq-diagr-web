@@ -26,6 +26,7 @@ Then open http://127.0.0.1:8765/app.html. Any static file server works, since `w
 - **Output**: SVG, PNG, PDF, EPS, the plot file, the table of results, printing, and a link that carries the data file in its fragment.
 - **Colours** of the program: as the computer, light, dark, or "original" after the desktop programs.
 - **What if:** up to six earlier diagrams stay in the drawing with broken lines, named by what differs; in live mode the concentrations and the log *K* values have sliders.
+- **pKa or log K:** the constants of the reactions are shown as the accumulated log *K* of the data file or as the individual steps of each acid (pKa), and can be changed in either form.
 - **Plot files and images:** a plot file (`.plt`) opens on its own; the diagram is copied to the clipboard as an image; the PNG size is chosen in the diagram style.
 - **Data file as text** (advanced mode): the open data file can be edited in a text box and is read again by the programs, with their error messages.
 - **Database tools** (advanced mode): statistics and checks, conversion, merging, adding data, references.
@@ -67,7 +68,7 @@ npm install && npm run install-browsers
 npm run test:ui
 ```
 
-32 steps of the main flow in Chromium, WebKit and Firefox with Playwright (the test starts its own server; Chromium is the installed Chrome). `npm run screenshots` retakes the pictures in `review/`.
+33 steps of the main flow in Chromium, WebKit and Firefox with Playwright (the test starts its own server; Chromium is the installed Chrome). `npm run screenshots` retakes the pictures in `review/`.
 
 ## Documentation
 
