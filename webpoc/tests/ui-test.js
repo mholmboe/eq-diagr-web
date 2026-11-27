@@ -538,7 +538,7 @@ const STEPS = [
     assert.match(await db.textContent("#status"), /Left out, without log K in the database: H2SO4/);
     assert.ok(!(await db.$eval("#toDiagram", b => b.disabled)));
   }],
-  ["constants as individual steps: the pKa values of phosphoric acid; a step changes alone", async t => {
+  ["constants as stepwise pKa: the values of phosphoric acid; a step changes alone", async t => {
     await t.page.click("#tabs .tab .t");
     await t.menu("File", "New chemical system");
     const db = await t.frame("database.html");

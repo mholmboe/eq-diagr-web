@@ -533,3 +533,5 @@ The data file holds accumulated constants (H₃PO₄ from 3 H⁺ and PO₄³⁻:
 - The data file is unchanged in format: it always holds accumulated values. The choice is remembered in the browser.
 
 Decision made without asking: the steps are always written as acid dissociation (pKa). A view in base constants (pKb) or in stepwise formation constants of metal complexes (log K₁, log K₂ for ligands other than H⁺) was not added.
+
+- **Wording** (after a comment): the choice reads "accumulated log K" and "stepwise pKa". The values are pKa = −log Ka; "log Ka" would have the opposite sign (−7.207 for H₂PO₄⁻), and pKb values are not shown.

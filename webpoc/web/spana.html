@@ -43,7 +43,7 @@
   html.live .three { align-items: start; }
   /* log K: the field, and a button back to the value of the file when it was changed */
   #specTable .kcell { display: flex; gap: var(--space-2); align-items: center; }
-  /* individual steps: which kind of constant the field of a row holds */
+  /* stepwise constants: which kind of constant the field of a row holds */
   #specTable .kkind { flex: none; width: 2.6em; font-size: var(--text-xs); color: var(--muted); }
   #specTable .kkind.pka { color: var(--accent); font-weight: 600; }
   .kmode label { margin: 0; }
@@ -185,8 +185,8 @@
         <label>Reactions <span class="note">(log <i>K</i> can be edited; switched-off reactions are kept in the file with a "*")</span></label>
         <div class="row tight kmode" style="margin-top:2px">
           <label for="kMode">Constants shown as</label>
-          <select id="kMode" title="Accumulated: log K of the formation of each species from the components, as in the data file. Individual steps: the pKa of each step of an acid (H3PO4, H2PO4−, HPO4 2−), which is the difference between two accumulated values.">
-            <option value="cum">accumulated log K</option><option value="step">individual steps (pKa)</option></select>
+          <select id="kMode" title="Accumulated: log K of the formation of each species from the components, as in the data file. Stepwise: the pKa of each step of an acid (H3PO4, H2PO4−, HPO4 2−), pKa = −log Ka, which is the difference between two accumulated values.">
+            <option value="cum">accumulated log K</option><option value="step">stepwise pKa</option></select>
         </div>
         <div class="scroll"><table class="grid" id="specTable"></table></div>
         <div class="row tight adv-only">

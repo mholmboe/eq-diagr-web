@@ -170,11 +170,11 @@
 
   const kChanged = x => { const o = origLogK[x.name.trim()]; return o !== undefined && o !== x.logK; };
 
-  // ---- accumulated constants and individual steps
+  // ---- accumulated and stepwise constants
   // The data file has the log K of the formation of each species from the
   // components (accumulated: H3PO4 from 3 H+ and PO4 3-). An acid is usually
   // described by the constants of its steps instead (pKa 2.15, 7.21, 12.35),
-  // which are differences of two accumulated values. With "individual steps"
+  // which are differences of two accumulated values. With "stepwise pKa"
   // the table shows, edits and slides the step of each species that belongs
   // to such a chain: soluble species that differ only in their number of H+,
   // down to the species without H+ (a component, or water for OH-).
@@ -217,7 +217,7 @@
     return { value: +(sign * (K(self) - K(p))).toFixed(4), orig: isFinite(o) ? +o.toFixed(4) : NaN, sign, shift,
              text: n > 0 ? `${name} ⇌ ${pName} + H+` : p.base === "H2O" ? `H2O ⇌ ${name} + H+ (pKw)` : `${pName} + H2O ⇌ ${name} + H+` };
   }
-  // what the field of species k shows: the step in the individual view, where the species has one
+  // what the field of species k shows: the step in the stepwise view, where the species has one
   function kShown(k) {
     const x = model.species[k], st = kMode === "step" ? stepOf(k) : null;
     if (st) return { step: st, value: st.value, orig: st.orig, changed: isFinite(st.orig) && Math.abs(st.orig - st.value) > 5e-5 };
@@ -347,7 +347,7 @@
 
   async function setLogK(k, value) {
     await applyForm();
-    // (in the individual view the value is a step: see kAssign)
+    // (in the stepwise view the value is a step: see kAssign)
     const r = await engine.datSet(dat, kAssign(k, value).map(([q, val]) => `species[${q}].logK=${val}`));
     if (!r.ok) { status("fail", "log K not changed; see the messages."); showLog(r.log || r.error); return; }
     dat = r.dat; checkDirty(); await reload();
