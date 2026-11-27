@@ -537,3 +537,5 @@ Decision made without asking: the steps are always written as acid dissociation 
 - **Wording** (after a comment): the choice reads "accumulated log K" and "stepwise pKa". The values are pKa = −log Ka; "log Ka" would have the opposite sign (−7.207 for H₂PO₄⁻), and pKb values are not shown.
 
 - **"Create a diagram" beside "Search reactions"** (after a comment): the two buttons of the Chemical system tab are in one row above the species found, so the second one is in view without scrolling past a long result. Before a search it is there but disabled.
+
+- **pKb as a third choice** (asked for): "stepwise pKb" shows pKw − pKa for each step, the pKb of the base of that step, with pKw from the reaction of OH⁻ in the data file. Phosphate in the KTH database: 11.851, 6.793 and 1.654 in the rows of H₃PO₄, H₂PO₄⁻ and HPO₄²⁻. The row of OH⁻ is marked "pKw" in both stepwise views. Fields, sliders and the reset button work on the pKb.

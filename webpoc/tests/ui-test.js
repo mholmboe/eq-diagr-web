@@ -538,7 +538,7 @@ const STEPS = [
     assert.match(await db.textContent("#status"), /Left out, without log K in the database: H2SO4/);
     assert.ok(!(await db.$eval("#toDiagram", b => b.disabled)));
   }],
-  ["constants as stepwise pKa: the values of phosphoric acid; a step changes alone", async t => {
+  ["constants as stepwise pKa or pKb: the values of phosphoric acid; a step changes alone", async t => {
     await t.page.click("#tabs .tab .t");
     await t.menu("File", "New chemical system");
     const db = await t.frame("database.html");
@@ -553,7 +553,7 @@ const STEPS = [
     const rows = () => sp.$$eval("#specTable tr", r => r.filter(x => x.querySelector("[data-logk]")).map(x => [x.cells[1].textContent, (x.querySelector(".kkind") || {}).textContent || "", x.querySelector("[data-logk]").value]));
     assert.deepEqual(await rows(), [["H2PO4-", "", "19.553"], ["H3PO4", "", "21.702"], ["HPO4 2-", "", "12.346"], ["OH-", "", "-14"]]);
     await sp.selectOption("#kMode", "step");
-    assert.deepEqual(await rows(), [["H2PO4-", "pKa", "7.207"], ["H3PO4", "pKa", "2.149"], ["HPO4 2-", "pKa", "12.346"], ["OH-", "pKa", "14"]]);
+    assert.deepEqual(await rows(), [["H2PO4-", "pKa", "7.207"], ["H3PO4", "pKa", "2.149"], ["HPO4 2-", "pKa", "12.346"], ["OH-", "pKw", "14"]]);
     assert.equal(await sp.$eval('#specTable tr:has(td.name:text-is("H2PO4-")) .kkind', e => e.title), "H2PO4- ⇌ HPO4 2- + H+");
     // pKa2 one unit higher: the accumulated log K of H2PO4- and H3PO4 move, the other steps stay
     const f = '#specTable tr:has(td.name:text-is("H2PO4-")) [data-logk]';
@@ -561,9 +561,19 @@ const STEPS = [
     await sp.waitForFunction(() => /^H2PO4- +, +20\.553 /m.test(document.getElementById("datText").textContent));
     const dat = await sp.textContent("#datText");
     assert.ok(/^H3PO4 +, +22\.702 /m.test(dat) && /^HPO4 2- +, +12\.346 /m.test(dat));
-    assert.deepEqual(await rows(), [["H2PO4-", "pKa", "8.207"], ["H3PO4", "pKa", "2.149"], ["HPO4 2-", "pKa", "12.346"], ["OH-", "pKa", "14"]]);
+    assert.deepEqual(await rows(), [["H2PO4-", "pKa", "8.207"], ["H3PO4", "pKa", "2.149"], ["HPO4 2-", "pKa", "12.346"], ["OH-", "pKw", "14"]]);
     assert.equal(await sp.$$eval("#specTable tr.changed", x => x.length), 1, "one step is marked as changed");
     await t.shot("23-individual-steps");
+    await sp.click("#specTable tr.changed [data-kreset]");
+    await sp.waitForFunction(() => /^H2PO4- +, +19\.553 /m.test(document.getElementById("datText").textContent) && !document.querySelector("#specTable tr.changed"));
+    // the same steps as pKb of their bases (pKb = pKw - pKa); a pKb is changed alone too
+    await sp.selectOption("#kMode", "stepb");
+    assert.deepEqual(await rows(), [["H2PO4-", "pKb", "6.793"], ["H3PO4", "pKb", "11.851"], ["HPO4 2-", "pKb", "1.654"], ["OH-", "pKw", "14"]]);
+    assert.equal(await sp.$eval('#specTable tr:has(td.name:text-is("H2PO4-")) .kkind', e => e.title), "HPO4 2- + H2O ⇌ H2PO4- + OH-");
+    assert.equal(await sp.textContent("#specTable tr th:nth-child(3)"), "pKb or log K");
+    await sp.fill(f, "5.793"); await sp.press(f, "Tab");
+    await sp.waitForFunction(() => /^H2PO4- +, +20\.553 /m.test(document.getElementById("datText").textContent));
+    assert.deepEqual(await rows(), [["H2PO4-", "pKb", "5.793"], ["H3PO4", "pKb", "11.851"], ["HPO4 2-", "pKb", "1.654"], ["OH-", "pKw", "14"]]);
     await sp.click("#specTable tr.changed [data-kreset]");
     await sp.waitForFunction(() => /^H2PO4- +, +19\.553 /m.test(document.getElementById("datText").textContent) && !document.querySelector("#specTable tr.changed"));
     // back to the accumulated view, which later steps expect
