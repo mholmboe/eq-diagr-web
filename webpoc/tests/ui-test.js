@@ -595,6 +595,44 @@ const STEPS = [
     await t.page.waitForFunction(() => document.querySelector("#tabs .tab.active .t").textContent === "Manual input");
     assert.equal(await t.page.$$eval("#tabs .tab .t", x => x.filter(b => b.textContent === "Manual input").length), 1);
   }],
+  ["manual input with redox: a standard potential becomes log K, and a species formed in one entry is a reactant in another", async t => {
+    await t.menu("File", "New chemical system (manual input)");
+    const h = await t.frame("byhand.html");
+    // the example with redox replaces what was entered before, after a question
+    await h.click("#exampleRedox");
+    await h.click('dialog[open] .btns button:text-is("Replace")');
+    await h.waitForFunction(() => /example with redox/.test(document.getElementById("status").textContent));
+    const rows = () => h.$$eval("#preview tbody tr", r => r.map(x => [(x.cells[0].querySelector("input") || {}).value || x.cells[0].textContent, x.cells[1].textContent.replace(/\u00a0/g, " "), x.cells[2].textContent.replace("−", "-")]));
+    // Fe 2+ from E° = 0.771 V; Fe(OH)2(s), entered with its solubility product from Fe 2+, is written from Fe 3+ and e-
+    assert.deepEqual(await rows(), [
+      ["Fe 2+", "e- + Fe 3+ ⇌ Fe 2+", "13.0326"], ["FeOH 2+", "Fe 3+ + H2O ⇌ FeOH 2+ + H+", "-2.19"], ["Fe(OH)2+", "Fe 3+ + 2 H2O ⇌ Fe(OH)2+ + 2 H+", "-5.7"],
+      ["OH-", "H2O ⇌ OH- + H+", "-14"], ["Fe(OH)3(s)", "Fe 3+ + 3 H2O ⇌ Fe(OH)3(s) + 3 H+", "-3.2"], ["Fe(OH)2(s)", "e- + Fe 3+ + 2 H2O ⇌ Fe(OH)2(s) + 2 H+", "0.1326"]]);
+    assert.match(await h.$eval("#preview tbody tr td.s", e => e.textContent.replace(/\u00a0/g, " ")), /^E° 0\.771 V \(log K 13\.0326\): Fe 3\+ \+ e- ⇌ Fe 2\+$/);
+    assert.equal(await h.getAttribute('fieldset[data-i="0"] [data-f="logK"]', "placeholder"), "0.771");
+    // a standard potential without electrons among the reactants is told in the entry
+    await h.fill('fieldset[data-i="0"] [data-r="1"][data-c="0"]', "");
+    await h.fill('fieldset[data-i="0"] [data-r="1"][data-c="1"]', "");
+    assert.match(await h.textContent('fieldset[data-i="0"] .err'), /with E° the electrons are among the reactants/);
+    assert.ok(await h.$eval("#create", b => b.disabled));
+    await h.fill('fieldset[data-i="0"] [data-r="1"][data-c="1"]', "e-");
+    // two species formed from each other
+    await h.fill('fieldset[data-i="3"] [data-f="product"]', "Fe 3+");
+    assert.match(await h.textContent('fieldset[data-i="3"] .err'), /Fe 3\+ and Fe 2\+ are each formed from the other/);
+    await h.fill('fieldset[data-i="3"] [data-f="product"]', "Fe(OH)2(s)");
+    assert.equal(await h.getAttribute("#name", "placeholder"), "Fe");
+    await t.shot("25-manual-input-redox");
+    await h.click("#create");
+    await t.page.waitForFunction(() => document.querySelector("#tabs .tab.active .t").textContent === "Fe", null, { timeout: 15000 });
+    // a predominance diagram against Eh and pH
+    const sp = await t.spana();
+    await sp.selectOption("#ptype", { label: "Predominance area diagram" });
+    await sp.selectOption("#compY", { label: "e-" });
+    await sp.click("#make");
+    await sp.waitForFunction(() => /Predom: [\d,.\s]+ equilibrium calculations/.test(document.getElementById("status").textContent), null, { timeout: 30000 });
+    const labels = await sp.$eval("#plot svg", s => s.textContent.replace(/\s+/g, ""));
+    for (const x of ["Fe2+", "Fe(OH)3(s)", "Fe(OH)2(s)", "pH"]) assert.ok(labels.includes(x), `${x} in the diagram (${labels.slice(0, 200)})`);
+    await t.shot("26-manual-input-redox-diagram");
+  }],
   ["a database in the CHESS format (.tdb) is converted when it is loaded, and searched", async t => {
     await t.page.click("#tabs .tab .t");
     await t.menu("File", "New chemical system");

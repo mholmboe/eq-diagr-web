@@ -1,5 +1,5 @@
 // The form of byhand.html: constants entered in blocks (an acid or base, a
-// metal ion with a ligand, a solid or another reaction), converted by
+// metal ion with a ligand, a solid, a redox couple or another reaction), converted by
 // byhand.js while they are typed and shown as the reactions of the data file.
 // "Create a diagram" has the engine read the file, saves it in this browser
 // and opens it in a diagram tab, as a search result of the database page.
@@ -23,6 +23,18 @@
     { type: "acid", base: "NH3", kind: "pKa", values: "9.25", names: [] },
     { type: "complex", metal: "Cu 2+", ligand: "NH3", kind: "step", values: "4.04 3.43 2.80 1.48", names: [] },
     { type: "reaction", product: "Cu(OH)2(s)", reactants: [["1", "Cu 2+"], ["2", "OH-"]], kind: "ksp", logK: "-19.66" } ] });
+  // redox: a couple from its standard potential, and the reduced ion as a reactant of the next entries
+  const EXAMPLE_REDOX = () => ({ name: "", pKw: "14.00", t: "25", water: true, blocks: [
+    { type: "reaction", product: "Fe 2+", reactants: [["1", "Fe 3+"], ["1", "e-"]], kind: "E0", logK: "0.771" },
+    { type: "complex", metal: "Fe 3+", ligand: "OH-", kind: "cum", values: "11.81 22.3", names: [] },
+    { type: "reaction", product: "Fe(OH)3(s)", reactants: [["1", "Fe 3+"], ["3", "OH-"]], kind: "ksp", logK: "-38.8" },
+    { type: "reaction", product: "Fe(OH)2(s)", reactants: [["1", "Fe 2+"], ["2", "OH-"]], kind: "ksp", logK: "-15.1" } ] });
+  // the value that is asked for, by the kind of constant of a reaction
+  const VALUE_PH = { form: "8.48", ksp: "-8.48", E0: "0.771" };
+  const REACTION_NOTE = {
+    form: "A solid ends with (s), (c), (cr) or (am), a gas with (g). H2O is left out. A species formed in another entry may be a reactant.",
+    ksp: "With log Ksp the reaction is read backwards: the solid, which ends with (s), dissolving into the reactants. H2O is left out.",
+    E0: "With E° the electrons are among the reactants (Fe 3+ and e- give Fe 2+), and log K = n E°/0.0592 V at 25 °C. H2O is left out." };
   let state = fresh(), result = null, idx = [];
   try {
     const s = JSON.parse(localStorage.getItem(KEY) || "null");
@@ -58,11 +70,11 @@
     const re = b.reactants.map((r, k) => `<span class="re">` +
       `<input data-r="${k}" data-c="0" type="text" class="coef code" spellcheck="false" autocomplete="off" placeholder="1" value="${esc(r[0])}" aria-label="Coefficient of reactant ${k + 1}">` +
       `<input data-r="${k}" data-c="1" type="text" class="formula" spellcheck="false" autocapitalize="off" autocomplete="off" list="comps" placeholder="${k === 0 ? "Ca 2+" : k === 1 ? "CO3 2-" : ""}" value="${esc(r[1])}" aria-label="Reactant ${k + 1}"></span>`).join("");
-    return `<fieldset class="block" data-i="${i}"><legend>Solid or other reaction</legend>${rm}<div class="f">` +
+    return `<fieldset class="block" data-i="${i}"><legend>Solid, redox or other reaction</legend>${rm}<div class="f">` +
       `<label for="b${i}product">Product</label>${field(i, "product", b, "CaCO3(s)")}` +
       `<label>Formed from</label><div class="reactants">${re}<button data-addre="${i}" title="One more reactant">+ reactant</button></div>` +
-      `<select data-f="kind" aria-label="The kind of constant">${opt("form", "log K of formation", b.kind)}${opt("ksp", "log Ksp (dissolving)", b.kind)}</select>${field(i, "logK", b, "8.48", "code")}</div>` +
-      `<p class="note">A solid ends with (s), (c), (cr) or (am), a gas with (g). H2O is left out. With log Ksp the reaction is read backwards: the solid dissolving into the reactants.</p><p class="err" role="alert"></p></fieldset>`;
+      `<select data-f="kind" aria-label="The kind of constant">${opt("form", "log K of formation", b.kind)}${opt("ksp", "log Ksp (dissolving)", b.kind)}${opt("E0", "E° (V), reduction", b.kind)}</select>${field(i, "logK", b, VALUE_PH[b.kind] || VALUE_PH.form, "code")}</div>` +
+      `<p class="note">${REACTION_NOTE[b.kind] || REACTION_NOTE.form}</p><p class="err" role="alert"></p></fieldset>`;
   }
   function drawBlocks() {
     $("blocks").innerHTML = state.blocks.map(blockHtml).join("");
@@ -77,6 +89,10 @@
       b[d.f] = e.target.value;
       // names changed in the table belong to the species of the old entry
       if (["base", "metal", "ligand"].includes(d.f)) b.names = [];
+      if (d.f === "kind" && b.type === "reaction") {
+        fs.querySelector('[data-f="logK"]').placeholder = VALUE_PH[b.kind] || VALUE_PH.form;
+        fs.querySelector(".note").textContent = REACTION_NOTE[b.kind] || REACTION_NOTE.form;
+      }
     } else if (d.r) b.reactants[+d.r][+d.c] = e.target.value;
     save(); update();
   });
@@ -149,7 +165,9 @@
     $("toDb").disabled = !result.ok || !at25;
     $("toDb").title = at25 ? "The same reactions as a text database with its element file, so that a search finds them together with the other databases"
       : "A text database holds the constants at 25 °C: not possible for another temperature";
-    $("comps").innerHTML = result.components.map(c => `<option value="${esc(c)}">`).join("") + `<option value="OH-">`;
+    // what can be a reactant: the components, the species formed in the entries, OH- and e-
+    const known = [...new Set([...result.components, ...result.species.map(x => x.name), "OH-", "e-"])];
+    $("comps").innerHTML = known.map(c => `<option value="${esc(c)}">`).join("");
   }
   // a name changed in the table: kept with its entry; an empty field gives the program's name again
   $("preview").addEventListener("change", e => {
@@ -212,12 +230,15 @@
     if (!nothing() && !(await EqDialog.confirm("Remove everything that is entered here?", { ok: "Remove" }))) return;
     state = fresh(); save(); status("", ""); log(""); drawBlocks();
   });
-  $("example").addEventListener("click", async e => {
+  async function example(e, make, text) {
     e.preventDefault();
     if (!nothing() && !(await EqDialog.confirm("Replace what is entered here with the example?", { ok: "Replace" }))) return;
-    state = EXAMPLE(); save(); drawBlocks();
-    status("", "An example: ammonia, the complexes of copper(II) with ammonia, and solid copper hydroxide. Check the values against your own source.");
-  });
+    state = make(); save(); drawBlocks();
+    status("", text + " Check the values against your own source.");
+  }
+  $("example").addEventListener("click", e => example(e, EXAMPLE, "An example: ammonia, the complexes of copper(II) with ammonia, and solid copper hydroxide."));
+  $("exampleRedox").addEventListener("click", e => example(e, EXAMPLE_REDOX,
+    "An example with redox: Fe 2+ from the standard potential of Fe 3+/Fe 2+, the hydroxide complexes of iron(III), and the two solid hydroxides, the second one entered from Fe 2+."));
 
   $("helpLink").addEventListener("click", e => {
     if (inApp && EqView.app.openHelp) { e.preventDefault(); EqView.app.openHelp("help/DB_By_Hand.htm"); }

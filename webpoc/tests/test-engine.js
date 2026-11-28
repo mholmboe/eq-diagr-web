@@ -340,13 +340,47 @@ function csvProblems(ref, cur) {
   record("ByHand", "the data file as the reference", hz.ok && hz.dat === read(path.join(T, "byhand/system.dat")));
   const wrong = [
     [{ blocks: [] }, /Nothing is entered/],
-    [{ blocks: [{ type: "acid", base: "CO3 2-", values: "10.33 6.35" }, { type: "acid", base: "HCO3-", values: "6.35" }] }, /HCO3- is a reactant in one place and a product in another/],
+    [{ blocks: [{ type: "acid", base: "CO3 2-", values: "10.33 6.35" }, { type: "acid", base: "HCO3-", values: "6.35" }] }, /H2CO3 is given twice/],
+    [{ blocks: [{ type: "reaction", product: "A", reactants: [[1, "B"], [1, "C"]], logK: 1 }, { type: "reaction", product: "B", reactants: [[1, "A"], [1, "D"]], logK: 1 }] }, /B and A are each formed from the other/],
+    [{ blocks: [{ type: "reaction", product: "E", reactants: [[1, "E"], [1, "D"]], logK: 1 }] }, /E is among its own reactants/],
+    [{ blocks: [{ type: "reaction", product: "Fe 2+", reactants: [[1, "Fe 3+"]], kind: "E0", logK: 0.771 }] }, /with E° the electrons are among the reactants/],
+    [{ blocks: [{ type: "reaction", product: "H+", reactants: [[1, "HA"], [-1, "A-"]], logK: -4 }] }, /H\+ is a component here and cannot be a product/],
     [{ blocks: [{ type: "acid", base: "CO3 2-", values: "10.33 x" }] }, /not all numbers/],
     [{ blocks: [{ type: "reaction", product: "CaCO3,s", reactants: [[1, "Ca 2+"]], logK: 8.48 }] }, /cannot contain a comma/],
     [{ blocks: [{ type: "reaction", product: "CaCO3(s)", reactants: [[1, "Ca 2+"], [1, "CO3 2-"]], logK: "" }] }, /give log K as a number/]
   ].map(([s, re]) => { const x = hand.build(s); return !x.ok && x.errors.some(e => re.test(e.text)); });
   const unbalanced = hand.build({ blocks: [{ type: "reaction", product: "CaCO3(s)", reactants: [[1, "Ca 2+"], [1, "CO3-"]], logK: 8.48 }] });
   record("ByHand", "what is wrong is told; charges that do not add up give a warning", wrong.every(Boolean) && unbalanced.ok && /charges do not add up/.test((unbalanced.warnings[0] || {}).text || ""), wrong.join(" "));
+  // redox: a standard potential becomes log K = n E° F/(RT ln 10), and a species formed in one
+  // entry (Fe 2+, HCO3-) is a reactant in another, where its own reaction is put in its place
+  const iron = hand.build({ pKw: 14, t: 25, water: true, blocks: [
+    { type: "reaction", product: "Fe 2+", reactants: [[1, "Fe 3+"], [1, "e-"]], kind: "E0", logK: "0,771" },
+    { type: "complex", metal: "Fe 3+", ligand: "OH-", kind: "cum", values: "11.81 22.3" },
+    { type: "complex", metal: "Fe 2+", ligand: "OH-", kind: "step", values: "4.5" },
+    { type: "reaction", product: "Fe(OH)3(s)", reactants: [[1, "Fe 3+"], [3, "OH-"]], kind: "ksp", logK: "-38.8" },
+    { type: "reaction", product: "Fe(OH)2(s)", reactants: [[1, "Fe 2+"], [2, "OH-"]], kind: "ksp", logK: "-15.1" } ] });
+  const fk = n => { const x = (iron.species || []).find(y => y.name === n); return x ? x.logK + " " + x.coef.join(",") : ""; };
+  const carb = hand.build({ blocks: [{ type: "acid", base: "CO3 2-", values: "10.33" }, { type: "acid", base: "HCO3-", values: "6.35" }] });
+  const mn = hand.build({ t: 25, blocks: [{ type: "reaction", product: "Mn 2+", reactants: [[1, "MnO4-"], [8, "H+"], [5, "e-"]], kind: "E0", logK: 1.51 }] });
+  const ox = hand.build({ t: 25, blocks: [{ type: "reaction", product: "Fe 3+", reactants: [[1, "Fe 2+"], [-1, "e-"]], kind: "E0", logK: 0.771 }] });
+  record("ByHand", "E° becomes log K; a product of one entry is a reactant in another",
+         iron.ok && !iron.warnings.length && iron.components.join("|") === "H+|e-|Fe 3+" &&
+         fk("Fe 2+") === "13.0326 0,1,1" && fk("FeOH 2+") === "-2.19 -1,0,1" && fk("FeOH+") === "3.5326 -1,1,1" &&
+         fk("Fe(OH)3(s)") === "-3.2 -3,0,1" && fk("Fe(OH)2(s)") === "0.1326 -2,1,1" &&
+         carb.ok && carb.components.join("|") === "H+|CO3 2-" && carb.species.find(x => x.name === "H2CO3").logK === 16.68 &&
+         mn.ok && mn.species[0].logK === 127.6214 && ox.ok && ox.species[0].logK === -13.0326 && ox.components.join("|") === "H+|e-|Fe 2+",
+         JSON.stringify([iron.errors, iron.species && iron.species.map(x => x.name + " " + x.logK), carb.errors, mn.errors, ox.errors]));
+  if (iron.ok) {
+    const fd = await engine.datDefaults(iron.dat), fm = fd.ok ? await engine.datRead({ text: fd.dat }) : fd;
+    const fdb = hand.database(iron, "Test");
+    await engine.writeFiles({ "/hand/Fe.txt": fdb.txt, "/hand/Fe.elt": fdb.elt });
+    const fs2 = await engine.search({ databases: ["/hand/Fe.txt"], components: ["H+", "e-", "Fe 3+"], allSolids: 1 });
+    const got = n => { const l = (fs2.dat || "").split(/\r?\n/).find(x => x.split(",")[0].trim() === n); return l ? parseFloat(l.split(",")[1]) : NaN; };
+    record("ByHand", "the redox system is read by the engine, and found by the search as a text database",
+           fd.ok && fm.ok && fm.model.na === 3 && fm.model.species.length === 7 &&
+           fs2.ok && fs2.species.length === 7 && !(fs2.warnings || []).length && got("Fe 2+") === 13.033 && got("Fe(OH)2(s)") === 0.133,   // DataBase writes three decimals
+           `${(fd.log || fm.log || "").slice(0, 150)} ${fs2.species && fs2.species.length} species; ${(fs2.log || "").slice(0, 200)}`);
+  }
   if (hz.ok) {
     const hd = await engine.datDefaults(hz.dat), hm = hd.ok ? await engine.datRead({ text: hd.dat }) : hd;
     record("ByHand", "the engine reads the data file and sets a default diagram",

@@ -8,12 +8,17 @@
 //   complex   a metal ion and a ligand, with the stepwise constants
 //             (log K1, log K2, ...) or the cumulative ones (log β1, log β2, ...)
 //   reaction  one product formed from any reactants, with log K of the
-//             formation, or log Ksp of a solid
+//             formation, log Ksp of a solid, or the standard potential E° of
+//             a reduction that has e- among its reactants
 // The data file wants every species as a product formed from the components,
 // with the accumulated log K. The conversion: pKa values are sorted and added
 // up from the base (HnB: the sum of the n largest), stepwise constants are
-// added up, log Ksp changes its sign, OH- among the reactants becomes
-// H2O - H+ (log K minus pKw for each OH-), and H2O is left out.
+// added up, log Ksp changes its sign, E° becomes log K = n E° F/(RT ln 10),
+// OH- among the reactants becomes H2O - H+ (log K minus pKw for each OH-),
+// and H2O is left out. A species formed in one entry may be a reactant in
+// another (Fe 2+ from Fe 3+ + e-, then Fe(OH)2(s) from Fe 2+): its own
+// reaction is put in its place, so that the components are the reactants
+// that are formed from nothing else.
 //
 //   const r = ByHand.build({ pKw: 14, t: 25, water: true, blocks: [
 //     { type: "acid", base: "PO4 3-", kind: "pKa", values: "2.15 7.20 12.35" },
@@ -78,6 +83,8 @@
   const number = v => { const n = typeof v === "number" ? [v] : numbers(v); return n.length === 1 ? n[0] : NaN; };
   const round = v => +(+v).toFixed(4);
   const coefText = c => Math.abs(c) === 1 ? "" : round(Math.abs(c)) + " ";
+  // RT ln(10)/F in volts (0.05916 V at 25 °C): log K = n E°/nernst(t)
+  const nernst = t => 8.314462618 * (t + 273.15) * Math.LN10 / 96485.33212;
   function badName(n, what) {
     if (!n) return `${what} has no name.`;
     if (/,/.test(n)) return `"${n}": a name cannot contain a comma.`;
@@ -87,7 +94,7 @@
   }
 
   // ---- the reactions of one block, as entered: [{name, logK, reactants: [[coef, name]], step}]
-  function blockReactions(b, pKw) {
+  function blockReactions(b, pKw, t) {
     const names = b.names || [], own = i => clean(names[i]);
     if (b.type === "acid") {
       const base = clean(b.base);
@@ -140,9 +147,16 @@
         reactants.push([cv, rn]);
       }
       if (!reactants.length) throw new Error(`${name}: give the reactants it is formed from.`);
-      const v = number(b.logK), ksp = b.kind === "ksp";
-      if (!isFinite(v)) throw new Error(`${name}: give ${ksp ? "log Ksp" : "log K"} as a number.`);
+      const v = number(b.logK), ksp = b.kind === "ksp", pot = b.kind === "E0";
+      if (!isFinite(v)) throw new Error(`${name}: give ${ksp ? "log Ksp" : pot ? "E° (in volts)" : "log K"} as a number.`);
       const side = reactants.map(([c, r]) => `${c < 0 ? "- " : ""}${coefText(c)}${r}`).join(" + ").replace(/\+ - /g, "- ");
+      if (pot) {
+        // the standard potential of the reduction: n electrons among the reactants
+        const ne = reactants.reduce((sum, [c, r]) => sum + (key(r) === K_E ? c : 0), 0);
+        if (!ne) throw new Error(`${name}: with E° the electrons are among the reactants, as in Fe 3+ + e- ⇌ Fe 2+.`);
+        const logK = ne * v / nernst(t);
+        return [{ name, logK, reactants, step: `E° ${round(v)} V (log K ${round(logK)}): ${side} ⇌ ${name}` }];
+      }
       return [{ name, logK: ksp ? -v : v, reactants,
                 step: ksp ? `log Ksp ${round(v)}: ${name} ⇌ ${side}` : `log K ${round(v)}: ${side} ⇌ ${name}` }];
     }
@@ -157,42 +171,62 @@
     if (!isFinite(pKw)) errors.push({ block: -1, text: "pKw is not a number." });
     if (!isFinite(t)) errors.push({ block: -1, text: "The temperature is not a number." });
     (spec.blocks || []).forEach((b, i) => {
-      try { for (const [n, r] of blockReactions(b, isFinite(pKw) ? pKw : 14).entries()) raw.push(Object.assign(r, { block: i, n })); }
+      try { for (const [n, r] of blockReactions(b, isFinite(pKw) ? pKw : 14, isFinite(t) ? t : 25).entries()) raw.push(Object.assign(r, { block: i, n })); }
       catch (e) { errors.push({ block: i, text: e.message }); }
     });
 
-    // the components: every reactant, H+ and e- first; OH- and H2O are none
+    // a species formed in one entry may be a reactant in another: its own reaction is put in its place
+    const products = new Map();
+    for (const r of raw) if (!products.has(key(r.name))) products.set(key(r.name), r);
+    // the components: the reactants that are formed from nothing else, H+ and e- first; OH- and H2O are none
     const comps = [], compKeys = new Map();
     const comp = name => { const k = key(name); if (!compKeys.has(k)) { compKeys.set(k, comps.length); comps.push(name); } return compKeys.get(k); };
     const water = spec.water !== false;
     const used = raw.flatMap(r => r.reactants.map(x => x[1])).filter(n => !isWater(n));
     if (water || used.some(n => key(n) === K_H || key(n) === K_OH)) comp("H+");
     if (used.some(n => key(n) === K_E)) comp("e-");
-    for (const n of used) if (key(n) !== K_OH) comp(n);
+    for (const n of used) if (key(n) !== K_OH && !products.has(key(n))) comp(n);
+
+    // the reaction of r written with components only: { coef, logK, w (the water of the reaction), error }
+    const resolved = new Map();
+    function resolve(r, chain) {
+      const k = key(r.name);
+      if (resolved.has(k)) return resolved.get(k);
+      const out = { coef: comps.map(() => 0), logK: r.logK, w: 0 };
+      for (const [c, n] of r.reactants) {
+        const kn = key(n);
+        if (isWater(n)) out.w += c;
+        else if (kn === K_OH) { out.coef[comp("H+")] -= c; out.logK -= c * pKw; out.w += c; }
+        else if (compKeys.has(kn)) out.coef[compKeys.get(kn)] += c;
+        else if (kn === k) { out.error = `${r.name} is among its own reactants.`; break; }
+        else if (chain.includes(kn)) { out.error = `${r.name} and ${products.get(kn).name} are each formed from the other. One of them must be formed from other species only.`; break; }
+        else {
+          const sub = resolve(products.get(kn), chain.concat(k));
+          if (sub.error) { out.error = sub.error; break; }
+          sub.coef.forEach((x, i) => { out.coef[i] += c * x; });
+          out.logK += c * sub.logK; out.w += c * sub.w;
+        }
+      }
+      resolved.set(k, out);
+      return out;
+    }
 
     const species = [], seen = new Map();
     for (const r of raw) {
-      let logK = r.logK;
-      const coef = comps.map(() => 0);
-      let w = 0;
-      for (const [c, n] of r.reactants) {
-        if (isWater(n)) { w += c; continue; }
-        if (key(n) === K_OH) { coef[comp("H+")] -= c; logK -= c * pKw; w += c; }
-        else coef[comp(n)] += c;
-      }
       const k = key(r.name), bad = badName(r.name, "A product");
       if (bad) { errors.push({ block: r.block, text: bad }); continue; }
       if (isWater(r.name)) { errors.push({ block: r.block, text: "H2O cannot be a product: water is always there." }); continue; }
-      if (compKeys.has(k)) { errors.push({ block: r.block, text: `${r.name} is a reactant in one place and a product in another. A reactant must be a component, which is formed from nothing else: write the reactions with ${r.name} as a reactant only, or with the species it is formed from.` }); continue; }
+      if (compKeys.has(k)) { errors.push({ block: r.block, text: `${r.name} is a component here and cannot be a product.` }); continue; }
       if (seen.has(k)) { errors.push({ block: r.block, text: `${r.name} is given twice.` }); continue; }
-      if (coef.every(c => !c)) { errors.push({ block: r.block, text: `${r.name}: nothing is left of the reactants.` }); continue; }
       seen.set(k, true);
-      // the charges of the two sides
-      const left = coef.reduce((s, c, i) => s + c * parseName(comps[i]).z, 0), right = parseName(r.name).z;
-      const text = reactionText(coef, comps, r.name, w);
+      const x = resolve(r, []);
+      if (x.error) { errors.push({ block: r.block, text: x.error }); continue; }
+      if (x.coef.every(c => !c)) { errors.push({ block: r.block, text: `${r.name}: nothing is left of the reactants.` }); continue; }
+      // the charges of the two sides, of the reaction as it was entered
+      const left = r.reactants.reduce((sum, [c, n]) => sum + c * parseName(n).z, 0), right = parseName(r.name).z;
       if (Math.abs(left - right) > 1e-9)
-        warnings.push({ block: r.block, text: `${text}: the charges do not add up (${signed(left)} on the left, ${signed(right)} on the right). Check the names and the coefficients.` });
-      species.push({ name: r.name, auto: r.auto, logK: round(logK), coef, solid: isSolid(r.name), text, step: r.step, block: r.block, n: r.n });
+        warnings.push({ block: r.block, text: `${enteredText(r.reactants, r.name)}: the charges do not add up (${signed(left)} on the left, ${signed(right)} on the right). Check the names and the coefficients.` });
+      species.push({ name: r.name, auto: r.auto, logK: round(x.logK), coef: x.coef.map(round), solid: isSolid(r.name), text: reactionText(x.coef, comps, r.name, x.w), step: r.step, block: r.block, n: r.n });
     }
     // water: OH- with pKw, unless it was entered
     if (water && comps.length && !seen.has(K_OH) && !compKeys.has(K_OH)) {
@@ -206,6 +240,11 @@
     return result;
   }
   const signed = z => (z > 0 ? "+" : z < 0 ? "−" : "") + round(Math.abs(z));
+  // the reaction as entered: "Cu 2+ + 2 OH- ⇌ Cu(OH)2(s)"; a negative coefficient goes to the right
+  function enteredText(reactants, name) {
+    const side = sign => reactants.filter(([c]) => c * sign > 0).map(([c, n]) => coefText(c) + n);
+    return `${side(1).join(" + ") || "…"} ⇌ ${[name, ...side(-1)].join(" + ")}`;
+  }
   // "3 H+ + PO4 3- ⇌ H3PO4"; a negative coefficient goes to the right: "Ca 2+ + H2O ⇌ CaOH+ + H+"
   // (w: the water of the reaction, known where OH- or H2O was written)
   function reactionText(coef, comps, name, w) {
@@ -254,6 +293,6 @@
     return { txt: rows.join("\n") + "\n", elt };
   }
 
-  const api = { build, database, numbers, parseName, protonated, complexName, isSolid, key };
+  const api = { build, database, numbers, parseName, protonated, complexName, isSolid, key, nernst };
   if (typeof module !== "undefined" && module.exports) module.exports = api; else global.ByHand = api;
 })(typeof window !== "undefined" ? window : globalThis);

@@ -13,14 +13,16 @@
 <h3>Manual input of constants</h3>
 
 <p>Equilibrium constants from a textbook, a table or an article can be entered as they are given there
-(p<i>K</i><sub>a</sub> values, stepwise or cumulative stability constants, solubility products), without a database. The
+(p<i>K</i><sub>a</sub> values, stepwise or cumulative stability constants, solubility products, standard
+potentials), without a database. The
 program writes them as a <a href="SP_Data_File_Format.htm">data file</a> and opens it for a diagram.</p>
 
 <ol class="steps">
 <li>Choose <span class="ui">File &gt; New chemical system (manual input)&hellip;</span> (or the link under the periodic table
 of the <span class="ui">Chemical system</span> tab). The <span class="ui">Manual input</span> tab opens.</li>
-<li>Enter what you have, with one entry for each acid, each metal with a ligand, and each solid (see below).
-<span class="ui">Fill in an example</span> shows the three kinds of entries.</li>
+<li>Enter what you have, with one entry for each acid, each metal with a ligand, and each solid or redox couple (see
+below). <span class="ui">Fill in an example</span> shows the three kinds of entries, and
+<span class="ui">an example with redox</span> shows a standard potential.</li>
 <li>The table on the right shows the chemical system as it is written to the data file: every species formed from
 the components, with its accumulated log&nbsp;<i>K</i>, beside the step you entered.</li>
 <li>Give the data file a name and click <span class="ui">Create a diagram</span>. The file is saved in this browser
@@ -49,12 +51,13 @@ of one, two, three ligands: the stepwise constants log&nbsp;<i>K</i><sub>1</sub>
 &hellip; or the cumulative constants log&nbsp;&beta;<sub>1</sub>, log&nbsp;&beta;<sub>2</sub>, &hellip;</td>
 <td>The complex with <i>n</i> ligands, with log&nbsp;&beta;<sub><i>n</i></sub>, which for stepwise constants is the
 sum of the first <i>n</i> of them.</td></tr>
-<tr><td><b>Solid or other reaction</b></td>
+<tr><td><b>Solid, redox or other reaction</b></td>
 <td>The product, the reactants it is formed from with their coefficients (an empty coefficient is 1), and
 log&nbsp;<i>K</i> of the formation. For a solid, log&nbsp;<i>K</i><sub>sp</sub> can be given: the reaction is then
-read backwards, as the solid dissolving into the reactants.</td>
+read backwards, as the solid dissolving into the reactants. For a redox couple, the standard potential
+<i>E</i>&deg; can be given (see <a href="#redox">redox</a> below).</td>
 <td>The product, with log&nbsp;<i>K</i> of its formation (&minus;log&nbsp;<i>K</i><sub>sp</sub> for a solubility
-product).</td></tr>
+product, <i>n</i><i>E</i>&deg;/0.0592&nbsp;V for a standard potential).</td></tr>
 </table>
 
 <p><b>Water.</b> With the box <span class="ui">with H+ and OH&minus;</span> ticked, H<sup>+</sup> is a component and
@@ -74,9 +77,30 @@ program makes the names of the acids and the complexes (<code>H2PO4-</code>, <co
 can be changed in the table, and an emptied field gives the name of the program again. If the charges of a reaction
 do not add up, a warning is shown, which most often points to a charge missing in a name.</p>
 
-<p><b>Components.</b> Every reactant becomes a component of the data file, and a component cannot also be a product.
-If <code>HCO3-</code> is the base of one entry and the acid made in another, the program says so: write both entries
-with the same base, <code>CO3 2-</code>.</p>
+<p><b>Components.</b> The components of the data file are the reactants that are formed in no entry. A species
+that is formed in one entry may be a reactant in another: its own reaction is then put in its place, and the constants
+are added. With <code>HCO3-</code> formed from <code>CO3 2-</code> (p<i>K</i><sub>a</sub> 10.33) and
+<code>H2CO3</code> entered as the acid of the base <code>HCO3-</code> (p<i>K</i><sub>a</sub> 6.35), the data file has
+the component <code>CO3 2-</code>, and <code>H2CO3</code> is written as formed from 2&nbsp;H<sup>+</sup> and
+CO<sub>3</sub><sup>2&minus;</sup> with log&nbsp;<i>K</i>&nbsp;=&nbsp;16.68. The column
+<span class="ui">Formed from the components</span> of the table shows the reaction that is written, and
+<span class="ui">As entered</span> the one you gave. Two species cannot each be formed from the other.</p>
+
+<p id="redox"><b>Redox.</b> A redox reaction is entered as a <span class="ui">Solid, redox or other reaction</span>
+with the electron, <code>e-</code>, among the reactants: <code>Fe 2+</code> formed from <code>Fe 3+</code> and
+<code>e-</code>. The electron becomes a component of the data file, and the diagram can then be made against
+<i>E</i><sub>H</sub> or pe. The constant is log&nbsp;<i>K</i> of the reaction, or, with
+<span class="ui">E&deg; (V), reduction</span>, the standard potential in volts, from which the program
+calculates log&nbsp;<i>K</i>&nbsp;=&nbsp;<i>n</i><i>E</i>&deg;<i>F</i>/(<i>RT</i>&nbsp;ln&nbsp;10), where <i>n</i> is the
+coefficient of <code>e-</code>: <i>n</i><i>E</i>&deg;/0.05916&nbsp;V at 25&nbsp;&deg;C. For Fe<sup>3+</sup>/Fe<sup>2+</sup>
+with <i>E</i>&deg;&nbsp;=&nbsp;0.771&nbsp;V, log&nbsp;<i>K</i>&nbsp;=&nbsp;13.03. The reaction has one product with the
+coefficient 1 (H<sub>2</sub>O is left out), so a half-reaction that gives two of the product is divided by two:
+Cr<sub>2</sub>O<sub>7</sub><sup>2&minus;</sup>&nbsp;+&nbsp;14&nbsp;H<sup>+</sup>&nbsp;+&nbsp;6&nbsp;e<sup>&minus;</sup>&nbsp;&#8652;&nbsp;2&nbsp;Cr<sup>3+</sup>&nbsp;+&nbsp;7&nbsp;H<sub>2</sub>O
+is entered as <code>Cr 3+</code> formed from 0.5&nbsp;<code>Cr2O7 2-</code>, 7&nbsp;<code>H+</code> and
+3&nbsp;<code>e-</code>, with the same <i>E</i>&deg;. The species of the reduced form are entered as they are given in
+the tables, with the reduced ion as a reactant: <code>Fe(OH)2(s)</code> with its solubility product from
+<code>Fe 2+</code> and <code>OH-</code>. The program writes it as formed from Fe<sup>3+</sup> and e<sup>&minus;</sup>
+(see Components above). See also <a href="ChEq_Redox_React.htm">redox reactions</a>.</p>
 
 <p class="note">The program takes the constants as valid for zero ionic strength and for one temperature (25&nbsp;&deg;C,
 or the temperature given in <a href="S_Menu_Prefs.htm">advanced mode</a>). Constants measured in an ionic medium, or

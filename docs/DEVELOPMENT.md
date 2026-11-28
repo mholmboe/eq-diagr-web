@@ -75,7 +75,7 @@ The claim that the browser version calculates as the desktop programs do rests o
 
 | Test | What it compares | Result (2026-11-27) |
 |---|---|---|
-| `node webpoc/tests/test-engine.js` | EC against the reference outputs of upstream, and HaltaFall against PHREEQC and the Fortran EC (test cases of the upstream haltaFall repository); SED and Predom plot files, database searches, plot conversions and data-file changes against files written by the desktop jars; the drawing of labels against the desktop formula routine | 205 of 205 |
+| `node webpoc/tests/test-engine.js` | EC against the reference outputs of upstream, and HaltaFall against PHREEQC and the Fortran EC (test cases of the upstream haltaFall repository); SED and Predom plot files, database searches, plot conversions and data-file changes against files written by the desktop jars; the drawing of labels against the desktop formula routine | 207 of 207 |
 | `node webpoc/tests/test-examples.js` | the plot files of the 17 example files of the release against those of the desktop jars, byte for byte | 17 of 17 |
 | `npm run test:ui` | 32 steps through the app in Chromium, WebKit and Firefox with Playwright, each with an empty profile | 32 of 32 in each |
 
@@ -91,7 +91,7 @@ Functions that the desktop programs do not have were added for teaching: a live 
 
 Databases in the format of CHESS (`.tdb`) can be loaded: `chess-tdb.js` converts them in the page to a text database and element file of eq-diagr (help page "Databases"). The CHESS files themselves are not part of the repository.
 
-Constants that are in no database can be entered manually (File > New chemical system (manual input), help page "Manual input of constants"): `byhand.js` converts pKa or pKb values, stepwise or cumulative stability constants and solubility products to the accumulated formation constants of a data file, or of a text database with its element file. The desktop programs have the forms of DataMaintenance for single reactions, with accumulated constants only.
+Constants that are in no database can be entered manually (File > New chemical system (manual input), help page "Manual input of constants"): `byhand.js` converts pKa or pKb values, stepwise or cumulative stability constants, solubility products and standard potentials (log K = n E° F/(RT ln 10), with e- among the reactants) to the accumulated formation constants of a data file, or of a text database with its element file. A species formed in one entry may be a reactant in another, as Fe(OH)2(s) from Fe 2+ when Fe 2+ is itself formed from Fe 3+ and e-: its reaction is put in its place, so that the components are the reactants formed in no entry. The desktop programs have the forms of DataMaintenance for single reactions, with accumulated constants only.
 
 A few behaviours differ on purpose and are described in the help: a species without log *K* in a database is left out of a search with a note (the desktop DataBase stops); a log *K* changed in a diagram tab is not written by the automatic saves; and in the drawing the ionic strength is written above the concentrations so that the temperature keeps its place.
 
