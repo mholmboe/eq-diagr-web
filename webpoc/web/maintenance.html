@@ -47,11 +47,11 @@
       <div class="row" style="margin-top:0">
         <select id="builtin" style="width:auto; flex:1 1 15em; min-width:0" title="The databases that come with the program"></select>
         <button id="pickFiles">Add your own files…</button>
-        <input id="files" type="file" multiple accept=".db,.elb,.txt,.skv,.csv,.elt,.elm" hidden>
+        <input id="files" type="file" multiple accept=".db,.elb,.txt,.skv,.csv,.elt,.elm,.tdb" hidden>
       </div>
       <p id="dbstatus" class="note">No database loaded.</p>
       <ol id="dbList"></ol>
-      <p class="note">The databases are used in this order (later ones replace reactions of earlier ones). These are the same files as on the Database page: a change here is seen there, and the set is remembered in this browser if it is there. Load a <code>.db</code> file with its <code>.elb</code> file, or a text <code>.txt</code> or <code>.skv</code> database with its <code>.elt</code> or <code>.elm</code> file, and <code>References.txt</code> for the references.</p>
+      <p class="note">The databases are used in this order (later ones replace reactions of earlier ones). These are the same files as on the Database page: a change here is seen there, and the set is remembered in this browser if it is there. Load a <code>.db</code> file with its <code>.elb</code> file, or a text <code>.txt</code> or <code>.skv</code> database with its <code>.elt</code> or <code>.elm</code> file, and <code>References.txt</code> for the references. A database in the CHESS format (<code>.tdb</code>) is converted to a text database and its element file when it is loaded.</p>
       <div class="row tight"><label class="check"><input id="remember" type="checkbox" checked> remember the files in this browser</label></div>
       <div class="row tight">
         <button id="sessSave" type="button" title="Download all the database files of the list as one session file, to open them again here or on another computer">Save session…</button>
@@ -153,6 +153,7 @@
 <script src="builtin-db.js"></script>
 <script src="properties.js"></script>
 <script src="dialogs.js"></script>
+<script src="chess-tdb.js"></script>
 <script src="maintenance.js"></script>
 </body>
 </html>

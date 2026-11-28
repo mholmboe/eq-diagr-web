@@ -221,7 +221,7 @@
   }
   // Files dropped on the window (or on a view, which hands them over): data
   // files (.dat) open in diagram tabs, database files are loaded together.
-  const DB_EXT = /\.(db|elb|txt|skv|csv|elt|elm)$/i;
+  const DB_EXT = /\.(db|elb|txt|skv|csv|elt|elm|tdb)$/i;
   async function dropFiles(list) {
     dragging(false);
     const files = [...list], dats = files.filter(f => /\.(dat|plt)$/i.test(f.name)), dbs = [];
@@ -230,7 +230,7 @@
       if (/\.txt$/i.test(f.name) && EqText.isDataFile(await EqText.read(f.slice(0, 400)))) dats.push(f); else dbs.push(f);
     }
     if (!dats.length && !dbs.length) {
-      if (files.length) { $("sbStatus").className = "sb-status fail"; $("sbStatus").textContent = "Drop data files (.dat), plot files (.plt) or database files (.db, .elb, .txt, .skv, .csv, .elt, .elm)."; }
+      if (files.length) { $("sbStatus").className = "sb-status fail"; $("sbStatus").textContent = "Drop data files (.dat), plot files (.plt) or database files (.db, .elb, .txt, .skv, .csv, .elt, .elm, or .tdb of CHESS)."; }
       return;
     }
     if (dbs.length) await loadDbFiles(dbs);

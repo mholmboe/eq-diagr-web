@@ -1,0 +1,96 @@
+# A small database in the CHESS format, written for the tests of the
+# conversion (web/chess-tdb.js): carbonate, calcium and iron, with one
+# redox couple, a gas, minerals and a surface site.
+
+H2O-halfredox  = 93.701(0), 86.003(25), 77.117(60), 68.972(100)
+
+basis-species {
+  H2O {
+    molew. = 18.0153
+  }
+  H[+] {
+    molew. = 1.0079
+    element = H
+  }
+  Ca[2+] {
+    molew. = 40.078
+    element = Ca
+    name = calcium
+  }
+  CO3[2-] {
+    molew. = 60.0092
+  }
+  Fe[2+] {
+    molew. = 55.847
+    element = Fe
+  }
+  Acetate[-] {
+    molew. = 59.045
+  }
+  O2(aq) {
+    molew. = 31.9988
+  }
+}
+
+redox-couples {
+  Fe[3+] {
+    composition = 1 Fe[2+], 0.25 O2(aq), -0.5 H2O, 1 H[+]
+    logK = 9.72(0), 8.47(25), 7.02(60), 5.68(100)
+  }
+}
+
+gaseous-species {
+  CO2(g) {
+    composition = 1 CO3[2-], 2 H[+], -1 H2O
+    logK = 18.20(0), 18.16(25), 18.12(60), 18.08(100)
+  }
+}
+
+surface-sites {
+  >S-OH2[+] {
+    composition = 1 >S-OH, 1 H[+]
+    logK = 7.29(25)
+  }
+}
+
+minerals {
+  Calcite {
+    composition = 1 Ca[2+], 1 CO3[2-]
+    logK = 8.39(0), 8.48(25), 8.82(60), 9.46(100)
+  }
+  Fe(OH)3(am,aged) {
+    composition = 1 Fe[3+], 3 H2O, -3 H[+]
+    logK = -3.2(25)
+  }
+  Nothing {
+    composition = 1 Xx[2+], 1 CO3[2-]
+    logK = 1.0(25)
+  }
+}
+
+aqueous species {
+  OH[-] {
+    composition = 1 H2O, -1 H[+]
+    logK = -14.94(0), -14.00(25), -13.03(60), -12.26(100)
+  }
+  HCO3[-] {
+    composition = 1 CO3[2-], 1 H[+]
+    logK = 10.33
+  }
+  CaCO3(aq) {
+    composition = 1 Ca[2+], 1 CO3[2-]
+    logK = 3.22(25), 3.50(60)
+  }
+  FeOH[2+] {
+    composition = 1 Fe[3+], 1 H2O, -1 H[+]
+    logK = -2.19(25)
+  }
+  CaAcetate[+] {
+    composition = 1 Ca[2+], 1 Acetate[-]
+    logK = 1.18(25)
+  }
+  NoK(aq) {
+    composition = 1 Ca[2+], 2 Acetate[-]
+    logK = 500(25)
+  }
+}

@@ -1,0 +1,11 @@
+COMPLEX;LogK;DH_kJmol;DCp_Jmol;R1;N1;R2;N2;R3;N3;R4;N4;R5;N5;R6;N6;H;Reference / Comment
+Fe 3+;-13.0307;analytic;100;-5.71124335143;;-2182.31090727;;;;2;Fe 2+;1;e-;-1;small.tdb
+OH-;-14;analytic;100;63.2483342301;;-5930.69058849;-23.179717732;;;2;H2O;1;H+;-1;small.tdb
+HCO3-;10.33;;;2;CO3 2-;1;H+;1;small.tdb
+CaCO3(aq);3.22;analytic;60;5.8852;;-794.62938;;;;2;Ca 2+;1;CO3 2-;1;small.tdb
+FeOH 2+;-15.2207;;;4;Fe 2+;1;H2O;1;H+;-1;e-;-1;small.tdb
+CaAcetate+;1.18;;;2;Ca 2+;1;Acetate-;1;small.tdb
+CO2(g);18.16;analytic;100;17.7596988104;;119.349799668;;;;3;CO3 2-;1;H+;2;H2O;-1;small.tdb
+Calcite(s);8.48;analytic;100;107.091212436;0.0722217155788;-365.792536002;-48.0583453243;;;2;Ca 2+;1;CO3 2-;1;small.tdb
+Fe(OH)3(aged)(am);-16.2308;;;4;Fe 2+;1;H2O;3;H+;-3;e-;-1;small.tdb
+O2(aq);-86.003;analytic;100;-147.459492475;-0.0331758210436;-20725.6144913;56.9269048281;;;3;H2O;2;H+;-4;e-;-4;small.tdb

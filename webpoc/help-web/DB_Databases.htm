@@ -38,6 +38,25 @@ files on the window) for files of your own: you are asked whether to <b>add</b> 
 <b>use them instead</b>. A database read later replaces the reactions of an earlier one that have the same name. In
 advanced mode, the <b>Database tools</b> tab lists the files, where they can be removed and put in another
 order.</p>
+<p><a name="CHESS"></a><b>Databases in the CHESS format.</b> A database written for the program CHESS (a file ending
+in <code>.tdb</code>, as the CHESS versions of the MINTEQ, WATEQ4F, PHREEQC, EQ3/6 and NEA databases) is loaded in the
+same way. It is converted to a text database and its element file (for <code>minteq.tdb</code>:
+<code>minteq-chess.txt</code> and <code>minteq-chess.elt</code>), which are then used as any database of your own and
+can be downloaded in the Database tools. The message after loading gives the number of components and reactions, and
+the list under <b>Search messages</b> names what was left out. In the conversion:</p>
+<ul>
+<li>the basis species of the file become the components, and reactions written with other species (the redox couples
+of CHESS) are rewritten with components only;</li>
+<li>redox reactions, which CHESS writes with dissolved oxygen, are written with the electron
+(<code>e-</code>), as in the other databases;</li>
+<li>names follow this program: <code>Ca[2+]</code> becomes <code>Ca 2+</code>, and minerals get the ending
+<code>(s)</code>, for example <code>Calcite(s)</code>;</li>
+<li>log <i>K</i> at 25&nbsp;&deg;C is that of the file. Where the file gives log <i>K</i> at several temperatures,
+an expression in the temperature is fitted through them, valid up to the last temperature of the table; the message
+says how closely the expressions reproduce the tables. A reaction with a value at 25&nbsp;&deg;C only cannot be used
+at another temperature, as in any database;</li>
+<li>surface sites, colloids and organic matter are left out, because this program has no such species.</li>
+</ul>
 <p><b>Sessions</b> <span class="adv">(advanced mode)</span>. In the Database tools,
 <b>Save session&hellip;</b> downloads all the database files of the list as one file
 (<code>databases.eqsession</code>), and <b>Open session&hellip;</b> puts the files of such a file in the place of

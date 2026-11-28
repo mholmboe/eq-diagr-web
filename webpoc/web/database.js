@@ -324,6 +324,15 @@
   // name of one in use replaces it; later databases replace reactions of earlier ones.
   async function loadUser(files) {
     if (!files.length) return;
+    // a database in the CHESS format (.tdb) becomes a text database and its element file (chess-tdb.js)
+    const conv = ChessTdb.convertFiles(files), told = () => {
+      if (!conv.reports.length) return;
+      const bad = conv.reports.filter(r => !r.ok);
+      status(bad.length ? "fail" : "ok", conv.reports.map(r => r.summary).join(" ") + (bad.length < conv.reports.length ? " The details are under \"Search messages\"." : ""));
+      log(conv.reports.map(r => r.details).join("\n\n"));
+    };
+    files = conv.files;
+    if (!files.length) { told(); return; }
     if (loaded.length && databases.length) {
       const a = await EqDialog.choose(`The databases in use are: ${databases.join(", ")}.\n\nAdd ${files.length === 1 ? files[0].name : "the " + files.length + " files"} to them, or use ${files.length === 1 ? "it" : "them"} instead?`,
         [["add", "Add"], ["replace", "Use instead"], ["cancel", "Cancel"]]);
@@ -334,6 +343,7 @@
       }
     }
     await load(files);
+    told();
   }
   $("files").addEventListener("change", async ev => {
     const files = await Promise.all([...ev.target.files].map(async f => ({ name: f.name, buffer: await f.arrayBuffer() })));

@@ -53,6 +53,8 @@ The browser-specific changes exist because TeaVM's Java library is not the JVM's
 | the charset is known as "UTF-8" only | "UTF8" was not found | replaced in the copied sources |
 | no file system of the computer | the programs read and write files | TeaVM's in-memory file system behind `java.io`, which the bridge fills and reads for the page |
 
+One change at build time corrects a fault of the upstream code and is not specific to the browser: in `DBSearch`, a reactant of a text database that is in no element file should be reported by name, but the test of the message reads a variable that is null when the reaction is otherwise in order, so the search ended with a null pointer. `build-web.sh` adds the null test. It should be reported upstream.
+
 A rebuild needs the eq-diagr sources (with the patches) in `eq-diagr/` and the TeaVM 0.14.1 jars in `webpoc/teavm-lib/`; both are git-ignored. The build also regenerates the test data, the example list and the help.
 
 ## Architecture of the app
@@ -73,7 +75,7 @@ The claim that the browser version calculates as the desktop programs do rests o
 
 | Test | What it compares | Result (2026-11-27) |
 |---|---|---|
-| `node webpoc/tests/test-engine.js` | EC against the reference outputs of upstream, and HaltaFall against PHREEQC and the Fortran EC (test cases of the upstream haltaFall repository); SED and Predom plot files, database searches, plot conversions and data-file changes against files written by the desktop jars; the drawing of labels against the desktop formula routine | 194 of 194 |
+| `node webpoc/tests/test-engine.js` | EC against the reference outputs of upstream, and HaltaFall against PHREEQC and the Fortran EC (test cases of the upstream haltaFall repository); SED and Predom plot files, database searches, plot conversions and data-file changes against files written by the desktop jars; the drawing of labels against the desktop formula routine | 200 of 200 |
 | `node webpoc/tests/test-examples.js` | the plot files of the 17 example files of the release against those of the desktop jars, byte for byte | 17 of 17 |
 | `npm run test:ui` | 32 steps through the app in Chromium, WebKit and Firefox with Playwright, each with an empty profile | 32 of 32 in each |
 
@@ -86,6 +88,8 @@ Two limits of this verification should be stated. The comparison is with eq-diag
 The app merges DataBase, Spana and the database tools into one window with tabs, and has a normal mode with the options that most diagrams need and an advanced mode with the rest, following the "advanced" preference of the desktop programs. The default database is that of the KTH course KD1280; the database of the eq-diagr release and four others are bundled.
 
 Functions that the desktop programs do not have were added for teaching: a live mode in which the diagram follows the settings, with sliders for concentrations, log *K* values, the ionic strength and the temperature of the calculation; diagrams kept in the drawing with broken lines for comparison; coordinates and species read off the diagram at the pointer; a diagram style with fonts, colours, axes and page options; a link that carries a data file; colour themes; and a search in the help.
+
+Databases in the format of CHESS (`.tdb`) can be loaded: `chess-tdb.js` converts them in the page to a text database and element file of eq-diagr (help page "Databases"). The CHESS files themselves are not part of the repository.
 
 A few behaviours differ on purpose and are described in the help: a species without log *K* in a database is left out of a search with a note (the desktop DataBase stops); a log *K* changed in a diagram tab is not written by the automatic saves; and in the drawing the ionic strength is written above the concentrations so that the temperature keeps its place.
 

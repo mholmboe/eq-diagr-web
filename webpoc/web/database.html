@@ -82,13 +82,13 @@
       <div class="row" style="margin-top:0">
         <select id="builtin" style="width:auto; flex:0 1 26em; min-width:0" title="The databases that come with the program"></select>
         <button id="pickFiles" class="adv-only">Load your own files…</button>
-        <input id="files" type="file" multiple accept=".db,.elb,.txt,.skv,.csv,.elt,.elm" hidden>
+        <input id="files" type="file" multiple accept=".db,.elb,.txt,.skv,.csv,.elt,.elm,.tdb" hidden>
       </div>
       <p id="dbstatus">Loading the database…</p>
       <div class="row adv-only" style="margin-top:4px">
         <label class="check"><input id="remember" type="checkbox" checked> remember your own database files in this browser</label>
       </div>
-      <p class="note adv-only">Three databases come with the program: the database of the KTH course KD1280 (the default; log <i>K</i> at 25 °C only), the database of the eq-diagr release (with its literature references and data for other temperatures), and a small sample. To use your own, load a <code>.db</code> file together with its <code>.elb</code> file (or a text <code>.txt</code> or <code>.skv</code> database with its <code>.elt</code> or <code>.elm</code> file), and a references file (<code>References.txt</code>) to see the literature references.</p>
+      <p class="note adv-only">Three databases come with the program: the database of the KTH course KD1280 (the default; log <i>K</i> at 25 °C only), the database of the eq-diagr release (with its literature references and data for other temperatures), and a small sample. To use your own, load a <code>.db</code> file together with its <code>.elb</code> file (or a text <code>.txt</code> or <code>.skv</code> database with its <code>.elt</code> or <code>.elm</code> file), and a references file (<code>References.txt</code>) to see the literature references. A database in the format of CHESS (<code>.tdb</code>) is converted to a text database when it is loaded.</p>
 
       <label>Elements <span class="note">(choose an element, then a component)</span></label>
       <div id="ptable" class="ptable"></div>
@@ -154,6 +154,7 @@
 <script src="store.js"></script>
 <script src="builtin-db.js"></script>
 <script src="dialogs.js"></script>
+<script src="chess-tdb.js"></script>
 <script src="database.js"></script>
 </body>
 </html>

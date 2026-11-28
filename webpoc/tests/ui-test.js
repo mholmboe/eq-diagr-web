@@ -532,6 +532,32 @@ const STEPS = [
     await t.page.click('dialog.eqdlg[open] button[value="discard"]');
     await t.page.waitForFunction(() => ![...document.querySelectorAll("#tabs .tab .t")].some(b => b.textContent === "10-Poubaix diag Cu"));
   }],
+  ["a database in the CHESS format (.tdb) is converted when it is loaded, and searched", async t => {
+    await t.page.click("#tabs .tab .t");
+    await t.menu("File", "New chemical system");
+    const db = await t.frame("database.html");
+    await t.page.setInputFiles("#openDb", path.join(ROOT, "webpoc", "tests", "chess", "small.tdb"));
+    await db.waitForSelector("dialog[open] .btns button");
+    await db.click('dialog[open] .btns button:text-is("Use instead")');
+    await db.waitForFunction(() => /^Your files: small-chess\.txt/.test(document.getElementById("dbstatus").textContent), null, { timeout: 15000 });
+    await db.waitForFunction(() => /CHESS format/.test(document.getElementById("status").textContent));
+    assert.match(await db.textContent("#status"), /small\.tdb \(CHESS format\) was converted to small-chess\.txt: 6 components, 7 aqueous species, 1 gas, 2 solids\. Left out: 1 surface site, 2 reactions\./);
+    assert.match(await db.textContent("#log"), /NoK\(aq\): no log K at 25 C/);
+    // calcium (the only component of its element) and carbonate; the mineral has the ending of a solid
+    await db.click('#ptable button:text-is("Ca")');
+    await db.click('#ptable button:text-is("C")');
+    await db.click('#avail button:text-is("CO3 2-")');
+    await db.click("#search");
+    await db.waitForFunction(() => /species found/.test(document.getElementById("status").textContent));
+    const found = await db.$$eval("#found tr", r => r.slice(1).map(x => x.textContent.replace(/\s+/g, " ").trim()));
+    for (const n of ["OH-", "HCO3-", "CaCO3(aq)", "CO2(g)", "Calcite(s)"]) assert.ok(found.some(x => x.startsWith(n)), `${n} is found (${found.join(", ")})`);
+    // a file with that ending that is no CHESS database changes nothing
+    await t.page.setInputFiles("#openDb", { name: "notes.tdb", mimeType: "text/plain", buffer: Buffer.from("hello\n") });
+    await db.waitForFunction(() => /"notes\.tdb" is not a database in the CHESS format/.test(document.getElementById("status").textContent));
+    assert.match(await db.textContent("#dbstatus"), /^Your files: small-chess\.txt/);
+    await t.menu("Database", "KTH course database KD1280");
+    await db.waitForFunction(() => /^The KTH course database/.test(document.getElementById("dbstatus").textContent), null, { timeout: 15000 });
+  }],
   ["a KTH search with sulfate leaves out H2SO4, which has no log K", async t => {
     await t.page.click("#tabs .tab .t");
     await t.menu("File", "New chemical system");

@@ -568,3 +568,28 @@ Checked with hand-made files opened through the file dialog and by dropping them
 4. On the diagram page on its own (`spana.html`, not in the app window), "Open .dat…" and "My files…" did nothing as long as no file was open, because the guard that ignores changes of the form fields before a file is read also stopped the event of the file field. The row that opens a file is now let through.
 
 Not changed: a file from the computer with the name of a file already stored in the browser is plotted but not saved automatically, so that the stored file is not overwritten without a question ("File > Save data file" asks for the name). The data file downloaded from the app is written in UTF-8, as the desktop programs read and write it (`ReadDataLib` and `WriteChemSyst` name UTF8), so a name read from a windows-1252 file comes back to the desktop Spana intact.
+
+## Databases in the CHESS format (2026-11-28)
+
+Eight databases in the format of CHESS (`chess.tdb`, `eq36.tdb`, `minteq.tdb`, `nea.tdb`, `nea2.tdb`, `phreeqc.tdb`, `tdbvit0.tdb`, `wateq4f.tdb`; not in the repository) were the test material. The app could not read them. `chess-tdb.js` now converts such a file when it is loaded (Database > Load database files, the Load buttons, a file dropped on the window, and the list of the Database tools) to a text database and element file named after it (`minteq-chess.txt`, `minteq-chess.elt`), which are stored and used as the user's other files.
+
+| File | Components | Aqueous species | Gases | Solids | Left out |
+|---|---|---|---|---|---|
+| `chess.tdb` | 84 | 1169 | 90 | 1114 | 75 surface sites, 3 colloids, 3 species of organic matter, 13 reactions |
+| `eq36.tdb` | 81 | 1671 | 92 | 1116 | 24 reactions |
+| `minteq.tdb` | 73 | 978 | 13 | 514 | 42 surface sites, 2 colloids, 3 reactions |
+| `nea.tdb` | 35 | 149 | 70 | 197 | 27 reactions |
+| `nea2.tdb` | 37 | 237 | 104 | 289 | 4 reactions |
+| `phreeqc.tdb` | 25 | 161 | 8 | 57 | 47 surface sites, 3 reactions |
+| `tdbvit0.tdb` | 46 | 655 | 10 | 636 | 12 reactions |
+| `wateq4f.tdb` | 35 | 323 | 8 | 309 | 61 surface sites, 3 reactions |
+
+The reactions left out have no log K at 25 °C, are defined twice in the file, or use a reactant that the file does not define.
+
+Checks. Each converted database was searched in the engine with all its components at once: every reaction was read and passed the checks of the search (charge balance, components in the element file). Against the Wateq4F database of eq-diagr, 107 aqueous reactions have the same name and the same reactants; 103 agree within 0.01 in log K and 4 within 0.1, which also covers the redox reactions rewritten from O2(aq) to e- (Fe 3+: -13.03, eq-diagr -13.02). Against MintEQ-v4 about half of the 118 comparable reactions differ by more than 0.1; the CHESS file is a conversion of an older MINTEQ, which was not verified further. At 60 and 100 °C the searches give the values of the tables of `minteq.tdb` within 0.005 (OH-, H3SiO4-, calcite, CO2(g)).
+
+Temperature. Log K at several temperatures is written as the analytic expression of eq-diagr, through the value at 25 °C, with the fewest terms (1/T; then log T; then T; then 1/T²) that reproduce the table within 0.005, valid up to the last temperature of the table. For five of the eight files all tables are reproduced within 0.03. The largest differences are 0.22 (nesquehonite in `chess.tdb`), 0.23 (2-octanone in `eq36.tdb`) and 2.9 for SnF4 in `tdbvit0.tdb`, whose table has 1.0401 at 25 °C between 11.50 at 0 °C and 11.97 at 60 °C, probably a misprint in the file; the conversion keeps the value of the file.
+
+Found on the way: a text database with a reactant that is in no element file (water, in the first trial) ended the search with "Cannot read properties of null". The fault is in the upstream `DBSearch` and is corrected at build time (`build-web.sh`); the search now names the component and asks whether to go on.
+
+Open: the minerals keep the names of the CHESS files with "(s)" added, so they do not replace the solids of another database loaded together with them, which have chemical formulas as names. A reaction with log K at 25 °C only stops a search at another temperature, as for every database ("Temperature-pressure data are missing for…"); with a converted database this happens often, since many of their reactions have no table. A JCHESS input script (`.chs`) is not read.

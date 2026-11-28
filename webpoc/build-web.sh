@@ -75,6 +75,16 @@ if grep -q "interface Display" "$SRC/DataBase/src/database/DBSearch.java" 2>/dev
   cp -R "$SRC/LibDataBase/src/." "$BUILD/src/"   # TeaVM only translates what the engine reaches
   mkdir -p "$BUILD/src/database"
   cp "$SRC/DataBase/src/database/DBSearch.java" "$BUILD/src/database/"
+  # A reactant of a text database that is in no element file: DBSearch means to
+  # name it, but tests the length of a message that is null when the reaction is
+  # otherwise in order, and the search ends with a null pointer instead.
+  python3 -I - "$BUILD/src/database/DBSearch.java" <<'PYEOF'
+import sys
+p = sys.argv[1]; s = open(p, encoding="utf-8").read()
+old = "if(msg.length() > 0) {msg = msg +nl+ t;} else {msg = t;}"
+assert s.count(old) == 1, "DBSearch.java: the message test was not found"
+open(p, "w", encoding="utf-8").write(s.replace(old, "if(msg != null && msg.length() > 0) {msg = msg +nl+ t;} else {msg = t;}"))
+PYEOF
   # the maintenance tools use LibDataBase's own code; its message boxes print instead
   python3 -I "$HERE/patch_dblib.py" "$BUILD/src/lib/database"
   DB_SRC="$HERE/src-db"

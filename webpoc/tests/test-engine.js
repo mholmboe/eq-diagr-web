@@ -295,6 +295,32 @@ function csvProblems(ref, cur) {
   }
   record("Setup", "text database = binary at 25 C", conv.ok && same === nconv, `${same} of ${nconv}`);
 
+  // ---- a database in the CHESS format (chess-tdb.js): the text database and element file made
+  //      of the small file in tests/chess, and the search in them
+  const chess = require(path.join(WEB, "chess-tdb.js"));
+  const cz = chess.convert(read(path.join(T, "chess/small.tdb")), "small.tdb");
+  record("Chess", "text database and element file as the reference", cz.ok && cz.txt === read(path.join(T, "chess/small-chess.txt")) && cz.elt === read(path.join(T, "chess/small-chess.elt")));
+  record("Chess", "what was left out is told", cz.ok && /Left out: 1 surface site, 2 reactions\./.test(cz.summary) &&
+         /NoK\(aq\): no log K at 25 C/.test(cz.details) && /Nothing: its reactant Xx\[2\+\] is not defined/.test(cz.details));
+  record("Chess", "a file that is no CHESS database is refused", chess.convert("COMPLEX;LogK\nOH-;-14;;;2;H2O;1;H+;-1;x\n", "x.tdb").ok === false);
+  if (cz.ok) {
+    await engine.writeFiles({ "/chess/small-chess.txt": cz.txt, "/chess/small-chess.elt": cz.elt });
+    const comps = ["H+", "e-", "Ca 2+", "CO3 2-", "Fe 2+", "Acetate-"];
+    const logK = (r, name) => { const l = (r.dat || "").split(/\r?\n/).find(x => x.split(",")[0].trim() === name); return l ? parseFloat(l.split(",")[1]) : NaN; };
+    const c25 = await engine.search({ databases: ["/chess/small-chess.txt"], components: comps, allSolids: 1 });
+    record("Chess", "every reaction is found, with the redox couple written with e-", c25.ok && c25.species.length === 10 && !(c25.warnings || []).length &&
+           Math.abs(logK(c25, "Fe 3+") + 13.031) < 0.0011 && Math.abs(logK(c25, "FeOH 2+") + 15.221) < 0.0011 && Math.abs(logK(c25, "Calcite(s)") - 8.48) < 0.0011,
+           `${c25.species && c25.species.length} species, Fe 3+ ${logK(c25, "Fe 3+")}`);
+    // away from 25 C: the values of the tables of the file (OH- -13.03 and calcite 8.82 at 60 C)
+    const c60 = await engine.search({ databases: ["/chess/small-chess.txt"], components: ["H+", "Ca 2+", "CO3 2-"], exclude: ["HCO3-"], allSolids: 1, t: "60" });
+    record("Chess", "log K at 60 C as in the tables", c60.ok && Math.abs(logK(c60, "OH-") + 13.03) < 0.006 && Math.abs(logK(c60, "Calcite(s)") - 8.82) < 0.006 && Math.abs(logK(c60, "CaCO3(aq)") - 3.50) < 0.006,
+           `OH- ${logK(c60, "OH-")}, calcite ${logK(c60, "Calcite(s)")}, ${(c60.missing || []).join(" ")}`);
+    // a reactant that is in no element file is named by the search (the fault of DBSearch corrected in build-web.sh)
+    await engine.writeFiles({ "/chess/nowater.txt": cz.txt, "/chess/nowater.elt": cz.elt.replace(/^XX,.*\n/m, "") });
+    const nw = await engine.searchOnce({ databases: ["/chess/nowater.txt"], components: ["H+", "Ca 2+", "CO3 2-"] });
+    record("Chess", "a reactant in no element file is named", /Component "H2O" in complex "[^"]+"\s+not found in the element-files/.test(nw.ask || ""), (nw.ask || nw.log || "").slice(0, 120));
+  }
+
   // ---- Database: the components of text databases read in the page (builtin-db.js)
   //      must be those the engine reads (LibDB.readElements)
   vm.runInThisContext(read(path.join(WEB, "builtin-db.js")));

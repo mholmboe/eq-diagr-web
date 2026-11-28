@@ -15692,7 +15692,7 @@ var main;
                                 }
                                 if (!var$3) {
                                     var$6 = ((((((((jl_StringBuilder__init_()).$append1($rt_s(1305))).$append1(var$6)).$append1($rt_s(1306))).$append1(var$1.$name0)).$append1($rt_s(7))).$append1(d_DBSearch_nl)).$append1($rt_s(1307))).$toString();
-                                    var$2 = var$2.$length() <= 0 ? var$6 : ((((jl_StringBuilder__init_()).$append1(var$2)).$append1(d_DBSearch_nl)).$append1(var$6)).$toString();
+                                    var$2 = var$2 !== null && var$2.$length() > 0 ? ((((jl_StringBuilder__init_()).$append1(var$2)).$append1(d_DBSearch_nl)).$append1(var$6)).$toString() : var$6;
                                 }
                             }
                         }

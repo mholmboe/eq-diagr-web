@@ -493,7 +493,13 @@
   $("files").addEventListener("change", async ev => {
     const f = await Promise.all([...ev.target.files].map(async x => ({ name: x.name, buffer: await x.arrayBuffer() })));
     ev.target.value = "";
-    if (f.length) await setFiles(f);
+    // a database in the CHESS format (.tdb) becomes a text database and its element file (chess-tdb.js)
+    const conv = ChessTdb.convertFiles(f);
+    if (conv.files.length) await setFiles(conv.files);
+    if (conv.reports.length) {
+      status(conv.reports.some(r => !r.ok) ? "fail" : "ok", conv.reports.map(r => r.summary).join(" "));
+      log(conv.reports.map(r => r.details).join("\n\n"));
+    }
   });
   $("remember").addEventListener("change", async () => {
     if ($("remember").checked) await remember();
