@@ -633,6 +633,126 @@ const STEPS = [
     for (const x of ["Fe2+", "Fe(OH)3(s)", "Fe(OH)2(s)", "pH"]) assert.ok(labels.includes(x), `${x} in the diagram (${labels.slice(0, 200)})`);
     await t.shot("26-manual-input-redox-diagram");
   }],
+  ["manual input: pKb values, pKw, water and temperature; the file downloaded, replaced, used as a database; the page on its own", async t => {
+    await t.page.click("#modeAdv");
+    const form = async () => { await t.menu("File", "New chemical system (manual input)"); return t.frame("byhand.html"); };
+    let h = await form();
+    const rows = () => h.$$eval("#preview tbody tr", r => r.map(x => [(x.cells[0].querySelector("input") || {}).value || x.cells[0].textContent, x.cells[2].textContent.replace("−", "-")]));
+    const k = async name => ((await rows()).find(x => x[0] === name) || [])[1];
+    // the first example replaces the redox example, after a question
+    await h.click("#example");
+    await h.click('dialog[open] .btns button:text-is("Replace")');
+    await h.waitForFunction(() => /An example: ammonia/.test(document.getElementById("status").textContent));
+    assert.deepEqual(await rows(), [["NH4+", "9.25"], ["CuNH3 2+", "4.04"], ["Cu(NH3)2 2+", "7.47"], ["Cu(NH3)3 2+", "10.27"], ["Cu(NH3)4 2+", "11.75"], ["OH-", "-14"], ["Cu(OH)2(s)", "-8.34"]]);
+    // the same acid from its pKb value
+    await h.selectOption('fieldset[data-i="0"] [data-f="kind"]', "pKb");
+    await h.fill('fieldset[data-i="0"] [data-f="values"]', "4,75");
+    assert.equal(await k("NH4+"), "9.25");
+    assert.match(await h.$eval("#preview tbody tr td.s", e => e.textContent.replace(/ /g, " ")), /^pKb 4\.75 \(pKa 9\.25\): NH3 \+ H2O ⇌ NH4\+ \+ OH-$/);
+    // another pKw changes what is entered with pKb or with OH-
+    await h.fill("#pKw", "13");
+    assert.deepEqual([await k("NH4+"), await k("OH-"), await k("Cu(OH)2(s)")], ["8.25", "-13", "-6.34"]);
+    await h.fill("#pKw", "x");
+    assert.match(await h.textContent("#problems"), /pKw is not a number/);
+    assert.ok(await h.$eval("#create", b => b.disabled));
+    await h.fill("#pKw", "14.00");
+    // without water there is no OH-; H+ stays, since the entries use it
+    await h.uncheck("#water");
+    assert.ok(!(await rows()).some(x => x[0] === "OH-"));
+    assert.match((await h.textContent("#dat")).split("\n")[0], /^ 3, 5, 1, 0,/);
+    await h.check("#water");
+    assert.match((await h.textContent("#dat")).split("\n")[0], /^ 3, 6, 1, 0,   \/manual input, t= 25$/);
+    // another temperature (advanced mode) is written to the file; a text database is then not offered
+    assert.ok(await h.isVisible("#t") && !(await h.$eval("#toDb", b => b.disabled)));
+    await h.fill("#t", "37");
+    assert.match((await h.textContent("#dat")).split("\n")[0], /t= 37$/);
+    assert.ok(await h.$eval("#toDb", b => b.disabled));
+    await h.fill("#t", "25");
+    // a kind of constant changes the value asked for and the explanation
+    await h.selectOption('fieldset[data-i="2"] [data-f="kind"]', "E0");
+    assert.equal(await h.getAttribute('fieldset[data-i="2"] [data-f="logK"]', "placeholder"), "0.771");
+    assert.match(await h.textContent('fieldset[data-i="2"] .note'), /With E° the electrons are among the reactants/);
+    assert.match(await h.textContent('fieldset[data-i="2"] .err'), /with E° the electrons are among the reactants/);
+    await h.selectOption('fieldset[data-i="2"] [data-f="kind"]', "ksp");
+    assert.equal(await h.textContent('fieldset[data-i="2"] .err'), "");
+    // one more reactant: the hydroxide carbonate, with a warning on the charges while a coefficient is missing
+    await h.click("#addReaction");
+    await h.fill('fieldset[data-i="3"] [data-f="product"]', "Cu2(OH)2CO3(s)");
+    await h.click('fieldset[data-i="3"] [data-addre]');
+    for (const [r, c, v] of [[0, 0, "2"], [0, 1, "Cu 2+"], [1, 1, "OH-"], [2, 1, "CO3 2-"]]) await h.fill(`fieldset[data-i="3"] [data-r="${r}"][data-c="${c}"]`, v);
+    await h.fill('fieldset[data-i="3"] [data-f="logK"]', "33.8");
+    assert.match(await h.textContent("#problems"), /2 Cu 2\+ \+ OH- \+ CO3 2- ⇌ Cu2\(OH\)2CO3\(s\): the charges do not add up \(\+1 on the left, 0 on the right\)/);
+    assert.ok(!(await h.$eval("#create", b => b.disabled)), "a warning does not stop the file");
+    await h.fill('fieldset[data-i="3"] [data-r="1"][data-c="0"]', "2");
+    assert.equal(await h.textContent("#problems"), "");
+    assert.equal(await k("Cu2(OH)2CO3(s)"), "5.8");
+    // an entry is removed
+    await h.click('fieldset[data-i="3"] [data-rm]');
+    assert.equal(await h.$$eval("fieldset.block", f => f.length), 3);
+    // the data file is downloaded as it is shown
+    const [dl] = await Promise.all([t.page.waitForEvent("download"), h.click("#download")]);
+    assert.equal(dl.suggestedFilename(), "NH3-Cu.dat");
+    const dat = fs.readFileSync(await dl.path(), "utf8");
+    assert.equal(dat, await h.textContent("#dat"));
+    assert.match(dat, /^ 3, 6, 1, 0,   \/manual input, t= 25\nH\+\nNH3\nCu 2\+\nNH4\+ +,  9\.25 +1  1  0\n/);
+    // created twice: the second time the program asks for a name, and offers a free one
+    await h.click("#create");
+    await t.page.waitForFunction(() => document.querySelector("#tabs .tab.active .t").textContent === "NH3-Cu", null, { timeout: 15000 });
+    h = await form();
+    await h.click("#create");
+    await h.waitForSelector("dialog[open] input");
+    assert.match(await h.textContent("dialog[open] .msg"), /There is already a data file "NH3-Cu\.dat" in this browser/);
+    assert.equal(await h.inputValue("dialog[open] input"), "NH3-Cu (2).dat");
+    await h.click('dialog[open] .btns button:text-is("Save")');
+    await t.page.waitForFunction(() => document.querySelector("#tabs .tab.active .t").textContent === "NH3-Cu (2)", null, { timeout: 15000 });
+    await t.page.waitForFunction(() => ["NH3-Cu.dat", "NH3-Cu (2).dat"].every(n => [...document.querySelectorAll("#sideFiles [data-file]")].some(b => b.dataset.file === n)));
+    // with the name kept the old file is replaced, and its tab is used again; a cancelled question saves nothing
+    h = await form();
+    await h.click("#create");
+    await h.waitForSelector("dialog[open] input");
+    await h.click('dialog[open] .btns button:text-is("Cancel")');
+    await h.waitForFunction(() => document.getElementById("status").textContent === "" && !document.querySelector("dialog[open]"));
+    assert.equal(await t.page.textContent("#tabs .tab.active .t"), "Manual input");
+    await h.click("#create");
+    await h.waitForSelector("dialog[open] input");
+    await h.fill("dialog[open] input", "NH3-Cu.dat");
+    await h.click('dialog[open] .btns button:text-is("Save")');
+    await t.page.waitForFunction(() => document.querySelector("#tabs .tab.active .t").textContent === "NH3-Cu", null, { timeout: 15000 });
+    assert.equal(await t.page.$$eval("#tabs .tab .t", x => x.filter(b => b.textContent === "NH3-Cu").length), 1);
+    // the same reactions as a text database: handed to the Chemical system tab, which asks what to do with them
+    h = await form();
+    await h.click("#toDb");
+    const db = await t.frame("database.html");
+    await db.waitForSelector("dialog[open] .btns button");
+    assert.match(await db.textContent("dialog[open] .msg"), /Add the 2 files to them, or use them instead\?/);
+    await db.click('dialog[open] .btns button:text-is("Add")');
+    await db.waitForFunction(() => /NH3-Cu\.txt/.test(document.getElementById("dbstatus").textContent), null, { timeout: 15000 });
+    assert.match(await h.textContent("#status"), /NH3-Cu\.txt and NH3-Cu\.elt go to the databases of the Chemical system tab/);
+    await t.menu("Database", "KTH course database KD1280");
+    await db.waitForFunction(() => /^The KTH course database/.test(document.getElementById("dbstatus").textContent), null, { timeout: 15000 });
+    // "Start again" empties the form, after a question
+    h = await form();
+    await h.click("#clear");
+    await h.click('dialog[open] .btns button:text-is("Remove")');
+    await h.waitForFunction(() => !document.getElementById("empty").hidden);
+    assert.ok(await h.isVisible("#empty") && await h.$eval("#create", b => b.disabled));
+    assert.equal(await h.$$eval("fieldset.block", f => f.length), 1);
+    for (const title of ["NH3-Cu", "NH3-Cu (2)"]) await t.page.click(`#tabs .tab:has(.t:text-is("${title}")) .x`);
+    // the page on its own: the example, and the diagram page opens with the new file
+    const alone = await t.page.context().newPage();
+    try {
+      await alone.goto(new URL("byhand.html", t.page.url()).href);
+      await alone.bringToFront();
+      await alone.click("#example");
+      await alone.fill("#name", "Alone");
+      await alone.click("#create");
+      await alone.waitForURL(/spana\.html\?file=Alone\.dat$/, { timeout: 15000 });
+      await alone.waitForFunction(() => document.getElementById("fileName").textContent === "Alone.dat" && !document.getElementById("make").disabled);
+    } finally { await alone.close(); await t.page.bringToFront(); }
+    // a new page starts in normal mode (the init script of this test), which the stored setting follows: back to advanced
+    await t.page.click("#modeNormal");
+    await t.page.click("#modeAdv");
+  }],
   ["a database in the CHESS format (.tdb) is converted when it is loaded, and searched", async t => {
     await t.page.click("#tabs .tab .t");
     await t.menu("File", "New chemical system");

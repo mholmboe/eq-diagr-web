@@ -75,7 +75,7 @@ The claim that the browser version calculates as the desktop programs do rests o
 
 | Test | What it compares | Result (2026-11-27) |
 |---|---|---|
-| `node webpoc/tests/test-engine.js` | EC against the reference outputs of upstream, and HaltaFall against PHREEQC and the Fortran EC (test cases of the upstream haltaFall repository); SED and Predom plot files, database searches, plot conversions and data-file changes against files written by the desktop jars; the drawing of labels against the desktop formula routine | 207 of 207 |
+| `node webpoc/tests/test-engine.js` | EC against the reference outputs of upstream, and HaltaFall against PHREEQC and the Fortran EC (test cases of the upstream haltaFall repository); SED and Predom plot files, database searches, plot conversions and data-file changes against files written by the desktop jars; the drawing of labels against the desktop formula routine | 221 of 221 |
 | `node webpoc/tests/test-examples.js` | the plot files of the 17 example files of the release against those of the desktop jars, byte for byte | 17 of 17 |
 | `npm run test:ui` | 32 steps through the app in Chromium, WebKit and Firefox with Playwright, each with an empty profile | 32 of 32 in each |
 

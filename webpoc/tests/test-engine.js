@@ -395,6 +395,9 @@ function csvProblems(ref, cur) {
            `${hs.species && hs.species.length} species; ${(hs.log || "").slice(0, 200)}`);
   }
 
+  // the rules for names and numbers, the options, every message, and the chemistry of the files through SED
+  await require(path.join(T, "byhand", "tests.js"))(engine, record);
+
   // ---- Database: the components of text databases read in the page (builtin-db.js)
   //      must be those the engine reads (LibDB.readElements)
   vm.runInThisContext(read(path.join(WEB, "builtin-db.js")));

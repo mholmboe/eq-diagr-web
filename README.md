@@ -53,7 +53,7 @@ Then open http://127.0.0.1:8765/app.html. Any static file server works, since `w
 node webpoc/tests/test-engine.js
 ```
 
-207 tests of the engine through the worker code in Node: EC and HaltaFall against reference results, SED and Predom plot files against the desktop jars, the database search, the plot converters, data-file edits and the diagram rendering.
+221 tests of the engine through the worker code in Node: EC and HaltaFall against reference results, SED and Predom plot files against the desktop jars, the database search, the plot converters, data-file edits and the diagram rendering.
 
 ```bash
 node webpoc/tests/test-examples.js
@@ -69,7 +69,7 @@ npm install && npm run install-browsers
 npm run test:ui
 ```
 
-38 steps of the main flow in Chromium, WebKit and Firefox with Playwright (the test starts its own server; Chromium is the installed Chrome). `npm run screenshots` retakes the pictures in `review/`.
+39 steps of the main flow in Chromium, WebKit and Firefox with Playwright (the test starts its own server; Chromium is the installed Chrome). `npm run screenshots` retakes the pictures in `review/`.
 
 ## Documentation
 
