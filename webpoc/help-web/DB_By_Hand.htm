@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Constants entered by hand</title>
+<link rel="stylesheet" href="1_.css">
+<link rel="stylesheet" href="1_web.css">
+</head>
+<body>
+<div class="crumb"><a href="0_Index.htm"><img src="images/thco35_s.gif" width="32" height="32" alt="Chem.Eq.Diagr"></a>
+<span><a href="DB_0_Main.htm">DATABASE</a></span></div>
+
+<h3>Constants entered by hand</h3>
+
+<p>Equilibrium constants from a textbook, a table or an article can be entered as they are given there
+(p<i>K</i><sub>a</sub> values, stepwise or cumulative stability constants, solubility products), without a database. The
+program writes them as a <a href="SP_Data_File_Format.htm">data file</a> and opens it for a diagram.</p>
+
+<ol class="steps">
+<li>Choose <span class="ui">File &gt; New chemical system by hand&hellip;</span> (or the link under the periodic table
+of the <span class="ui">Chemical system</span> tab). The <span class="ui">By hand</span> tab opens.</li>
+<li>Enter what you have, with one entry for each acid, each metal with a ligand, and each solid (see below).
+<span class="ui">Fill in an example</span> shows the three kinds of entries.</li>
+<li>The table on the right shows the chemical system as it is written to the data file: every species formed from
+the components, with its accumulated log&nbsp;<i>K</i>, beside the step you entered.</li>
+<li>Give the data file a name and click <span class="ui">Create a diagram</span>. The file is saved in this browser
+and opened in a diagram tab, where the diagram type, the axes and the concentrations are chosen as for any other
+chemical system.</li>
+</ol>
+
+<p>What is entered stays in the <span class="ui">By hand</span> tab, also after the browser is closed, so that a
+value can be corrected and the diagram made again. <span class="ui">Start again</span> empties the tab.</p>
+
+<h4>The three kinds of entries</h4>
+
+<table class="opts">
+<tr><th>Entry</th><th>What is given</th><th>What is written</th></tr>
+<tr><td><b>Acid or base</b></td>
+<td>The base, which is the form without the protons of the acid (<code>PO4 3-</code> for phosphoric acid,
+<code>NH3</code> for the ammonium ion), and the p<i>K</i><sub>a</sub> values of its acids, one for each proton and in
+any order. With <span class="ui">pKb values</span> the values are those of the bases, and
+p<i>K</i><sub>a</sub>&nbsp;=&nbsp;p<i>K</i><sub>w</sub>&nbsp;&minus;&nbsp;p<i>K</i><sub>b</sub>.</td>
+<td>The acid with <i>n</i> protons, with log&nbsp;<i>K</i> equal to the sum of the <i>n</i> largest
+p<i>K</i><sub>a</sub> values. For 2.15, 7.20 and 12.35: <code>HPO4 2-</code> 12.35, <code>H2PO4-</code> 19.55 and
+<code>H3PO4</code> 21.70.</td></tr>
+<tr><td><b>Metal ion with a ligand</b></td>
+<td>The metal ion (<code>Cu 2+</code>), the ligand (<code>NH3</code>) and one constant for each complex, in the order
+of one, two, three ligands: the stepwise constants log&nbsp;<i>K</i><sub>1</sub>, log&nbsp;<i>K</i><sub>2</sub>,
+&hellip; or the cumulative constants log&nbsp;&beta;<sub>1</sub>, log&nbsp;&beta;<sub>2</sub>, &hellip;</td>
+<td>The complex with <i>n</i> ligands, with log&nbsp;&beta;<sub><i>n</i></sub>, which for stepwise constants is the
+sum of the first <i>n</i> of them.</td></tr>
+<tr><td><b>Solid or other reaction</b></td>
+<td>The product, the reactants it is formed from with their coefficients (an empty coefficient is 1), and
+log&nbsp;<i>K</i> of the formation. For a solid, log&nbsp;<i>K</i><sub>sp</sub> can be given: the reaction is then
+read backwards, as the solid dissolving into the reactants.</td>
+<td>The product, with log&nbsp;<i>K</i> of its formation (&minus;log&nbsp;<i>K</i><sub>sp</sub> for a solubility
+product).</td></tr>
+</table>
+
+<p><b>Water.</b> With the box <span class="ui">with H+ and OH&minus;</span> ticked, H<sup>+</sup> is a component and
+OH<sup>&minus;</sup> is added with the p<i>K</i><sub>w</sub> given (14.00 at 25&nbsp;&deg;C). A data file has no
+component for OH<sup>&minus;</sup>, but it may be written as a ligand or a reactant: each OH<sup>&minus;</sup> is
+converted to H<sub>2</sub>O&nbsp;&minus;&nbsp;H<sup>+</sup>, and p<i>K</i><sub>w</sub> is subtracted from
+log&nbsp;<i>K</i>. Copper hydroxide with log&nbsp;<i>K</i><sub>sp</sub>&nbsp;=&nbsp;&minus;19.66, entered as
+<code>Cu(OH)2(s)</code> formed from <code>Cu 2+</code> and 2 <code>OH-</code>, is written as
+Cu<sup>2+</sup>&nbsp;+&nbsp;2&nbsp;H<sub>2</sub>O&nbsp;&#8652;&nbsp;Cu(OH)<sub>2</sub>(s)&nbsp;+&nbsp;2&nbsp;H<sup>+</sup>
+with log&nbsp;<i>K</i>&nbsp;=&nbsp;19.66&nbsp;&minus;&nbsp;28.00&nbsp;=&nbsp;&minus;8.34. H<sub>2</sub>O itself is
+left out of the reactions.</p>
+
+<p><b>Names.</b> Names are written as in the databases (see <a href="SP_Names_Numbers.htm">names and numbers</a>): the
+charge at the end, as in <code>PO4 3-</code>, <code>Cu 2+</code> or <code>CH3COO-</code>; a solid ends with
+<code>(s)</code>, <code>(c)</code>, <code>(cr)</code> or <code>(am)</code>, and a gas with <code>(g)</code>. The
+program makes the names of the acids and the complexes (<code>H2PO4-</code>, <code>Cu(NH3)4 2+</code>); such a name
+can be changed in the table, and an emptied field gives the name of the program again. If the charges of a reaction
+do not add up, a warning is shown, which most often points to a charge missing in a name.</p>
+
+<p><b>Components.</b> Every reactant becomes a component of the data file, and a component cannot also be a product.
+If <code>HCO3-</code> is the base of one entry and the acid made in another, the program says so: write both entries
+with the same base, <code>CO3 2-</code>.</p>
+
+<p class="note">The program takes the constants as valid for zero ionic strength and for one temperature (25&nbsp;&deg;C,
+or the temperature given in <a href="S_Menu_Prefs.htm">advanced mode</a>). Constants measured in an ionic medium, or
+taken from tables for different conditions, are used as they are, and the diagram is then only as consistent as the
+constants. See also <a href="ChEq_Sources_logK.htm">how to get equilibrium constants</a>.</p>
+
+<h4>The same constants as a database</h4>
+
+<p>In <a href="S_Menu_Prefs.htm">advanced mode</a>, <span class="ui">Use as a database&hellip;</span> writes the same
+reactions as a text database (a <a href="DB_logK_files.htm">logK file</a> <code>.txt</code> with its
+<a href="DB_Element_files.htm">element file</a> <code>.elt</code>) and hands the two files to the
+<span class="ui">Chemical system</span> tab, which asks whether they are added to the databases in use or used
+instead of them. A search then finds your reactions together with those of the other databases, and a reaction of
+yours replaces one of the same name in a database before it. A text database holds constants at 25&nbsp;&deg;C, so
+this is not offered for another temperature. Single reactions can also be added to a text database in the
+<span class="ui">Database tools</span> tab (see <a href="DB_Add_data.htm">adding data</a>).</p>
+
+<ul class="plain">
+<li><a href="DB_Working_with.htm">Searching the database</a></li>
+<li><a href="S_Modify_Chem_System.htm">Changing the chemical system of a data file</a></li>
+</ul>
+<p>&nbsp;</p>
+</body>
+</html>

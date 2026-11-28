@@ -21,9 +21,10 @@
   let dbInfo = null, dbInfoLoading = null;
 
   // ---------------------------------------------------------------- tabs
-  // kind: chem (database search), diagram, maint (database tools, advanced), help
-  const PAGES = { chem: "database.html", diagram: "spana.html", maint: "maintenance.html", help: "help.html" };
-  const TITLES = { chem: "Chemical system", diagram: "Diagram", maint: "Database tools", help: "Help" };
+  // kind: chem (database search), diagram, maint (database tools, advanced), help,
+  // hand (a chemical system from constants entered by hand)
+  const PAGES = { chem: "database.html", diagram: "spana.html", maint: "maintenance.html", help: "help.html", hand: "byhand.html" };
+  const TITLES = { chem: "Chemical system", diagram: "Diagram", maint: "Database tools", help: "Help", hand: "By hand" };
 
   function openTab(kind, opts = {}) {
     const tab = { id: "t" + (++seq), kind, title: opts.title || TITLES[kind], closable: kind !== "chem",
@@ -317,6 +318,7 @@
     { label: "File", items: [
       { label: "Open data or plot file…", act: openDatFile, key: "" },
       { label: "New chemical system", act: () => chem("newSystem") },
+      { label: "New chemical system by hand…", act: () => ensure("hand") },
       { label: "Open an example…", act: showExamples },
       "-",
       { label: "Save data file in this browser", cmd: "saveMy" },
@@ -548,6 +550,8 @@
       drawSidebar();
     },
     openDiagram,
+    openByHand: () => ensure("hand"),
+    openHelp: help,
     dropFiles, dragging, shareUrl,
     key,
     closeMenus() { closeMenus(); closeDrawer(); }

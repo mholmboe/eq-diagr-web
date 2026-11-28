@@ -532,6 +532,69 @@ const STEPS = [
     await t.page.click('dialog.eqdlg[open] button[value="discard"]');
     await t.page.waitForFunction(() => ![...document.querySelectorAll("#tabs .tab .t")].some(b => b.textContent === "10-Poubaix diag Cu"));
   }],
+  ["a chemical system entered by hand: pKa values, stepwise constants and a solubility product become a data file", async t => {
+    await t.menu("File", "New chemical system by hand");
+    const h = await t.frame("byhand.html");
+    assert.equal(await t.page.textContent("#tabs .tab.active .t"), "By hand");
+    await h.click("#clear");
+    assert.ok(await h.$eval("#create", b => b.disabled) && await h.isVisible("#empty"));
+    const rows = () => h.$$eval("#preview tbody tr", r => r.map(x => [(x.cells[0].querySelector("input") || {}).value || x.cells[0].textContent, x.cells[2].textContent.replace("−", "-")]));
+    // phosphoric acid from its pKa values, with decimal commas and in any order
+    await h.fill('fieldset[data-i="0"] [data-f="base"]', "PO4 3-");
+    await h.fill('fieldset[data-i="0"] [data-f="values"]', "7,20 2,15 12,35");
+    assert.deepEqual(await rows(), [["HPO4 2-", "12.35"], ["H2PO4-", "19.55"], ["H3PO4", "21.7"], ["OH-", "-14"]]);
+    // the ammine complexes of copper from stepwise constants; the hydroxide from its solubility product, written with OH-
+    await h.click("#addComplex");
+    await h.fill('fieldset[data-i="1"] [data-f="metal"]', "Cu 2+");
+    await h.fill('fieldset[data-i="1"] [data-f="ligand"]', "NH3");
+    await h.fill('fieldset[data-i="1"] [data-f="values"]', "4.04 3.43 2.80 1.48");
+    await h.click("#addReaction");
+    await h.fill('fieldset[data-i="2"] [data-f="product"]', "Cu(OH)2(s)");
+    await h.fill('fieldset[data-i="2"] [data-r="0"][data-c="1"]', "Cu 2+");
+    await h.fill('fieldset[data-i="2"] [data-r="1"][data-c="0"]', "2");
+    await h.fill('fieldset[data-i="2"] [data-r="1"][data-c="1"]', "OH-");
+    await h.selectOption('fieldset[data-i="2"] [data-f="kind"]', "ksp");
+    await h.fill('fieldset[data-i="2"] [data-f="logK"]', "-19.66");
+    assert.deepEqual((await rows()).slice(3), [["CuNH3 2+", "4.04"], ["Cu(NH3)2 2+", "7.47"], ["Cu(NH3)3 2+", "10.27"], ["Cu(NH3)4 2+", "11.75"], ["OH-", "-14"], ["Cu(OH)2(s)", "-8.34"]]);
+    assert.equal(await h.$eval("#preview tbody tr:last-child td.r", e => e.textContent.replace(/ /g, " ")), "Cu 2+ + 2 H2O ⇌ Cu(OH)2(s) + 2 H+");
+    // a value that is no number: told in the entry, and no file can be made
+    await h.fill('fieldset[data-i="1"] [data-f="values"]', "4.04 x");
+    assert.match(await h.textContent('fieldset[data-i="1"] .err'), /not all numbers/);
+    assert.ok(await h.$eval("#create", b => b.disabled) && await h.$eval('fieldset[data-i="1"]', f => f.classList.contains("bad")));
+    await h.fill('fieldset[data-i="1"] [data-f="values"]', "4.04 3.43 2.80 1.48");
+    // a name made by the program is changed in the table
+    await h.fill('#preview input[data-auto="CuNH3 2+"]', "Cu(NH3) 2+");
+    await h.press('#preview input[data-auto="CuNH3 2+"]', "Tab");
+    assert.equal((await rows())[3][0], "Cu(NH3) 2+");
+    assert.equal(await h.getAttribute("#name", "placeholder"), "PO4-Cu-NH3");
+    await t.shot("24-by-hand");
+    // what is entered is kept over a reload of the view
+    await h.evaluate(() => location.reload());
+    const h2 = await t.frame("byhand.html");
+    await h2.waitForSelector('#preview input[data-auto="CuNH3 2+"]');
+    assert.equal(await h2.inputValue('fieldset[data-i="0"] [data-f="values"]'), "7,20 2,15 12,35");
+    await h2.fill("#name", "My copper");
+    await h2.click("#create");
+    await t.page.waitForFunction(() => document.querySelector("#tabs .tab.active .t").textContent === "My copper", null, { timeout: 15000 });
+    assert.match(await h2.textContent("#status"), /Saved in this browser as My copper\.dat/);
+    await t.page.waitForFunction(() => [...document.querySelectorAll("#sideFiles [data-file]")].some(b => b.dataset.file === "My copper.dat"));
+    // in the diagram tab the steps are the pKa values that were entered
+    const sp = await t.spana();
+    await sp.evaluate(() => { document.getElementById("sysPanel").open = true; });
+    await sp.selectOption("#kMode", "step");
+    const steps = await sp.$$eval("#specTable tr", r => r.filter(x => x.querySelector("[data-logk]")).map(x => x.cells[1].textContent + " " + ((x.querySelector(".kkind") || {}).textContent || "") + " " + x.querySelector("[data-logk]").value));
+    for (const x of ["H3PO4 pKa 2.15", "H2PO4- pKa 7.2", "HPO4 2- pKa 12.35", "Cu(NH3)4 2+ log K 11.75", "Cu(OH)2(s) log K -8.34"]) assert.ok(steps.includes(x), `${x} (${steps.join("; ")})`);
+    await sp.selectOption("#kMode", "cum");
+    await sp.click("#make");
+    await sp.waitForFunction(() => /equilibrium calculations/.test(document.getElementById("status").textContent), null, { timeout: 30000 });
+    assert.ok(await sp.$$eval("#plot svg path, #plot svg text", p => p.length) > 10, "the plot is drawn");
+    // the link on the Chemical system tab opens the same form
+    await t.page.click("#tabs .tab .t");
+    const db = await t.frame("database.html");
+    await db.click("#byHand");
+    await t.page.waitForFunction(() => document.querySelector("#tabs .tab.active .t").textContent === "By hand");
+    assert.equal(await t.page.$$eval("#tabs .tab .t", x => x.filter(b => b.textContent === "By hand").length), 1);
+  }],
   ["a database in the CHESS format (.tdb) is converted when it is loaded, and searched", async t => {
     await t.page.click("#tabs .tab .t");
     await t.menu("File", "New chemical system");

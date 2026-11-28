@@ -321,6 +321,46 @@ function csvProblems(ref, cur) {
     record("Chess", "a reactant in no element file is named", /Component "H2O" in complex "[^"]+"\s+not found in the element-files/.test(nw.ask || ""), (nw.ask || nw.log || "").slice(0, 120));
   }
 
+  // ---- a chemical system entered by hand (byhand.js): pKa values, stepwise constants and a
+  //      solubility product become a data file the engine reads, and a text database it searches
+  const hand = require(path.join(WEB, "byhand.js"));
+  const spec = { pKw: 14, t: 25, water: true, blocks: [
+    { type: "acid", base: "PO4 3-", kind: "pKa", values: "2.15 7.20 12.35" },
+    { type: "acid", base: "NH3", kind: "pKb", values: "4,75" },
+    { type: "complex", metal: "Cu 2+", ligand: "NH3", kind: "step", values: "4.04, 3.43, 2.80, 1.48" },
+    { type: "complex", metal: "Cu 2+", ligand: "OH-", kind: "cum", values: "6.3 11.8" },
+    { type: "reaction", product: "Cu(OH)2(s)", reactants: [[1, "Cu 2+"], [2, "OH-"]], kind: "ksp", logK: "-19.3" },
+    { type: "reaction", product: "CuHPO4", reactants: [["", "Cu 2+"], [1, "H+"], [1, "PO4-3"], ["", ""]], kind: "form", logK: "16.5" } ] };
+  const hz = hand.build(spec), hk = n => { const x = (hz.species || []).find(y => y.name === n); return x ? x.logK : NaN; };
+  record("ByHand", "pKa, pKb, stepwise and cumulative constants, log Ksp: the accumulated log K",
+         hz.ok && !hz.warnings.length && hz.components.join("|") === "H+|PO4 3-|NH3|Cu 2+" &&
+         hk("HPO4 2-") === 12.35 && hk("H2PO4-") === 19.55 && hk("H3PO4") === 21.7 && hk("NH4+") === 9.25 &&
+         hk("Cu(NH3)4 2+") === 11.75 && hk("CuOH+") === -7.7 && hk("Cu(OH)2") === -16.2 && hk("Cu(OH)2(s)") === -8.7 && hk("OH-") === -14,
+         JSON.stringify(hz.errors));
+  record("ByHand", "the data file as the reference", hz.ok && hz.dat === read(path.join(T, "byhand/system.dat")));
+  const wrong = [
+    [{ blocks: [] }, /Nothing is entered/],
+    [{ blocks: [{ type: "acid", base: "CO3 2-", values: "10.33 6.35" }, { type: "acid", base: "HCO3-", values: "6.35" }] }, /HCO3- is a reactant in one place and a product in another/],
+    [{ blocks: [{ type: "acid", base: "CO3 2-", values: "10.33 x" }] }, /not all numbers/],
+    [{ blocks: [{ type: "reaction", product: "CaCO3,s", reactants: [[1, "Ca 2+"]], logK: 8.48 }] }, /cannot contain a comma/],
+    [{ blocks: [{ type: "reaction", product: "CaCO3(s)", reactants: [[1, "Ca 2+"], [1, "CO3 2-"]], logK: "" }] }, /give log K as a number/]
+  ].map(([s, re]) => { const x = hand.build(s); return !x.ok && x.errors.some(e => re.test(e.text)); });
+  const unbalanced = hand.build({ blocks: [{ type: "reaction", product: "CaCO3(s)", reactants: [[1, "Ca 2+"], [1, "CO3-"]], logK: 8.48 }] });
+  record("ByHand", "what is wrong is told; charges that do not add up give a warning", wrong.every(Boolean) && unbalanced.ok && /charges do not add up/.test((unbalanced.warnings[0] || {}).text || ""), wrong.join(" "));
+  if (hz.ok) {
+    const hd = await engine.datDefaults(hz.dat), hm = hd.ok ? await engine.datRead({ text: hd.dat }) : hd;
+    record("ByHand", "the engine reads the data file and sets a default diagram",
+           hd.ok && hd.defaulted && hm.ok && hm.model.na === 4 && hm.model.species.length === 13 && hm.model.species.filter(x => x.name.trim() === "Cu(OH)2(s)").length === 1,
+           (hd.log || hm.log || "").slice(0, 200));
+    const hdb = hand.database(hz, "Test");
+    await engine.writeFiles({ "/hand/Mine.txt": hdb.txt, "/hand/Mine.elt": hdb.elt });
+    const hs = await engine.search({ databases: ["/hand/Mine.txt"], components: ["H+", "PO4 3-", "NH3", "Cu 2+"], allSolids: 1 });
+    const found = n => { const l = (hs.dat || "").split(/\r?\n/).find(x => x.split(",")[0].trim() === n); return l ? parseFloat(l.split(",")[1]) : NaN; };
+    record("ByHand", "the same reactions as a text database are found by the search",
+           hs.ok && hs.species.length === 13 && !(hs.warnings || []).length && found("H3PO4") === 21.7 && found("Cu(OH)2(s)") === -8.7 && found("OH-") === -14,
+           `${hs.species && hs.species.length} species; ${(hs.log || "").slice(0, 200)}`);
+  }
+
   // ---- Database: the components of text databases read in the page (builtin-db.js)
   //      must be those the engine reads (LibDB.readElements)
   vm.runInThisContext(read(path.join(WEB, "builtin-db.js")));

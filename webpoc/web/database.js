@@ -456,6 +456,10 @@
     }
     catch (e) { status("fail", "Could not save the file in this browser: " + e.message); }
   });
+  // constants of the user's own: the form of byhand.html, a tab in the app window
+  $("byHand").addEventListener("click", e => {
+    if (window.EqView && EqView.app && EqView.app.openByHand) { e.preventDefault(); EqView.app.openByHand(); }
+  });
   // ---------------------------------------------------------------- in the app window (app-view.js)
   if (window.EqView) {
     Object.assign(EqView.commands, {

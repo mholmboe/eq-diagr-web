@@ -11,7 +11,8 @@ contents (the desktop help has the search of JavaHelp).
 The pages that describe how to use the desktop programs (their windows, menus
 and preferences) are replaced by pages for the web app, kept in help-web/ with
 the same file names, so that the links of the other pages still lead to them.
-TOC_TEXT renames their entries in the contents, and DROP leaves out entries.
+TOC_TEXT renames their entries in the contents, DROP leaves out entries, and
+EXTRA adds entries for pages that only the web app has.
 """
 import html
 import json
@@ -47,6 +48,9 @@ TOC_TEXT = {
     "Install_Uninstall_htm": "Running in the browser",
 }
 DROP = {"S_Batch_htm"}
+# pages of the web app that the desktop help has no entry for: put in the
+# contents after the entry named, {target: [(text, page in help-web/)]}
+EXTRA = {"DB_Working_with_htm": [("Constants entered by hand", "DB_By_Hand.htm")]}
 
 urls = {}
 for m in ET.parse(os.path.join(hs, "javahelp", "map.jhm")).getroot().iter("mapID"):
@@ -73,6 +77,8 @@ def items(node, depth):
                        % (" open" if depth == 0 and t.get("expand") == "true" else "", link, "".join(kids)))
         else:
             out.append("<li>%s</li>" % link)
+        for text, page in EXTRA.get(t.get("target"), []):
+            out.append('<li><a href="help/%s" target="topic">%s</a></li>' % (html.escape(page), html.escape(text)))
     return out
 
 
@@ -85,6 +91,9 @@ toc_title = {}
 for t in toc_root.iter("tocitem"):
     if t.get("target") not in DROP and urls.get(t.get("target")):
         toc_title.setdefault(urls[t.get("target")], TOC_TEXT.get(t.get("target"), t.get("text", "")))
+for extra in EXTRA.values():
+    for text, page in extra:
+        toc_title.setdefault("help/" + page, text)
 
 
 def page_text(path):
