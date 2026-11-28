@@ -321,7 +321,7 @@ function csvProblems(ref, cur) {
     record("Chess", "a reactant in no element file is named", /Component "H2O" in complex "[^"]+"\s+not found in the element-files/.test(nw.ask || ""), (nw.ask || nw.log || "").slice(0, 120));
   }
 
-  // ---- a chemical system entered by hand (byhand.js): pKa values, stepwise constants and a
+  // ---- manual input of a chemical system (byhand.js): pKa values, stepwise constants and a
   //      solubility product become a data file the engine reads, and a text database it searches
   const hand = require(path.join(WEB, "byhand.js"));
   const spec = { pKw: 14, t: 25, water: true, blocks: [

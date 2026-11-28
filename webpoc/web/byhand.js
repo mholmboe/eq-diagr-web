@@ -1,4 +1,4 @@
-// A chemical system entered by hand: equilibrium constants as a textbook or a
+// Manual input of a chemical system: equilibrium constants as a textbook or a
 // table gives them, written as a data file of Spana (.dat) or as a text
 // database of DataBase (.txt with its element file, .elt).
 //
@@ -218,7 +218,7 @@
   function datText(r, title) {
     const sol = r.species.filter(x => !x.solid).length, solids = r.species.length - sol;
     const num = v => { const s = String(round(v)); return (v < 0 ? "" : " ") + s; };
-    const lines = [` ${r.components.length}, ${sol}, ${solids}, 0,   /entered by hand, t= ${round(r.t)}`];
+    const lines = [` ${r.components.length}, ${sol}, ${solids}, 0,   /manual input, t= ${round(r.t)}`];
     for (const c of r.components) lines.push(c);
     for (const x of r.species)
       lines.push(`${x.name.padEnd(20)}, ${num(x.logK).padEnd(10)}${x.coef.map(c => String(round(c)).padStart(3)).join("")}`);
@@ -240,7 +240,7 @@
   }
   /** r: a result of build(); reference: the text in the reference column. Constants at 25 °C. */
   function database(r, reference) {
-    const ref = clean(reference || "entered by hand").replace(/;/g, ",");
+    const ref = clean(reference || "manual input").replace(/;/g, ",");
     const rows = ["COMPLEX;LogK;DH_kJmol;DCp_Jmol;R1;N1;R2;N2;R3;N3;R4;N4;R5;N5;R6;N6;H;Reference / Comment"];
     for (const x of r.species) {
       const re = x.coef.map((c, i) => c ? `${r.components[i]};${round(c)}` : null).filter(Boolean);

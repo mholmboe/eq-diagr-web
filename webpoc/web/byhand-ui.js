@@ -199,7 +199,7 @@
   });
   $("toDb").addEventListener("click", async () => {
     if (!result || !result.ok) return;
-    const base = fileName(), db = ByHand.database(result, "entered by hand");
+    const base = fileName(), db = ByHand.database(result, "manual input");
     if (inApp && EqView.app.dropFiles) {
       status("ok", `${base}.txt and ${base}.elt go to the databases of the Chemical system tab.`);
       await EqView.app.dropFiles([new File([db.txt], base + ".txt", { type: "text/plain" }), new File([db.elt], base + ".elt", { type: "text/plain" })]);

@@ -50,7 +50,7 @@ TOC_TEXT = {
 DROP = {"S_Batch_htm"}
 # pages of the web app that the desktop help has no entry for: put in the
 # contents after the entry named, {target: [(text, page in help-web/)]}
-EXTRA = {"DB_Working_with_htm": [("Constants entered by hand", "DB_By_Hand.htm")]}
+EXTRA = {"DB_Working_with_htm": [("Manual input of constants", "DB_By_Hand.htm")]}
 
 urls = {}
 for m in ET.parse(os.path.join(hs, "javahelp", "map.jhm")).getroot().iter("mapID"):

@@ -80,8 +80,8 @@ Dependencies that matter: TeaVM (Java→JS; its class library lacks `%e/%g` form
         ├── theme.css              theme tokens (colours, spacing, text, fonts) for the light, dark and original themes, and base styles
         ├── theme.js               sets the chosen theme on <html> before the page is drawn (loaded in every page's head)
         ├── dialogs.js             EqDialog.confirm/prompt/choose (in-page <dialog>)
-        ├── byhand.js              ByHand.build/database: constants entered by hand (pKa or pKb values of an acid, stepwise or cumulative constants of a metal with a ligand, log K or log Ksp of a single reaction) to a data file (.dat) or a text database with its element file; browser and Node
-        ├── byhand.html, byhand-ui.js  the "By hand" tab (kind `hand`): the entries as blocks, the resulting reactions in a table while typing, kept in localStorage `eqdiagr.byhand`; "Create a diagram" checks the file with `datDefaults`, saves it in IndexedDB `files` and opens a diagram tab
+        ├── byhand.js              ByHand.build/database: manual input of constants (pKa or pKb values of an acid, stepwise or cumulative constants of a metal with a ligand, log K or log Ksp of a single reaction) to a data file (.dat) or a text database with its element file; browser and Node
+        ├── byhand.html, byhand-ui.js  the "Manual input" tab (kind `hand`): the entries as blocks, the resulting reactions in a table while typing, kept in localStorage `eqdiagr.byhand`; "Create a diagram" checks the file with `datDefaults`, saves it in IndexedDB `files` and opens a diagram tab
         ├── store.js               IndexedDB key-value store
         ├── chess-tdb.js           ChessTdb.convert/convertFiles: a database in the CHESS format (.tdb) to a text database and element file (reactions in components only, e- for O2(aq), names, analytic log K(T)); used by the loaders of database.js and maintenance.js, and in Node by the tests
         ├── textfile.js            EqText.read/decode: a text file of the user as UTF-8, or as windows-1252 when its bytes are not UTF-8 (older data files, files saved from a Windows text editor); isDataFile() tells a data file with the ending .txt from a text database
@@ -148,7 +148,7 @@ Menus are **hard-coded** in one array, `MENUS` in `webpoc/web/app.js` (verbatim 
 |---|---|---|---|
 | File > Open data or plot file… | both | app.js `openDatFile` → `<input type=file accept=.dat,.txt,.plt>` (a `.plt` goes to spana.js `loadPlot`: the drawing alone, class `plotonly`) → `openDiagram({name,text})` → spana.js `loadText` | `datDefaults`, `datRead` |
 | File > New chemical system | both | `chem("newSystem")` → database.js `newSystem` | none (clears selection to H⁺, result) |
-| File > New chemical system by hand… | both | app.js `ensure("hand")` → tab "By hand" (byhand.html, byhand-ui.js; also the link `#byHand` on the Chemical system tab, through `EqApp.openByHand`) → byhand.js `ByHand.build` while typing; `#create` → `Store.put("files")` → `openDiagram({file})`; `#toDb` (advanced) → `ByHand.database` → `EqApp.dropFiles` (the .txt and .elt go to database.js `loadUser`) | `datDefaults` on Create |
+| File > New chemical system (manual input)… | both | app.js `ensure("hand")` → tab "Manual input" (byhand.html, byhand-ui.js; also the link `#byHand` on the Chemical system tab, through `EqApp.openByHand`) → byhand.js `ByHand.build` while typing; `#create` → `Store.put("files")` → `openDiagram({file})`; `#toDb` (advanced) → `ByHand.database` → `EqApp.dropFiles` (the .txt and .elt go to database.js `loadUser`) | `datDefaults` on Create |
 | File > Open an example… | both | app.js `showExamples` → dialog `#examples` → `fetch(data/examples/*.dat)` → `openDiagram` | `datDefaults`, `datRead` |
 | File > Save data file in this browser | both, needs file | spana.js `saveMy` → `EqDialog.prompt` (name, default `<file>.dat`, `.dat` appended) | `datSet`; `Store.put("files")` |
 | File > Download data file (.dat) | both | spana.js `#dlDat` | `datSet`; browser download |
@@ -318,7 +318,7 @@ Unsure
     { label: "File", items: [
       { label: "Open data or plot file…", act: openDatFile, key: "" },
       { label: "New chemical system", act: () => chem("newSystem") },
-      { label: "New chemical system by hand…", act: () => ensure("hand") },
+      { label: "New chemical system (manual input)…", act: () => ensure("hand") },
       { label: "Open an example…", act: showExamples },
       "-",
       { label: "Save data file in this browser", cmd: "saveMy" },

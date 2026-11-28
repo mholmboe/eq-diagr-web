@@ -91,7 +91,7 @@ Functions that the desktop programs do not have were added for teaching: a live 
 
 Databases in the format of CHESS (`.tdb`) can be loaded: `chess-tdb.js` converts them in the page to a text database and element file of eq-diagr (help page "Databases"). The CHESS files themselves are not part of the repository.
 
-Constants that are in no database can be entered by hand (File > New chemical system by hand, help page "Constants entered by hand"): `byhand.js` converts pKa or pKb values, stepwise or cumulative stability constants and solubility products to the accumulated formation constants of a data file, or of a text database with its element file. The desktop programs have the forms of DataMaintenance for single reactions, with accumulated constants only.
+Constants that are in no database can be entered manually (File > New chemical system (manual input), help page "Manual input of constants"): `byhand.js` converts pKa or pKb values, stepwise or cumulative stability constants and solubility products to the accumulated formation constants of a data file, or of a text database with its element file. The desktop programs have the forms of DataMaintenance for single reactions, with accumulated constants only.
 
 A few behaviours differ on purpose and are described in the help: a species without log *K* in a database is left out of a search with a note (the desktop DataBase stops); a log *K* changed in a diagram tab is not written by the automatic saves; and in the drawing the ionic strength is written above the concentrations so that the temperature keeps its place.
 

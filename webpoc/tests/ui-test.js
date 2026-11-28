@@ -532,10 +532,10 @@ const STEPS = [
     await t.page.click('dialog.eqdlg[open] button[value="discard"]');
     await t.page.waitForFunction(() => ![...document.querySelectorAll("#tabs .tab .t")].some(b => b.textContent === "10-Poubaix diag Cu"));
   }],
-  ["a chemical system entered by hand: pKa values, stepwise constants and a solubility product become a data file", async t => {
-    await t.menu("File", "New chemical system by hand");
+  ["manual input of a chemical system: pKa values, stepwise constants and a solubility product become a data file", async t => {
+    await t.menu("File", "New chemical system (manual input)");
     const h = await t.frame("byhand.html");
-    assert.equal(await t.page.textContent("#tabs .tab.active .t"), "By hand");
+    assert.equal(await t.page.textContent("#tabs .tab.active .t"), "Manual input");
     await h.click("#clear");
     assert.ok(await h.$eval("#create", b => b.disabled) && await h.isVisible("#empty"));
     const rows = () => h.$$eval("#preview tbody tr", r => r.map(x => [(x.cells[0].querySelector("input") || {}).value || x.cells[0].textContent, x.cells[2].textContent.replace("−", "-")]));
@@ -567,7 +567,7 @@ const STEPS = [
     await h.press('#preview input[data-auto="CuNH3 2+"]', "Tab");
     assert.equal((await rows())[3][0], "Cu(NH3) 2+");
     assert.equal(await h.getAttribute("#name", "placeholder"), "PO4-Cu-NH3");
-    await t.shot("24-by-hand");
+    await t.shot("24-manual-input");
     // what is entered is kept over a reload of the view
     await h.evaluate(() => location.reload());
     const h2 = await t.frame("byhand.html");
@@ -592,8 +592,8 @@ const STEPS = [
     await t.page.click("#tabs .tab .t");
     const db = await t.frame("database.html");
     await db.click("#byHand");
-    await t.page.waitForFunction(() => document.querySelector("#tabs .tab.active .t").textContent === "By hand");
-    assert.equal(await t.page.$$eval("#tabs .tab .t", x => x.filter(b => b.textContent === "By hand").length), 1);
+    await t.page.waitForFunction(() => document.querySelector("#tabs .tab.active .t").textContent === "Manual input");
+    assert.equal(await t.page.$$eval("#tabs .tab .t", x => x.filter(b => b.textContent === "Manual input").length), 1);
   }],
   ["a database in the CHESS format (.tdb) is converted when it is loaded, and searched", async t => {
     await t.page.click("#tabs .tab .t");
